@@ -12,7 +12,7 @@ class CrTracce {
         return undefined
     }
 
-    getAllProcesses() {
+    getProcesses() {
         return this.processes
     }
 
@@ -40,8 +40,20 @@ class CrProcess {
         return undefined
     }
 
-    getAllThreads() {
+    getThreadsByName(name) {
+        return this.threads.filter(t => { return t.name === name })
+    }
+
+    getThreads() {
         return this.threads
+    }
+
+    getThreadNames() {
+        var res = new Set()
+        for (var i in this.threads) {
+            res.add(this.threads[i].name)
+        }
+        return res
     }
 
     addThread(t) {
@@ -54,7 +66,8 @@ class CrThread {
     constructor(id) {
         this.id = id
         this.name = ""
-        this.events = []
+        this.eventList = []
+        this.eventTree = []
     }
 
     setName(n) {
@@ -62,17 +75,18 @@ class CrThread {
     }
 
     addEvent(e) {
-        this.events.push(e)
+        this.eventList.push(e)
     }
 
     buildEventTree() {
         var dependency = {}
         var child_indexes = new Set()
 
-        for (var i = 0; i < this.events.length; i++) {
-            var e1 = this.events[i]
-            for (var j = i + 1; j < this.events.length; j++) {
-                var e2 = this.events[j]
+        // Discover including dependency.
+        for (var i = 0; i < this.eventList.length; i++) {
+            var e1 = this.eventList[i]
+            for (var j = i + 1; j < this.eventList.length; j++) {
+                var e2 = this.eventList[j]
                 if (e1.includes(e2)) {
                     if (!dependency.hasOwnProperty(i)) dependency[i] = []
                     dependency[i].push(j)
@@ -85,7 +99,7 @@ class CrThread {
             }
         }
 
-        // Remove multi-hop path.
+        // Remove multi-hop dependency.
         for (var k in dependency) {
             var keys = [...dependency[k]]
             keys.forEach(k_ => {
@@ -102,29 +116,63 @@ class CrThread {
         // Build trees based on dependency.
         for (var k in dependency) {
             var idx = parseInt(k)
-            var root = this.events[idx]
+            var root = this.eventList[idx]
             dependency[k].forEach(k_ => {
-                root.children.push(this.events[k_])
+                root.children.push(this.eventList[k_])
             })
         }
 
-        // Keep only root nodes.
-        this.events.filter((_, i) => {
+        // Update render_related attribute.
+        this.eventList.forEach(e => {
+            e.updateRenderRelated()
+        })
+
+        // Keep only top-level event nodes.
+        this.eventTree = this.eventList.filter((_, i) => {
             return !child_indexes.has(i)
         })
 
-        this.events.forEach(e => {
-            e.updateRenderRelated()
+        dependency = undefined
+        child_indexes = undefined
+    }
+
+    getEventNames() {
+        var res = new Set()
+        for (var i in this.eventList) {
+            res.add(this.eventList[i].name)
+        }
+        return res
+    }
+
+    getRenderPipelines() {
+        var tmp = []
+        var render_event_names = Object.keys(CrEvent.RenderEvents)
+        var sorted_events = [...this.eventList]
+            .sort((a, b) => {
+                return a.ts - b.ts
+            })
+        sorted_events.forEach(e => {
+            if (render_event_names.indexOf(e.name) !== -1)
+                tmp.push(e.name)
+            if (e.name === 'CompositeLayers') {
+                console.log(tmp)
+                tmp = []
+            }
         })
     }
+}
 
-    filterByName(n) {
-
-    }
-
-    getFirstRenderEventAfter(t) {
-
-    }
+CrThread.ThreadNames = {
+    BrowserMain: 'CrBrowserMain',
+    RendererMain: 'CrRendererMain',
+    GPUMain: 'CrGpuMain',
+    NetworkService: 'NetworkService',
+    ForegroundWorker: 'ThreadPoolForegroundWorker',
+    DevToolsHandler: 'Chrome_DevToolsHandlerThread',
+    IOThread: 'Chrome_IOThread',
+    Compositor: 'Compositor',
+    CompositorTileWorker: 'CompositorTileWorker',
+    VizCompositor: 'VizCompositorThread'
 }
 
 class CrEvent {
@@ -134,42 +182,28 @@ class CrEvent {
         this.ts = ts
         this.dur = dur
         this.data = data
-        this.render_related = this.isRenderRelated()
 
         this.children = []
+
+        this.render_related = false
     }
 
     includes(e) {
         return this.ts <= e.ts && this.ts + this.dur >= e.ts + e.dur
     }
-
-    isRenderRelated() {
-        return CrEvent.RenderEvents.indexOf(this.name) !== -1
-    }
-
-    updateRenderRelated() {
-        if (this.children.length !== 0) {
-            for (var i = 0; i < this.children.length; i++) {
-                if (this.children[i].updateRenderRelated()) {
-                    this.render_related = true
-                }
-            }
-        }
-        return this.render_related
-    }
 }
 
-CrEvent.RenderEvents = [
-    'ParseHTML',
-    'ParseAuthorStyleSheet',
-    'Layout',
-    'UpdateLayer',
-    'UpdateLayerTree',
-    'UpdateLayoutTree',
-    'Paint',
-    'PaintImage',
-    'CompositeLayers'
-]
+CrEvent.RenderEvents = {
+    ParseHTML: 'ParseHTML',
+    ParseCSS: 'ParseAuthorStyleSheet',
+    UpdateLayoutTree: 'UpdateLayoutTree',
+    Layout: 'Layout',
+    UpdateLayer: 'UpdateLayer',
+    UpdateLayerTree: 'UpdateLayerTree',
+    Paint: 'Paint',
+    PaintImage: 'PaintImage',
+    Composite: 'CompositeLayers'
+}
 
 function modelTesting(traceFile) {
     var ct = new CrTracce()
@@ -197,18 +231,21 @@ function modelTesting(traceFile) {
                 break
             default:
                 if (e.cat !== '__metadata') {
-                    var event = new CrEvent(e.cat, e.name, e.ts, e.dur || 0, e.args || e.args.data)
+                    var event = new CrEvent(e.cat, e.name, e.ts,
+                        e.dur || 0, e.args || e.args.data)
                     thread.addEvent(event)
                 }
                 break
         }
     })
 
-    ct.getAllProcesses().forEach(p => {
-        p.getAllThreads().forEach(t => {
+    ct.getProcesses().forEach(p => {
+        p.getThreads().forEach(t => {
+            if (t.name === CrThread.ThreadNames.RendererMain)
+                t.getRenderPipelines()
             t.buildEventTree()
         })
     })
 }
 
-modelTesting('trace.json')
+modelTesting('../data/trace.json')
