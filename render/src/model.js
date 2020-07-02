@@ -82,17 +82,19 @@ class CrThread {
         var dependency = {}
         var child_indexes = new Set()
 
-        // Discover including dependency.
+        // Discover `includes` dependency.
         for (var i = 0; i < this.eventList.length; i++) {
             var e1 = this.eventList[i]
             for (var j = i + 1; j < this.eventList.length; j++) {
                 var e2 = this.eventList[j]
                 if (e1.includes(e2)) {
-                    if (!dependency.hasOwnProperty(i)) dependency[i] = []
+                    if (!dependency.hasOwnProperty(i))
+                        dependency[i] = []
                     dependency[i].push(j)
                     child_indexes.add(j)
                 } else if (e2.includes(e1)) {
-                    if (!dependency.hasOwnProperty(j)) dependency[j] = []
+                    if (!dependency.hasOwnProperty(j))
+                        dependency[j] = []
                     dependency[j].push(i)
                     child_indexes.add(i)
                 }
@@ -122,43 +124,38 @@ class CrThread {
             })
         }
 
-        // Update render_related attribute.
-        this.eventList.forEach(e => {
-            e.updateRenderRelated()
-        })
-
-        // Keep only top-level event nodes.
-        this.eventTree = this.eventList.filter((_, i) => {
-            return !child_indexes.has(i)
-        })
+        this.eventTree = this.eventList.filter((_, i) => !child_indexes.has(i))
+        this.eventTree.sort((a, b) => a.ts - b.ts)
+        for (var i in this.eventTree)
+            this.eventTree[i].sortByTime()
 
         dependency = undefined
         child_indexes = undefined
     }
 
-    getEventNames() {
+    getIncludingEventNames() {
         var res = new Set()
-        for (var i in this.eventList) {
-            res.add(this.eventList[i].name)
+        for (var i in this.eventTree) {
+            var res_ = this.eventTree[i].getIncludingEventNames()
+            for (var n of res_)
+                res.add(n)
         }
         return res
     }
 
-    getRenderPipelines() {
-        var tmp = []
-        var render_event_names = Object.keys(CrEvent.RenderEvents)
-        var sorted_events = [...this.eventList]
-            .sort((a, b) => {
-                return a.ts - b.ts
-            })
-        sorted_events.forEach(e => {
-            if (render_event_names.indexOf(e.name) !== -1)
-                tmp.push(e.name)
-            if (e.name === 'CompositeLayers') {
-                console.log(tmp)
-                tmp = []
-            }
-        })
+    filterEventsByNames(nameList) {
+        var tmp = [...this.eventList]
+        tmp.forEach(e => e.children = undefined)
+        return tmp.filter(e => nameList.indexOf(e.name) !== -1)
+    }
+
+    filterEventsByPeriod(start, end) {
+
+    }
+
+    getIdelPeriods() {
+        var res = []
+
     }
 }
 
@@ -184,25 +181,73 @@ class CrEvent {
         this.data = data
 
         this.children = []
-
-        this.render_related = false
     }
 
     includes(e) {
         return this.ts <= e.ts && this.ts + this.dur >= e.ts + e.dur
     }
+
+    isRenderRelated() {
+        for (var k in CrEvent.RenderEvents) {
+            if (this.name === CrEvent.RenderEvents[k])
+                return true
+        }
+        var childrenRenderRelated = false
+        for (var i in this.children) {
+            if (this.children[i].isRenderRelated()) {
+                childrenRenderRelated = true
+                break
+            }
+        }
+        return childrenRenderRelated
+    }
+
+    getIncludingEventNames() {
+        var res = new Set()
+        res.add(this.name)
+
+        for (var i in this.children) {
+            var res_ = this.children[i].getIncludingEventNames()
+            for (var n of res_)
+                res.add(n)
+            res_ = undefined
+        }
+        return res
+    }
+
+    sortByTime() {
+        this.children.sort((a, b) => { return a.ts - b.ts })
+        for (var i in this.children) {
+            this.children[i].sortByTime()
+        }
+    }
 }
 
+// Events in RendererMain.
 CrEvent.RenderEvents = {
     ParseHTML: 'ParseHTML',
     ParseCSS: 'ParseAuthorStyleSheet',
+    // EvaluateScript: 'EvaluateScript',
+    StyleRecaculation: 'ScheduleStyleRecalculation',
     UpdateLayoutTree: 'UpdateLayoutTree',
     Layout: 'Layout',
+    InvalidateLayout: 'InvalidateLayout',
     UpdateLayer: 'UpdateLayer',
     UpdateLayerTree: 'UpdateLayerTree',
     Paint: 'Paint',
     PaintImage: 'PaintImage',
-    Composite: 'CompositeLayers'
+    Composite: 'CompositeLayers',
+    DrawLazyPixel: 'Draw LazyPixelRef',
+    BeginMainThreadFrame: 'BeginMainThreadFrame'
+}
+
+// Events in Compositor.
+CrEvent.FrameEvents = {
+    NeedsBeginFrameChanged: 'NeedsBeginFrameChanged',
+    BeginFrame: 'BeginFrame',
+    RequestMainThreadFrame: 'RequestMainThreadFrame',
+    ActivateLayerTree: 'ActivateLayerTree',
+    DrawFrame: 'DrawFrame'
 }
 
 function modelTesting(traceFile) {
@@ -210,16 +255,16 @@ function modelTesting(traceFile) {
     var rawData = JSON.parse(fs.readFileSync(traceFile))
 
     rawData.traceEvents.forEach(e => {
-        var proc = ct.getProcessById(e.pid)
-        if (!proc) {
-            proc = new CrProcess(e.pid)
-            ct.addProcess(proc)
+        var process = ct.getProcessById(e.pid)
+        if (!process) {
+            process = new CrProcess(e.pid)
+            ct.addProcess(process)
         }
 
-        var thread = proc.getThreadById(e.tid)
+        var thread = process.getThreadById(e.tid)
         if (!thread) {
             thread = new CrThread(e.tid)
-            proc.addThread(thread)
+            process.addThread(thread)
         }
 
         switch (e.name) {
@@ -227,25 +272,46 @@ function modelTesting(traceFile) {
                 thread.setName(e.args.name)
                 break
             case 'process_name':
-                proc.setName(e.args.name)
+                process.setName(e.args.name)
                 break
             default:
                 if (e.cat !== '__metadata') {
-                    var event = new CrEvent(e.cat, e.name, e.ts,
-                        e.dur || 0, e.args || e.args.data)
+                    var event = new CrEvent(e.cat,
+                        e.name,
+                        e.ts,
+                        e.dur || 0,
+                        e.args || e.args.data)
                     thread.addEvent(event)
                 }
                 break
         }
     })
 
+    var bmtf = []
+    var cl = []
+    var bf = []
+    var df = []
+
     ct.getProcesses().forEach(p => {
         p.getThreads().forEach(t => {
-            if (t.name === CrThread.ThreadNames.RendererMain)
-                t.getRenderPipelines()
-            t.buildEventTree()
+            // t.buildEventTree()
+
+            if (t.name === CrThread.ThreadNames.RendererMain) {
+                bmtf = t.filterEventsByNames([CrEvent.RenderEvents.BeginMainThreadFrame])
+                cl = t.filterEventsByNames([CrEvent.RenderEvents.Composite])
+            } else if (t.name === CrThread.ThreadNames.Compositor) {
+                bf = t.filterEventsByNames([CrEvent.FrameEvents.BeginFrame])
+                df = t.filterEventsByNames([CrEvent.FrameEvents.DrawFrame])
+            }
         })
     })
+
+    bmtf.sort((a, b) => a.ts - b.ts)
+    cl.sort((a, b) => a.ts - b.ts)
+
+    for (var i = 0; i < df.length - 1; i++) {
+        console.log((df[i + 1].ts - df[i].ts) / 1000)
+    }
 }
 
 modelTesting('../data/trace.json')
