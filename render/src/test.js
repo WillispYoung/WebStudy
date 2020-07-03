@@ -1,5 +1,5 @@
 const fs = require('fs')
-const { CrTrace, CrProcess, CrThread, CrEvent } = require('./model_')
+const { CrTrace, CrProcess, CrThread, CrEvent } = require('./model')
 
 var rawData = JSON.parse(fs.readFileSync('../data/trace.json'))
 var crTrace = new CrTrace()
@@ -45,5 +45,3 @@ crTrace.processes.forEach(p => {
         }
     })
 })
-
-console.log(idlePeriods)
