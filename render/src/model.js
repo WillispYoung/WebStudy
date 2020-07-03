@@ -150,7 +150,7 @@ class CrEventSequence {
         for (var t of this.trees) t.sortByTime()
     }
 
-    getEventInitiator(e) {}
+    getEventInitiator(e) { }
 
     // Idle: no events in given `limit` milliseconds.
     getIdlePeriods(limit) {
@@ -175,6 +175,14 @@ class CrEventSequence {
         var total = 0
         this.trees.forEach(t => total += t.dur)
         res.total = total
+        return res
+    }
+
+    getRunningDuration() {
+        var res = 0
+        this.trees.forEach(t => {
+            res += t.dur
+        })
         return res
     }
 }
