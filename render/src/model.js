@@ -9,6 +9,7 @@ class CrEvent {
     }
 
     includes(e) { return this.ts <= e.ts && this.ts + this.dur >= e.ts + e.dur }
+    getEndTimestamp() { return this.ts + this.dur }
 
     isRenderRelated() {
         for (var n of CrEvent.RenderEvents) {
@@ -149,7 +150,7 @@ class CrEventSequence {
         for (var t of this.trees) t.sortByTime()
     }
 
-    getEventInitiator(e) { }
+    getEventInitiator(e) {}
 
     // Idle: no events in given `limit` milliseconds.
     getIdlePeriods(limit) {

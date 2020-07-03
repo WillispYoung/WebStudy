@@ -7,8 +7,10 @@ const {
 } = require('./model')
 
 const renderEventNames = Object.values(CrEvent.RenderEvents)
+
 var files = fs.readdirSync('../data/')
-var res = []
+var start = Number.MAX_SAFE_INTEGER
+var end = 0
 
 for (var f of files) {
     if (f !== 'domains.txt') {
@@ -42,30 +44,20 @@ for (var f of files) {
             }
         })
 
-        let rendererDuration
+
+
         crTrace.processes.forEach(p => {
             p.threads.forEach(t => {
-                if (t.name === CrThread.ThreadNames.RendererMain) {
-                    t.buildEventTrees()
-                    rendererDuration = t.getEventDuration()
-                }
+                t.buildEventTrees()
+
+                start = Math.min(start, t.trees[0].ts)
+                end = Math.max(end, t.trees[t.trees.length - 1].getEndTimestamp())
             })
         })
 
-        for (var k in rendererDuration) {
-            if (k !== 'total' && renderEventNames.indexOf(k) !== -1) {
-                var v = rendererDuration[k] / rendererDuration.total
-                v = Number.parseFloat(v).toFixed(3)
-                rendererDuration[k] = Number.parseFloat(v)
-            } else if (k !== 'total') {
-                delete rendererDuration[k]
-            }
-        }
+        console.log(start, end)
 
-        res.push(rendererDuration)
         rawData = undefined
         crTrace = undefined
     }
 }
-
-fs.writeFileSync('proportion.json', JSON.stringify({ res }))
