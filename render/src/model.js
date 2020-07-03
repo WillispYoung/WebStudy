@@ -140,9 +140,8 @@ class CrEventSequence {
     }
 
     filterByPeriod(start, end) {
-        var tmp = [...this.list]
-        tmp.forEach(e => e.children = [])
-        return tmp.filter(e => start <= e.ts <= end)
+        var tmp = [...this.tree]
+        return tmp.filter(e => start <= e.ts <= end || start <= e.ts + e.dur <= end)
     }
 
     sortByTime() {
@@ -150,7 +149,7 @@ class CrEventSequence {
         for (var t of this.trees) t.sortByTime()
     }
 
-    getEventInitiator(e) {}
+    getEventInitiator(e) { }
 
     // Idle: no events in given `limit` milliseconds.
     getIdlePeriods(limit) {
@@ -159,10 +158,22 @@ class CrEventSequence {
         for (var i = 0; i < l - 1; i++) {
             var t1 = this.trees[i]
             var t2 = this.trees[i + 1]
-            var gap = t2.ts - t1.ts - t1.dur
+            var gap = t2.ts - (t1.ts + t1.dur)
             gap = Math.round(gap / 1000)
             if (gap >= limit) res.push([t1.ts + t1.dur, t2.ts])
         }
+        return res
+    }
+
+    getEventDuration() {
+        var res = {}
+        this.list.forEach(e => {
+            if (!res.hasOwnProperty(e.name)) res[e.name] = 0
+            res[e.name] += e.dur
+        })
+        var total = 0
+        this.trees.forEach(t => total += t.dur)
+        res.total = total
         return res
     }
 }

@@ -1,64 +1,45 @@
+const EventEmitter = require('events')
 const delay = require('delay')
 const fs = require('fs')
 const puppeteer = require('puppeteer')
 
-async function navigate(url) {
-    var paint_events = []
-    var layer_change_events = []
-
-    var browser = await puppeteer.launch()
+async function navigate(url, label, notifier) {
+    var browser = await puppeteer.launch({ timeout: 10000, headless: false })
     var page = await browser.newPage()
-    var client = await page.target().createCDPSession()
 
-    await client.send("LayerTree.enable")
-
-    var count1 = 0,
-        count2 = 0
-    client.on('LayerTree.layerPainted', args => {
-        count1 += 1
-        args.ts = Date.now()
-        paint_events.push(args)
-    })
-
-    client.on('LayerTree.layerTreeDidChange', args => {
-        count2 += 1
-        args.ts = Date.now()
-        layer_change_events.push(args)
-    })
-
-    page.on('load', async() => {
+    page.on('load', async () => {
         console.log('Page loaded...')
-        console.log(`${count1} layerPainted events triggered.`)
-        console.log(`${count2} layerTreeDidChange events triggered.`)
         await delay(1000)
 
-        console.log('Closing headless browser...')
+        console.log(`Saving trace data to ../data/${label}.json...`)
         await page.tracing.stop()
-        await client.detach()
+
+        console.log('Closing headless browser...\n')
         await page.close()
         await browser.close()
 
-        console.log('Saving trace data...')
-        fs.writeFileSync('../data/layer_paint.json',
-            JSON.stringify({ paint_events, layer_change_events, navigation_start }))
+        await delay(1000)
+        if (notifier) notifier.emit('next')
     })
 
-    // setTimeout(async function () {
-    //     await page.tracing.stop()
-    //     await client.detach()
-    //     await page.close()
-    //     await browser.close()
+    console.log(`Starting navigation to ${url}...`)
 
-    //     fs.writeFileSync('layer_paint.json',
-    //         JSON.stringify({ paint_events, layer_change_events, navigation_start }))
-    // }, 20000)
-
-    console.log('Navigation starting...')
-    var navigation_start = Date.now()
-
-    await page.tracing.start({ path: '../data/trace.json' })
+    await page.tracing.start({ path: `../data/${label}.json` })
     await page.goto(url)
 }
 
-var url = process.argv[2]
-navigate(url)
+function main() {
+    var domains = fs.readFileSync('../data/domains.txt', { encoding: 'utf-8' }).split('\r\n')
+    var startIndex = 30
+    var monitor = new EventEmitter()
+
+    monitor.on('next', () => {
+        startIndex += 1
+        if (startIndex < domains.length)
+            navigate(domains[startIndex], `trace${startIndex}`, monitor)
+    })
+
+    navigate(domains[startIndex], `trace${startIndex}`, monitor)
+}
+
+main()
