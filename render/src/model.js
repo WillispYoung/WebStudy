@@ -1,201 +1,218 @@
 class CrEvent {
     constructor(name, ts, dur, data) {
-        this.name = name
-        this.ts = ts
-        this.dur = dur
-        this.data = data
+        this.name = name;
+        this.ts = ts;
+        this.dur = dur;
+        this.data = data;
 
-        this.children = []
+        this.children = [];
     }
 
-    includes(e) { return this.ts <= e.ts && this.ts + this.dur >= e.ts + e.dur }
-    getEndTimestamp() { return this.ts + this.dur }
-
-    isRenderRelated() {
-        for (var n of CrEvent.RenderEvents) {
-            if (this.name === n)
-                return true
-        }
-        var childrenRenderRelated = false
-        for (var i in this.children) {
-            if (this.children[i].isRenderRelated()) {
-                childrenRenderRelated = true
-                break
-            }
-        }
-        return childrenRenderRelated
+    getEndtime() {
+        return this.ts + this.dur;
     }
 
-    getIncludingEventNames() {
-        var res = new Set()
-        res.add(this.name)
-
-        for (var c of this.children) {
-            var res_ = c.getIncludingEventNames()
-            for (var n of res_)
-                res.add(n)
-            res_ = undefined
-        }
-        return res
+    includes(e) {
+        return this.ts <= e.ts && this.getEndtime() >= e.getEndtime();
     }
 
     sortByTime() {
-        this.children.sort((a, b) => a.ts - b.ts)
-        for (var e of this.children) e.sortByTime()
+        this.children.sort((a, b) => {
+            return a.ts - b.ts;
+        });
+        for (var e of this.children)
+            e.sortByTime();
+    }
+
+    isRenderingPipeline() {
+        if (this.name === 'RunTask' &&
+            this.children.length === 1 &&
+            this.children[0].name === 'ThreadControllerImpl::RunTask') {
+            var root = this.children[0];
+            var l = root.children.length;
+
+            if (l)
+                return root.children[0].name === 'BeginMainThreadFrame' &&
+                    root.children[l - 1].name === 'CompositeLayers';
+            else
+                return false;
+        }
+    }
+
+    getIncludingEventNames() {
+        var res = new Set();
+        if (this.name !== 'RunTask' && this.name !== 'ThreadControllerImpl::RunTask')
+            res.add(this.name);
+
+        for (var e of this.children) {
+            var res_ = e.getIncludingEventNames();
+            for (var n of res_)
+                res.add(n);
+        }
+
+        return res;
     }
 }
 
-// Events in RendererMain.
-CrEvent.RenderEvents = {
-    ParseHTML: 'ParseHTML',
-    ParseCSS: 'ParseAuthorStyleSheet',
-    EvaluateScript: 'EvaluateScript',
-    StyleRecaculation: 'ScheduleStyleRecalculation',
-    UpdateLayoutTree: 'UpdateLayoutTree',
-    Layout: 'Layout',
-    InvalidateLayout: 'InvalidateLayout',
-    UpdateLayer: 'UpdateLayer',
-    UpdateLayerTree: 'UpdateLayerTree',
-    Paint: 'Paint',
-    PaintImage: 'PaintImage',
-    Composite: 'CompositeLayers',
-    DrawLazyPixel: 'Draw LazyPixelRef',
-    BeginMainThreadFrame: 'BeginMainThreadFrame'
-}
+// Rendering related events. In CrRendererMain thread.
+CrEvent.RenderEvents = [
+    'BeginMainThreadFrame',
+    'ParseHTML',
+    'ParseAuthorStyleSheet',
+    'ScheduleStyleRecalculation',
+    'UpdateLayoutTree',
+    'InvalidateLayout',
+    'Layout',
+    'UpdateLayer',
+    'UpdateLayerTree',
+    'Paint',
+    'PaintImage',
+    'Draw LazyPixelRef',
+    'CompositeLayers'
+];
 
-// Events in Compositor.
-CrEvent.FrameEvents = {
-    NeedsBeginFrameChanged: 'NeedsBeginFrameChanged',
-    BeginFrame: 'BeginFrame',
-    RequestMainThreadFrame: 'RequestMainThreadFrame',
-    ActivateLayerTree: 'ActivateLayerTree',
-    DrawFrame: 'DrawFrame'
-}
+// Frame related events. In Compositor thread.
+CrEvent.FrameEvents = [
+    'NeedsBeginFrameChanged',
+    'BeginFrame',
+    'RequestMainThreadFrame',
+    'ActivateLayerTree',
+    'DrawFrame'
+];
 
 class CrEventSequence {
     constructor() {
-        this.list = []
-        this.trees = []
+        this.list = [];
+        this.trees = [];
+        this.treeUpdated = false;
     }
 
-    addEvent(e) { this.list.push(e) }
+    addEvent(e) {
+        this.list.push(e);
+        if (this.treeUpdated)
+            this.treeUpdated = false;
+    }
 
     buildEventTrees() {
-        var dep = {}
-        var leaf_index = new Set()
+        var dependency = {};
+        var leaf_index = new Set();
 
-        // Discover `includes` dependency.
-        var l = this.list.length
+        // Discover `includes` dependency. O(n^2)
+        var l = this.list.length;
         for (var i = 0; i < l - 1; i++) {
-            var e1 = this.list[i]
+            var e1 = this.list[i];
             for (var j = i + 1; j < l; j++) {
-                var e2 = this.list[j]
+                var e2 = this.list[j];
                 if (e1.includes(e2)) {
-                    if (!dep.hasOwnProperty(i)) dep[i] = []
-                    dep[i].push(j)
-                    leaf_index.add(j)
+                    if (!dependency.hasOwnProperty(i))
+                        dependency[i] = [];
+
+                    dependency[i].push(j);
+                    leaf_index.add(j);
                 } else if (e2.includes(e1)) {
-                    if (!dep.hasOwnProperty(j)) dep[j] = []
-                    dep[j].push(i)
-                    leaf_index.add(i)
+                    if (!dependency.hasOwnProperty(j))
+                        dependency[j] = [];
+
+                    dependency[j].push(i);
+                    leaf_index.add(i);
                 }
             }
         }
 
         // Remove multi-hop dependency.
-        for (var k in dep) {
-            var keys = [...dep[k]]
+        for (var k in dependency) {
+            var keys = [...dependency[k]];
             keys.forEach(k_ => {
-                if (dep.hasOwnProperty(k_)) {
-                    var keys_ = dep[k_]
+                if (dependency.hasOwnProperty(k_)) {
+                    var keys_ = dependency[k_];
                     keys_.forEach(k__ => {
-                        var idx = dep[k].indexOf(k__)
-                        if (idx >= 0) dep[k].splice(idx, 1)
+                        var idx = dependency[k].indexOf(k__);
+                        if (idx >= 0)
+                            dependency[k].splice(idx, 1);
                     })
                 }
             })
         }
 
         // Build trees based on dependency.
-        for (var k in dep) {
-            var idx = parseInt(k)
-            var root = this.list[idx]
-            dep[k].forEach(k_ => {
-                root.children.push(this.list[k_])
+        for (var k in dependency) {
+            var idx = parseInt(k);
+            var root = this.list[idx];
+            dependency[k].forEach(k_ => {
+                root.children.push(this.list[k_]);
             })
         }
 
         // Remove leaf nodes and sort events.
-        this.trees = this.list.filter((_, i) => !leaf_index.has(i))
-        this.trees.sort((a, b) => a.ts - b.ts)
-        for (var t of this.trees) t.sortByTime()
+        this.trees = this.list.filter((_, i) => {
+            return !leaf_index.has(i);
+        });
+        this.trees.sort((a, b) => {
+            return a.ts - b.ts;
+        });
+        for (var t of this.trees)
+            t.sortByTime();
 
-        dep = undefined
-        leaf_index = undefined
-    }
+        dependency = undefined;
+        leaf_index = undefined;
 
-    filterByNames(names) {
-        var tmp = [...this.list]
-        tmp.forEach(e => e.children = [])
-        return tmp.filter(e => names.indexOf(e.name) !== -1)
-    }
-
-    filterByPeriod(start, end) {
-        var tmp = [...this.tree]
-        return tmp.filter(e => start <= e.ts <= end || start <= e.ts + e.dur <= end)
+        this.treeUpdated = true;
     }
 
     sortByTime() {
-        this.trees.sort((a, b) => a.ts - b.ts)
-        for (var t of this.trees) t.sortByTime()
-    }
-
-    getEventInitiator(e) { }
-
-    // Idle: no events in given `limit` milliseconds.
-    getIdlePeriods(limit) {
-        var res = []
-        var l = this.trees.length
-        for (var i = 0; i < l - 1; i++) {
-            var t1 = this.trees[i]
-            var t2 = this.trees[i + 1]
-            var gap = t2.ts - (t1.ts + t1.dur)
-            gap = Math.round(gap / 1000)
-            if (gap >= limit) res.push([t1.ts + t1.dur, t2.ts])
-        }
-        return res
-    }
-
-    getEventDuration() {
-        var res = {}
-        this.list.forEach(e => {
-            if (!res.hasOwnProperty(e.name)) res[e.name] = 0
-            res[e.name] += e.dur
-        })
-        var total = 0
-        this.trees.forEach(t => total += t.dur)
-        res.total = total
-        return res
-    }
-
-    getRunningDuration() {
-        var res = 0
-        this.trees.forEach(t => {
-            res += t.dur
-        })
-        return res
+        this.trees.sort((a, b) => {
+            return a.ts - b.ts;
+        });
+        for (var t of this.trees)
+            t.sortByTime();
     }
 }
 
 class CrThread extends CrEventSequence {
     constructor(id) {
-        super()
-        this.id = id
-        this.name = ""
+        super();
+        this.id = id;
+        this.name = "";
     }
 
-    setName(n) { this.name = n }
-    getName() { return this.name }
+    setName(n) {
+        this.name = n;
+    }
+    getName() {
+        return this.name;
+    }
+
+    findRenderPipelines() {
+        if (!this.treeUpdated)
+            this.buildEventTrees();
+
+        var rpls = [];
+        for (var t of this.trees) {
+            if (t.isRenderingPipeline())
+                rpls.push(t);
+        }
+        return rpls;
+    }
+
+    // For test.
+    findRenderEventsFromNonPipelines() {
+        if (!this.treeUpdated)
+            this.buildEventTrees();
+
+        var res = new Set();
+        for (var t of this.trees) {
+            if (!t.isRenderingPipeline()) {
+                var eventNames = t.getIncludingEventNames();
+                for (var en of eventNames) {
+                    if (CrEvent.RenderEvents.indexOf(en) !== -1) {
+                        res.add(en);
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
 }
 
 CrThread.ThreadNames = {
@@ -209,41 +226,89 @@ CrThread.ThreadNames = {
     Compositor: 'Compositor',
     CompositorTileWorker: 'CompositorTileWorker',
     VizCompositor: 'VizCompositorThread'
-}
+};
 
 class CrProcess {
     constructor(id) {
-        this.id = id
-        this.name = ""
-        this.threads = []
-        this.id_to_thread = {}
+        this.id = id;
+        this.name = "";
+        this.threads = [];
+        this.id_to_thread = {};
     }
 
-    setName(n) { this.name = n }
-    getName() { return this.name }
+    setName(n) {
+        this.name = n;
+    }
+    getName() {
+        return this.name;
+    }
 
-    getThreads() { return this.threads }
-    getThreadById(id) { return this.id_to_thread[id] }
+    getThreads() {
+        return this.threads;
+    }
+    getThreadById(id) {
+        return this.id_to_thread[id];
+    }
 
     addThread(t) {
-        this.threads.push(t)
-        this.id_to_thread[t.id] = t
+        this.threads.push(t);
+        this.id_to_thread[t.id] = t;
     }
 }
 
 class CrTrace {
     constructor() {
-        this.processes = []
-        this.id_to_proc = {}
+        this.processes = [];
+        this.id_to_proc = {};
     }
 
-    getProcesses() { return this.processes }
-    getProcessById(id) { return this.id_to_proc[id] }
+    getProcesses() {
+        return this.processes;
+    }
+    getProcessById(id) {
+        return this.id_to_proc[id];
+    }
 
     addProcess(p) {
-        this.processes.push(p)
-        this.id_to_proc[p.id] = p
+        this.processes.push(p);
+        this.id_to_proc[p.id] = p;
     }
+}
+
+function parseTrace(tracefile) {
+    const fs = require('fs');
+    const rawData = JSON.parse(fs.readFileSync(tracefile));
+
+    var crTrace = new CrTrace();
+    rawData.traceEvents.forEach(e => {
+        if (!(e.pid && e.tid))
+            return;
+
+        var process = crTrace.getProcessById(e.pid);
+        if (!process) {
+            process = new CrProcess(e.pid);
+            crTrace.addProcess(process);
+        }
+
+        var thread = process.getThreadById(e.tid);
+        if (!thread) {
+            thread = new CrThread(e.tid);
+            process.addThread(thread);
+        }
+
+        if (e.cat === '__metadata') {
+            if (e.name === 'process_name') {
+                process.setName(e.args.name);
+            } else if (e.name === 'thread_name') {
+                thread.setName(e.args.name);
+            }
+        } else {
+            var event = new CrEvent(e.name, e.ts, e.dur || 0, e.args || e.args.data);
+            thread.addEvent(event);
+        }
+    })
+
+    return crTrace;
 }
 
 module.exports = {
@@ -251,5 +316,6 @@ module.exports = {
     CrEventSequence,
     CrThread,
     CrProcess,
-    CrTrace
-}
+    CrTrace,
+    parseTrace,
+};

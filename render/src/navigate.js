@@ -7,7 +7,7 @@ async function navigate(url, label, notifier) {
     var browser = await puppeteer.launch({ timeout: 10000, headless: false })
     var page = await browser.newPage()
 
-    page.on('load', async () => {
+    page.on('load', async() => {
         console.log('Page loaded...')
         await delay(1000)
 
