@@ -57,7 +57,7 @@ def running_duration():
     plt.plot(renderer_main, marker='o')
     plt.plot(compositor, marker='.')
     plt.plot(tileworker, marker='x')
-    
+
     plt.yscale('log')
     plt.ylim([0.00001, 0.5])
     plt.legend(['Renderer', 'Compositor', 'TileWorker'])
@@ -66,4 +66,26 @@ def running_duration():
     plt.show()
 
 
-running_duration()
+def pipeline_task_proportion():
+    data = json.loads(open('task_proportion.json', 'r').read())
+    for i in range(10):
+        v = []
+        for arr in data['res']:
+            v.append(arr[i])
+        v.sort()
+        plt.plot(v)
+    plt.legend(['UpdateLayoutTree',
+                'Layout',
+                'UpdateLayerTree',
+                'Paint',
+                'UpdateLayer',
+                'CompositeLayers',
+                'FireAnimationFrame',
+                'FunctionCall',
+                'EventDispatch',
+                'HitTest'
+                ])
+    plt.show()
+
+
+pipeline_task_proportion()

@@ -5,7 +5,6 @@ https://www.tmall.com/
 https://www.qq.com/
 https://www.baidu.com/
 https://www.sohu.com/
-https://www.tmall.com/
 https://www.taobao.com/
 https://www.jd.com/
 https://www.wikipedia.org/
@@ -25,7 +24,6 @@ https://www.okezone.com/
 https://www.csdn.net/
 https://www.blogger.com/
 https://www.tribunnews.com/
-https://www.yahoo.co.jp/
 https://www.instagram.com/
 https://bongacams.com/
 https://github.com/

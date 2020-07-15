@@ -20,12 +20,8 @@ class CrEvent {
             e.sortChildrenByTime();
     }
 
+    // Rendering pipeline equals to function ScheduledActionSendBeginMainFrame.
     isRenderingPipeline() {
-        // A pipeline is indicated by following attributes:
-        // "data": {
-        //     "src_file": "../../cc/trees/proxy_impl.cc",
-        //     "src_func": "ScheduledActionSendBeginMainFrame"
-        // }
         return this.name === 'RunTask' &&
             this.children.length === 1 &&
             this.children[0].name === 'ThreadControllerImpl::RunTask' &&
@@ -133,7 +129,19 @@ CrEvent.RenderEvents = [
     'Draw LazyPixelRef',
     'CompositeLayers'
 ];
-
+// Tasks in render pipeline.
+CrEvent.Pipeline = [
+    'UpdateLayoutTree',
+    'Layout',
+    'UpdateLayerTree',
+    'Paint',
+    'UpdateLayer',
+    'CompositeLayers',
+    'FireAnimationFrame',
+    'FunctionCall',
+    'EventDispatch',
+    'HitTest'
+];
 // Frame related events. In Compositor thread.
 CrEvent.FrameEvents = [
     'NeedsBeginFrameChanged',
@@ -167,16 +175,18 @@ class CrEventSequence {
             for (var j = i + 1; j < l; j++) {
                 var e2 = this.list[j];
                 if (e1.includes(e2)) {
-                    if (!dependency.hasOwnProperty(i))
-                        dependency[i] = [];
+                    if (dependency.hasOwnProperty(i))
+                        dependency[i].push(j);
+                    else
+                        dependency[i] = [j];
 
-                    dependency[i].push(j);
                     leaf_index.add(j);
                 } else if (e2.includes(e1)) {
-                    if (!dependency.hasOwnProperty(j))
-                        dependency[j] = [];
+                    if (dependency.hasOwnProperty(j))
+                        dependency[j].push(i);
+                    else
+                        dependency[j] = [i];
 
-                    dependency[j].push(i);
                     leaf_index.add(i);
                 }
             }
@@ -340,20 +350,60 @@ class CrThread extends CrEventSequence {
         }
         return srcFunc;
     }
+
+    // TODO: compute the rendering delay from earliest visual change to a relative drawFrame event.
+    findRenderingDelay() {
+
+    }
+
+    findRenderTaskProportion() {
+        if (!this.treeUpdated) {
+            this.buildEventTrees();
+        }
+        var nameToIndex = {};
+        for (var i = 0; i < CrEvent.Pipeline.length; i++) {
+            nameToIndex[CrEvent.Pipeline[i]] = i;
+        }
+        var taskProportion = [];
+        if (!this.treeUpdated)
+            this.buildEventTrees();
+        for (var t of this.trees) {
+            if (t.isRenderingPipeline()) {
+                var totalDuration = t.dur;
+                var res = [];
+                for (var i = 0; i < CrEvent.Pipeline.length; i++) {
+                    res.push(0);
+                }
+                for (var e of t.children[0].children) {
+                    if (e.dur > 0) {
+                        var v = e.dur / totalDuration;
+                        var idx = nameToIndex[e.name];
+                        res[idx] += v;
+                    }
+                }
+                for (var i = 0; i < res.length; i++) {
+                    res[i] = parseFloat(res[i].toFixed(3));
+                }
+                taskProportion.push(res);
+            }
+        }
+
+        return taskProportion;
+    }
 }
 
-CrThread.ThreadNames = {
-    BrowserMain: 'CrBrowserMain',
-    RendererMain: 'CrRendererMain',
-    GPUMain: 'CrGpuMain',
-    NetworkService: 'NetworkService',
-    ForegroundWorker: 'ThreadPoolForegroundWorker',
-    DevToolsHandler: 'Chrome_DevToolsHandlerThread',
-    IOThread: 'Chrome_IOThread',
-    Compositor: 'Compositor',
-    CompositorTileWorker: 'CompositorTileWorker',
-    VizCompositor: 'VizCompositorThread'
-};
+CrThread.ThreadNames = [
+    'CrBrowserMain',
+    'CrRendererMain',
+    'CrGpuMain',
+    'NetworkService',
+    'ThreadPoolForegroundWorker',
+    'Chrome_DevToolsHandlerThread',
+    'Chrome_IOThread',
+    'Compositor',
+    'CompositorTileWorker',
+    'VizCompositorThread'
+];
 
 class CrProcess {
     constructor(id) {
