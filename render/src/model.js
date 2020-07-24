@@ -16,99 +16,50 @@ class CrEvent {
         this.children.sort((a, b) => {
             return a.ts - b.ts;
         });
-        for (var e of this.children)
+        for (var e of this.children) {
             e.sortChildrenByTime();
+        }
     }
 
-    // Rendering pipeline equals to function ScheduledActionSendBeginMainFrame.
-    isRenderingPipeline() {
+    // Render pipeline equals to function ScheduledActionSendBeginMainFrame.
+    isRenderPipeline() {
+        // return this.name === 'RunTask' &&
+        //     this.children.length === 1 &&
+        //     this.children[0].name === 'ThreadControllerImpl::RunTask' &&
+        //     this.children[0].data.src_func === 'ScheduledActionSendBeginMainFrame';
         return this.name === 'RunTask' &&
             this.children.length === 1 &&
-            this.children[0].name === 'ThreadControllerImpl::RunTask' &&
-            this.children[0].data.src_func === 'ScheduledActionSendBeginMainFrame';
+            this.children[0].children.length > 0 &&
+            this.children[0].children[0].name === 'BeginMainThreadFrame';
     }
 
-    // Value 1: earliest timestamp when visual change happens.
-    // Value 2: the number of visual changes caused by this task. 
-    // Note: a render-related task included by another render-related task 
-    //       is not considered to contribute to value 2.
-    findVisualChanges() {
+    // Timestamp and duration of each top-level task that causes visual changes. 
+    // Used to compute in-task delay.
+    visualChangeAttributes() {
+        var res = [];
         if (CrEvent.RenderEvents.indexOf(this.name) !== -1)
-            return [this.ts, 1];
-
-        var visualChangesOfChildren = [-1, 0];
-        for (var e of this.children) {
-            var vc = e.findVisualChanges();
-            if (vc[0] !== -1)
-                visualChangesOfChildren[0] = vc[0];
-
-            visualChangesOfChildren[1] += vc[1];
-        }
-
-        return visualChangesOfChildren;
-    }
-
-    // Side effect: the duration of render tasks caused by non-render tasks.
-    getTaskSideEffect(isTopLevel) {
-        if (isTopLevel) {
-            if (this.name === 'RunTask' &&
-                this.children.length === 1 &&
-                this.children[0].name === 'ThreadControllerImpl::RunTask') {
-
-                // Value 1: duration of top-level task.
-                // Value 2: render task duration.
-                // Value 3: count of render tasks.
-                var res = [];
-                var root = this.children[0];
-                for (var e of root.children) {
-                    // When a task is not render-related, its side effect is accounted.
-                    if (CrEvent.RenderEvents.indexOf(e.name) === -1 && e.dur > 0) {
-                        var v = e.getTaskSideEffect(false);
-                        if (v[0] > 0)
-                            res.push([e.dur, v[0], v[1]]);
-                    }
-                }
-                return res;
-            } else
-                return [];
-        } else {
-            // Value 1: render task duration.
-            // Value 2: count of render tasks.
-            if (CrEvent.RenderEvents.indexOf(this.name) !== -1)
-                return [this.dur, 1];
-
-            var res = [0, 0];
-            for (var e of this.children) {
-                var v = e.getTaskSideEffect(false);
-                res[0] += v[0];
-                res[1] += v[1];
+            res.push(this.dur);
+        else {
+            for (var t of this.children) {
+                var tmp = t.visualChangeAttributes();
+                for (var v of tmp)
+                    res.push(v);
             }
-
-            return res;
         }
-    }
-
-    getIncludingEventNames() {
-        var res = new Set();
-        if (this.name !== 'RunTask' && this.name !== 'ThreadControllerImpl::RunTask')
-            res.add(this.name);
-
-        for (var e of this.children) {
-            var res_ = e.getIncludingEventNames();
-            for (var n of res_)
-                res.add(n);
-        }
-
         return res;
     }
 
-    getSourceFunction() {
-        if (this.name === 'RunTask' &&
-            this.children.length === 1 &&
-            this.children[0].name === 'ThreadControllerImpl::RunTask') {
-            var node = this.children[0];
-            return node.data && node.data.src_func;
+    // Includes CrEvent.NetworkEvents. 
+    // Only applicable for tasks that are not pipeline and does not cause visual changes.
+    networkRelated() {
+        if (CrEvent.NetworkEvents.indexOf(this.name) !== -1) return true;
+        else {
+            for (var t of this.children) {
+                if (t.networkRelated())
+                    return true;
+            }
         }
+        return false;
     }
 }
 
@@ -149,6 +100,12 @@ CrEvent.FrameEvents = [
     'ActivateLayerTree',
     'BeginFrame',
     'DrawFrame'
+];
+// Network related events. In CrRendererMain thread.
+CrEvent.NetworkEvents = [
+    'ResourceSendRequest',
+    'ResourceReceivedData',
+    'ResourceReceiveResponse'
 ];
 
 class CrEventSequence {
@@ -251,112 +208,38 @@ class CrThread extends CrEventSequence {
     setName(n) { this.name = n; }
     getName() { return this.name; }
 
-    // RendererMain only.
-    findRenderPipelines() {
+    // Compute the render delay from earliest visual change to a relative drawFrame event.
+    // Render delay consists of: in-task delay, network delay, normal task delay.
+    getRenderDelay() {
         if (!this.treeUpdated)
             this.buildEventTrees();
-
-        var rpls = [];
-        for (var t of this.trees) {
-            if (t.isRenderingPipeline())
-                rpls.push(t);
-        }
-        return rpls;
-    }
-
-    // RendererMain only.
-    // Value 1: processing delay from the earliest visual change to its relative render pipeline.
-    // Value 2: processing duration of render pipeline.
-    // Value 3: the number of visual changes before a relative render pipeline.
-    getVisualChangesProcessingAttributes() {
-        if (!this.treeUpdated)
-            this.buildEventTrees();
-
-        var visualChanges = [];
-        var renderPipelines = [];
-        for (var t of this.trees) {
-            if (t.isRenderingPipeline()) {
-                renderPipelines.push([t.ts, t.dur]);
-            } else {
-                var v = t.findVisualChanges();
-                if (v[0] !== -1) {
-                    visualChanges.push(v);
-                }
-            }
-        }
-
-        var i = 0;
-        var j = 0;
         var res = [];
-        while (i < renderPipelines.length && j < visualChanges.length) {
-            var v1 = renderPipelines[i];
-            var v2 = visualChanges[j];
-            if (v2[0] < v1[0]) {
-                var count = 1;
-                while (j < visualChanges.length) {
-                    if (visualChanges[j][0] < v1[0]) {
-                        count += visualChanges[j][1];
-                        j += 1;
-                    } else
-                        break;
-                }
-                res.push([v1[0] - v2[0], v1[1], count]);
+        var inTaskDelay = 0;
+        var networkDelay = 0;
+        var normalDelay = 0;
+        for (var t of this.trees) {
+            if (t.isRenderPipeline()) {
+                res.push({ inTaskDelay, networkDelay, normalDelay });
+                inTaskDelay = 0;
+                networkDelay = 0;
+                normalDelay = 0;
             } else {
-                res.push([0, v1[1], 0]);
-            }
-            i += 1;
-        }
-        return res;
-    }
-
-    // RendererMain only.
-    getAllTaskSideEffect() {
-        if (!this.treeUpdated)
-            this.buildEventTrees();
-
-        var res = [];
-        for (var t of this.trees) {
-            var tse = t.getTaskSideEffect(true);
-            for (var v of tse)
-                res.push(v);
-        }
-
-        return res;
-    }
-
-    findRenderEventsFromNonPipelines() {
-        if (!this.treeUpdated)
-            this.buildEventTrees();
-
-        var res = new Set();
-        for (var t of this.trees) {
-            if (!t.isRenderingPipeline()) {
-                var eventNames = t.getIncludingEventNames();
-                for (var en of eventNames) {
-                    if (CrEvent.RenderEvents.indexOf(en) !== -1) {
-                        res.add(en);
-                    }
-                }
+                var vc = t.visualChangeAttributes();
+                if (vc.length > 0) {
+                    var vc_dur = 0;
+                    for (var v of vc)
+                        vc_dur += v;
+                    inTaskDelay += t.dur - vc_dur;
+                } else if (t.networkRelated)
+                    networkDelay += t.dur;
+                else
+                    normalDelay += t.dur;
             }
         }
-
         return res;
     }
 
-    getAllSourceFunction() {
-        var srcFunc = new Set();
-        for (var t of this.trees) {
-            srcFunc.add(t.getSourceFunction())
-        }
-        return srcFunc;
-    }
-
-    // TODO: compute the rendering delay from earliest visual change to a relative drawFrame event.
-    findRenderingDelay() {
-
-    }
-
-    findRenderTaskProportion() {
+    getPipelineTaskDuration(prop) {
         if (!this.treeUpdated) {
             this.buildEventTrees();
         }
@@ -364,11 +247,9 @@ class CrThread extends CrEventSequence {
         for (var i = 0; i < CrEvent.Pipeline.length; i++) {
             nameToIndex[CrEvent.Pipeline[i]] = i;
         }
-        var taskProportion = [];
-        if (!this.treeUpdated)
-            this.buildEventTrees();
+        var taskDuration = [];
         for (var t of this.trees) {
-            if (t.isRenderingPipeline()) {
+            if (t.isRenderPipeline()) {
                 var totalDuration = t.dur;
                 var res = [];
                 for (var i = 0; i < CrEvent.Pipeline.length; i++) {
@@ -376,19 +257,20 @@ class CrThread extends CrEventSequence {
                 }
                 for (var e of t.children[0].children) {
                     if (e.dur > 0) {
-                        var v = e.dur / totalDuration;
+                        var v = prop ? e.dur / totalDuration : e.dur;
                         var idx = nameToIndex[e.name];
                         res[idx] += v;
                     }
                 }
-                for (var i = 0; i < res.length; i++) {
-                    res[i] = parseFloat(res[i].toFixed(3));
+                if (prop) {
+                    for (var i = 0; i < res.length; i++) {
+                        res[i] = parseFloat(res[i].toFixed(3));
+                    }
                 }
-                taskProportion.push(res);
+                taskDuration.push(res);
             }
         }
-
-        return taskProportion;
+        return taskDuration;
     }
 }
 
@@ -438,9 +320,39 @@ class CrTrace {
         this.processes.push(p);
         this.id_to_proc[p.id] = p;
     }
+
+    pipelineAnalysis() {
+        var ptd = [];
+        this.processes.forEach(p => {
+            p.threads.forEach(t => {
+                if (t.name === 'CrRendererMain') {
+                    var res = t.getPipelineTaskDuration(false);
+                    for (var arr of res) {
+                        ptd.push(arr);
+                    }
+                }
+            });
+        });
+        return ptd;
+    }
+
+    renderDelayAnalysis() {
+        var rd = [];
+        this.processes.forEach(p => {
+            p.threads.forEach(t => {
+                if (t.name === 'CrRendererMain') {
+                    var res = t.getRenderDelay();
+                    for (var arr of res) {
+                        rd.push(arr);
+                    }
+                }
+            });
+        });
+        return rd;
+    }
 }
 
-function parseTrace(tracefile) {
+CrTrace.parseTrace = function(tracefile) {
     const fs = require('fs');
     const rawData = JSON.parse(fs.readFileSync(tracefile));
 
@@ -478,9 +390,7 @@ function parseTrace(tracefile) {
 
 module.exports = {
     CrEvent,
-    CrEventSequence,
     CrThread,
     CrProcess,
-    CrTrace,
-    parseTrace,
+    CrTrace
 };
