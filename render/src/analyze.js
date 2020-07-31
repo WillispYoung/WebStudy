@@ -40,16 +40,25 @@ function comparePipelineSimilarity(ptd1, ptd2) {
     return res;
 }
 
-function test() {
-    var folder = '../traces/';
-    var files = fs.readdirSync(folder);
+function ptdAverage() {
+    var files = fs.readdirSync('traces/').filter(f => f.startsWith(process.argv[2]));
     var res = [];
     for (var f of files) {
-        var trace = CrTrace.parseTrace(folder + f);
-        var rd = trace.renderDelayAnalysis();
-        res.push({ domain: f, rd });
+        var trace = CrTrace.parseTrace('traces/' + f);
+        var ptd = trace.pipelineAnalysis();
+        console.log(ptd.length);
+        for (var v of ptd) {
+            for (var i = 0; i < 10; i++) {
+                if (res.length < i + 1)
+                    res[i] = v[i];
+                else
+                    res[i] += v[i];
+            }
+        }
     }
-    fs.writeFileSync('rd.json', JSON.stringify({ res }));
+    for (var i = 0; i < 10; i++)
+        res[i] /= files.length;
+    console.log(res);
 }
 
-test();
+ptdAverage();

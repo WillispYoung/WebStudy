@@ -23,10 +23,7 @@ process.on('unhandledRejection', function(error) {
 });
 
 async function navigate(url, folder, latency, bandwidth, notifier) {
-    var browser = await puppeteer.launch({
-        timeout: 10000,
-        headless: false
-    });
+    var browser = await puppeteer.launch();
     var page = await browser.newPage();
     await page.setViewport({ width: 1600, height: 900 });
 
@@ -39,7 +36,9 @@ async function navigate(url, folder, latency, bandwidth, notifier) {
         uploadThroughput: bandwidth * 1024
     });
 
-    var label = `${url.split('/')[2]}-${latency}ms-${bandwidth}KB`;
+    var domain = url.split('/')[2].split(':')[0];
+    var tag = url.split('/')[3];
+    var label = `${domain}-${tag}-${latency}ms-${bandwidth}KB`;
     var filename = `${folder}/${label}-${randomSuffix()}.json`;
     page.on('load', async() => {
         console.log('Page loaded.');
@@ -96,8 +95,27 @@ async function navigateUnderGivenCondition(url, latency, bandwidth) {
     await page.goto(url);
 }
 
-// navigate(process.argv[2], process.argv[3], 100, parseInt(process.argv[4]));
-navigate('https://www.qq.com', 'test', 100, 200);
+async function localNavigate(tag) {
+    var browser = await puppeteer.launch();
+    var page = await browser.newPage();
 
+    page.on('load', async() => {
+        await delay(1000);
+        await page.tracing.stop();
+        await page.close();
+        await browser.close();
+        console.log(filename, 'saved.');
+    })
+
+    var filename = tag + '-' + randomSuffix() + '.json';
+    await page.tracing.start({ path: `traces/${filename}` });
+    await page.goto('http://localhost:8000/' + tag);
+}
+
+// navigate(process.argv[2], process.argv[3], 100, parseInt(process.argv[4]));
+// navigate('https://www.qq.com', 'test', 100, 200);
 // navigateUnderGivenCondition('https://www.speedtest.cn/', 100, 100);
 // navigateUnderGivenCondition('http://www.webkaka.com/', 100, 100);
+// navigate('http://localhost:8000/singleimage', 'traces', 100, 300);
+
+localNavigate(process.argv[2]);

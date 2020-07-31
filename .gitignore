@@ -107,6 +107,5 @@ dist
 #####################################
 
 render/traces/
-render/exp/
-render/src/test/
-render/src/img/
+render/src/traces/
+render/src/plots/
