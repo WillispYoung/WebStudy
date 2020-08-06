@@ -61,4 +61,43 @@ function ptdAverage() {
     console.log(res);
 }
 
-ptdAverage();
+function test() {
+    const target = [
+        'ParseHTML',
+        'ParseAuthorStyleSheet',
+        'UpdateLayoutTree',
+        'Layout',
+        'UpdateLayer',
+        'UpdateLayerTree',
+        'Paint',
+        'CompositeLayers'
+    ];
+
+    var files = fs.readdirSync('traces/').filter(f => f.startsWith(process.argv[2]));
+    var res = [];
+    for (var i = 0; i < target.length; i++) res.push(0);
+
+    for (var f of files) {
+        var data = JSON.parse(fs.readFileSync('traces/' + f)).traceEvents;
+        var count = 0;
+        for (var e of data) {
+            var idx = target.indexOf(e.name);
+            if (idx !== -1) {
+                res[idx] += e.dur || 0;
+                count += 1;
+            }
+        }
+        console.log(count);
+    }
+
+    var total = 0;
+    for (var i = 0; i < res.length; i++) {
+        res[i] /= files.length;
+        total += res[i];
+    }
+    res.push(total);
+
+    console.log(res);
+}
+
+test();
