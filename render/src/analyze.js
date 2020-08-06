@@ -65,10 +65,10 @@ function test() {
     const target = [
         'ParseHTML',
         'ParseAuthorStyleSheet',
-        'UpdateLayoutTree',
+        'UpdateLayoutTree', // == Recalculate Styles.
         'Layout',
-        'UpdateLayer',
         'UpdateLayerTree',
+        'UpdateLayer',
         'Paint',
         'CompositeLayers'
     ];
@@ -79,15 +79,21 @@ function test() {
 
     for (var f of files) {
         var data = JSON.parse(fs.readFileSync('traces/' + f)).traceEvents;
-        var count = 0;
-        for (var e of data) {
-            var idx = target.indexOf(e.name);
-            if (idx !== -1) {
-                res[idx] += e.dur || 0;
-                count += 1;
+        var tasks = data.filter(t => target.indexOf(t.name) !== -1)
+        for (var t of tasks) {
+            var idx = target.indexOf(t.name);
+            res[idx] += t.dur;
+        }
+
+        tasks.sort((a, b) => a.ts - b.ts);
+        for (var i = 0; i < tasks.length - 1; i++) {
+            for (var j = i + 1; j < tasks.length; j++) {
+                if (tasks[i].ts + tasks[i].dur > tasks[j].ts + tasks[j].dur) {
+                    var idx = target.indexOf(tasks[i].name);
+                    res[idx] -= tasks[j].dur;
+                }
             }
         }
-        console.log(count);
     }
 
     var total = 0;
