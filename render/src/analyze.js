@@ -73,7 +73,7 @@ function test() {
         'CompositeLayers'
     ];
 
-    var files = fs.readdirSync('traces/').filter(f => f.startsWith(process.argv[2]));
+    var files = fs.readdirSync('traces/');
     var res = [];
     for (var i = 0; i < target.length; i++) res.push(0);
 
@@ -82,7 +82,7 @@ function test() {
         var tasks = data.filter(t => target.indexOf(t.name) !== -1)
         for (var t of tasks) {
             var idx = target.indexOf(t.name);
-            res[idx] += t.dur;
+            res[idx] += t.dur || 0;
         }
 
         tasks.sort((a, b) => a.ts - b.ts);

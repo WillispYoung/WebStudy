@@ -62,6 +62,29 @@ async function navigate(url, folder, latency, bandwidth, notifier) {
     await page.goto(url);
 }
 
+async function simpleNavigate(url) {
+    var browser = await puppeteer.launch();
+    var page = await browser.newPage();
+    await page.setViewport({ width: 1600, height: 900 });
+
+    var filename = 'traces/' + randomSuffix() + '.json';
+    page.on('load', async() => {
+        console.log('Page loaded.');
+        await delay(1000);
+
+        console.log(`Saving trace data to ${filename}...`);
+        await page.tracing.stop();
+
+        console.log('Closing headless browser...\n');
+        await page.close();
+        await browser.close();
+    });
+
+    console.log(`Starting navigation to ${url}...`);
+    await page.tracing.start({ path: `${filename}` });
+    await page.goto(url);
+}
+
 // Navigate a list of domains.
 function navigateDomainList() {
     var domains = fs.readFileSync('domains.txt', { encoding: 'utf-8' }).split('\r\n');
@@ -119,3 +142,5 @@ async function localNavigate(tag) {
 // navigate('http://localhost:8000/singleimage', 'traces', 100, 300);
 
 localNavigate(process.argv[2]);
+
+// simpleNavigate('https://www.jd.com');
