@@ -1,0 +1,47 @@
+.menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.menu div {
+    margin: 5px;
+    background-color: aliceblue;
+}
+
+.main {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.main div {
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+.left {
+    width: 8%;
+}
+
+.middle {
+    width: 40%;
+}
+
+.right {
+    width: 25%;
+}
+
+.footnote {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.footnote div {
+    margin: 5px;
+    background-color: antiquewhite;
+}
