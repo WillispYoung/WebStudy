@@ -196,4 +196,43 @@ def test():
         plt.title(v['domain'][:-5])
         plt.savefig('img/' + v['domain'][:-5] + '.png')
 
-test()
+def ptd_sim():
+    data = json.loads(open('ptd-sim.json', 'r').read())['res']
+    
+    data = [v[:6] for v in data]
+
+    max_sim = [max(v) for v in data]
+    max_sim.sort()
+    min_sim = [min(v) for v in data]
+    min_sim.sort()
+    avg_sim = [sum(v) / 10 for v in data]
+    avg_sim.sort()
+    
+    plt.plot(max_sim)
+    plt.plot(min_sim)
+    plt.plot(avg_sim)
+    plt.legend(['Max Sim', 'Min Sim', 'Avg Sim'])
+    plt.show()
+
+
+def bar_chart():
+    tasks = ['ParseHTML', 'ParseCSS', 'UpdateLayoutTree', 'Layout', 'UpdateLayerTree', 'UpdateLayer', 'Paint', 'CompositeLayers']
+    v0 = [1348.9,36.7,12876.4,21899.6,421.3,38.6,610,237.9]
+    v1 = [1332.3,93.4,13264.9,24337.5,452.1,37.3,752.3,237]
+    v2 = [1395.4,37.9,12656.2,23543.2,421.5,35.9,743.9,241.6]
+    # v3 = [1432.6,79.1,12014.7,20687.6,420.6,33.2,406.9,322.8]
+    # v4 = [341.4,1882.2,758.5,684.5,262,1031.3]
+
+    plt.scatter(range(8), v0)
+    plt.scatter(range(8), v1, marker='.')
+    plt.scatter(range(8), v2, marker='^')
+    # plt.scatter(range(8), v3, marker='x')
+    # plt.scatter(range(6), v4, marker='v')
+
+    plt.xticks(range(len(tasks)), tasks, rotation=45)
+    plt.legend(['Baseline', 'Nth-child', 'In Tag'])
+    plt.title('CSS Selector Complexity: Render Task Duration ($\mu$s)')
+
+    plt.show()
+
+bar_chart()

@@ -143,4 +143,4 @@ async function localNavigate(tag) {
 
 localNavigate(process.argv[2]);
 
-// simpleNavigate('https://www.jd.com');
+// simpleNavigate('https://www.163.com');

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { CrTrace } = require('./model');
+const { trace } = require('console');
 
 function numericSimilarity(x, y) {
     if (x === y) return 1;
@@ -107,3 +108,26 @@ function test() {
 }
 
 test();
+
+function test1() {
+    var files = fs.readdirSync('traces/');
+    var ptds = [];
+    for (var f of files) {
+        var trace = CrTrace.parseTrace('traces/' + f);
+        var ptd = trace.pipelineAnalysis();
+        ptds.push(ptd);
+    }
+
+    var res = [];
+    for (var i = 0; i < ptds.length - 1; i++) {
+        for (var j = i + 1; j < ptds.length; j++) {
+            var v = comparePipelineSimilarity(ptds[i], ptds[j]);
+            res.push(v);
+        }
+    }
+
+    // console.log(res);
+    fs.writeFileSync('ptd-sim.json', JSON.stringify({ res }));
+}
+
+// test1();
