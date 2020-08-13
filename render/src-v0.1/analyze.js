@@ -1,0 +1,1 @@
+const CrTrace = require('./model');
