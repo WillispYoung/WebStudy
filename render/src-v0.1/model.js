@@ -10,6 +10,11 @@ const MainThreadDurationalTasks = [
     'CompositeLayers'
 ];
 
+const MainThreadInstantTasks = [
+    "InvalidateLayout",
+    "ScheduleStyleRecalculation"
+];
+
 const ThreadNames = [
     'CrBrowserMain',
     'CrRendererMain',
@@ -40,6 +45,34 @@ class Task {
         this.children.sort((a, b) => a.ts - b.ts);
         this.children.map(c => c.sort());
     }
+
+    beginMainThreadFrame() {
+        return this.children.length > 0 &&
+            this.children[0].children.length > 0 &&
+            this.children[0].children[0].name === 'BeginMainThreadFrame';
+    }
+
+    getTaskDuration() {
+        var ctd = [];
+        for (var i = 0; i < MainThreadDurationalTasks.length; i++) ctd.push(0);
+
+        if (this.children.length > 0) {
+            for (let c of this.children) {
+                let td_ = c.getTaskDuration();
+                for (var i = 0; i < td_.length; i++)
+                    ctd[i] += td_[i];
+            }
+        }
+
+        let idx = MainThreadDurationalTasks.indexOf(this.name);
+        if (idx >= 0) {
+            ctd[idx] = 0;
+            let sum = ctd.reduce((a, b) => a + b);
+            ctd[idx] = this.dur - sum;
+        }
+
+        return ctd;
+    }
 }
 
 class Thread {
@@ -58,11 +91,12 @@ class Thread {
 
         for (var i = 0; i < listLength; i++)
             dependency.push([]);
+
         // Uncover dependency.
         for (var i = 0; i < listLength - 1; i++) {
-            var t1 = this.list[i];
+            let t1 = this.list[i];
             for (var j = i + 1; j < listLength; j++) {
-                var t2 = this.list[j];
+                let t2 = this.list[j];
                 if (t1.includes(t2)) {
                     dependency[i].push(j);
                     leafNodes.add(j);
@@ -74,14 +108,17 @@ class Thread {
         }
         // Remove multi-hop dependency.
         for (var i in dependency) {
-            var inclusion = [...dependency[i]];
+            let inclusion = [...dependency[i]];
             inclusion.forEach(k => {
                 dependency[i] = dependency[i].filter(v => !dependency[k].includes(v));
             });
         }
         // Build task trees.
+        var description = new Set();
         for (var i in dependency) {
             for (var j of dependency[i]) {
+                if (MainThreadDurationalTasks.indexOf(this.list[i].name) !== -1)
+                    description.add(`${this.list[i].name}->${this.list[j].name}`);
                 this.list[i].children.push(this.list[j]);
             }
         }
@@ -94,6 +131,11 @@ class Thread {
         leafNodes = undefined;
 
         this.sortTrees();
+
+        const fs = require('fs');
+        description = Array.from(description);
+        description.sort();
+        fs.writeFileSync('dependency.json', JSON.stringify({ description }));
     }
 
     sortTrees() {
@@ -134,12 +176,36 @@ class Trace {
         this.processes.forEach(p => {
             p.threads.forEach(t => {
                 if (t.name === 'CrRendererMain') {
-                    t.buildTaskTrees();
-                    fs.writeFileSync(`render-tree-${count}.json`, JSON.stringify({ trees: t.trees }));
                     count += 1;
+                    t.buildTaskTrees();
+                    fs.writeFileSync(`render-trees-${count}.json`, JSON.stringify({ trees: t.trees }));
                 }
             });
         });
+    }
+
+    taskDurationBeforeFrameUpdate() {
+        var res = [];
+        this.processes.forEach(p => {
+            p.threads.forEach(t => {
+                if (t.name === 'CrRendererMain') {
+                    t.buildTaskTrees();
+
+                    var td = [];
+                    for (var i = 0; i < MainThreadDurationalTasks.length; i++) td.push(0);
+                    for (var tree of t.trees) {
+                        let td_ = tree.getTaskDuration();
+                        for (var i in td_) td[i] += td_[i];
+                        if (tree.beginMainThreadFrame()) {
+                            res.push(td);
+                            td = [];
+                            for (var i = 0; i < MainThreadDurationalTasks.length; i++) td.push(0);
+                        }
+                    }
+                }
+            });
+        });
+        return res;
     }
 }
 
