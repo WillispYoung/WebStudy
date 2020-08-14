@@ -28,7 +28,7 @@ async function navigate(url) {
     var filename = `traces/${formatDate()}.json`;
     page.on('load', async() => {
         console.log('Page loaded.');
-        await delay(1000);
+        await delay(3000);
 
         console.log(`Saving trace data to ${filename}...`);
         await page.tracing.stop();
@@ -44,4 +44,4 @@ async function navigate(url) {
     await page.goto(url);
 }
 
-navigate('https://www.qq.com');
+navigate('http://localhost:8000/webworker/');

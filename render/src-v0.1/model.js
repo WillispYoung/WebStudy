@@ -52,6 +52,19 @@ class Task {
             this.children[0].children[0].name === 'BeginMainThreadFrame';
     }
 
+    causesVisualChanges() {
+        if (MainThreadDurationalTasks.indexOf(this.name) >= 0) return true;
+
+        var cvc = false;
+        for (var c of this.children) {
+            if (c.causesVisualChanges()) {
+                cvc = true;
+                break;
+            }
+        }
+        return cvc;
+    }
+
     getTaskDuration() {
         var ctd = [];
         for (var i = 0; i < MainThreadDurationalTasks.length; i++) ctd.push(0);

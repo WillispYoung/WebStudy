@@ -1,0 +1,15 @@
+<html>
+
+<head>
+    <title>Web Worker Example</title>
+    <link rel="icon" href="../mark.ico">
+</head>
+
+<body>
+    <script>
+        var worker = new Worker('prime.js');
+        worker.postMessage("");
+    </script>
+</body>
+
+</html>
