@@ -1,0 +1,139 @@
+.menu {
+    width: 1190px;
+    height: 20px;
+    margin: auto;
+    font-size: 12px;
+    color: lightslategray;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+a {
+    text-decoration: none;
+}
+
+.left {
+    display: flex;
+    flex-direction: row;
+    justify-content: top;
+}
+
+.regions {
+    margin-right: 20px;
+}
+
+.regions select {
+    font-size: 12px;
+    border: 0;
+    appearance: none;
+    -moz-appearance: none;
+    -webkit-appearance: none;
+}
+
+.login-register {
+    margin-right: 20px;
+}
+
+.login-register a:first-child {
+    color: crimson;
+    margin-right: 5px;
+}
+
+.space-filler {
+    flex-grow: 1;
+}
+
+.right {
+    display: flex;
+    flex-direction: row;
+    justify-content: top;
+}
+
+.right div {
+    margin-right: 15px;
+}
+
+.right div :last-child {
+    margin-right: 0px;
+}
+
+.ad-under-menu {
+    width: 100%;
+    background-color: #e71b1b;
+    height: 70px;
+    text-align: center;
+}
+
+.search {
+    margin: auto;
+    width: 1190px;
+    /* height: 121px; */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#logo {
+    margin-right: 50px;
+}
+
+.qr-code {
+    display: flex;
+}
+
+.qr-code div:first-child {
+    width: 16px;
+    height: 16px;
+    color: gainsboro;
+    vertical-align: middle;
+    border: 1px solid gainsboro;
+}
+
+.content-under-search-box {
+    margin: auto;
+}
+
+.module {
+    width: 1190px;
+    height: 30px;
+    line-height: 30px;
+    margin: auto;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    background-image: linear-gradient(to right, #ff9000 0, #ff5000 100%)
+}
+
+.module span {
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+.module span:first-child {
+    width: 190px;
+    text-align: center;
+    background-color: #ff5000;
+}
+
+.category {
+    width: 1190px;
+    margin: auto;
+}
+
+.left-category {
+    width: 158px;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding-left: 30px;
+}
+
+.left-category span {
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+    font-weight: 400;
+}

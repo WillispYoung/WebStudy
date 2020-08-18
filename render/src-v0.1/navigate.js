@@ -44,4 +44,4 @@ async function navigate(url) {
     await page.goto(url);
 }
 
-navigate('http://localhost:8000/webworker/');
+navigate('https://www.qq.com');
