@@ -145,10 +145,10 @@ class Thread {
 
         this.sortTrees();
 
-        const fs = require('fs');
-        description = Array.from(description);
-        description.sort();
-        fs.writeFileSync('dependency.json', JSON.stringify({ description }));
+        // const fs = require('fs');
+        // description = Array.from(description);
+        // description.sort();
+        // fs.writeFileSync('dependency.json', JSON.stringify({ description }));
     }
 
     sortTrees() {

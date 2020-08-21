@@ -85,8 +85,9 @@ a {
 .qr-code div:first-child {
     width: 16px;
     height: 16px;
+    font-size: 16px;
+    line-height: 16px;
     color: gainsboro;
-    vertical-align: middle;
     border: 1px solid gainsboro;
 }
 
@@ -118,12 +119,86 @@ a {
     background-color: #ff5000;
 }
 
+#filter-above-search-box {
+    display: flex;
+    flex-direction: row;
+    justify-content: top;
+}
+
+#filter-above-search-box div {
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-right: 5px;
+    color: orangered;
+    font-size: 12px;
+}
+
+#filter-above-search-box div:first-child {
+    margin-left: 20px;
+    font-weight: bold;
+    background-color: orangered;
+    color: white;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.search-box {
+    margin-left: 50px;
+}
+
+#search-input {
+    width: 472px;
+    height: 28px;
+    /* padding: 4px; */
+    margin-left: 20px;
+    font-size: 12px;
+    line-height: 22px;
+    vertical-align: middle;
+    border: none;
+    appearance: none;
+}
+
+#search-input:focus {
+    border: none;
+    appearance: none;
+    outline: none;
+}
+
+#search-camera {
+    height: 36px;
+    font-size: 24px;
+}
+
+#search-button {
+    height: 36px;
+    width: 80px;
+    float: right;
+    border: none;
+    appearance: none;
+    font-size: 18px;
+    font-weight: 700;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    background-image: linear-gradient(to right, #ff9000 0, #ff5000 100%);
+    color: white;
+}
+
+#keywords-under-search-box span {
+    font-size: 12px;
+    height: 18px;
+    vertical-align: middle;
+}
+
 .category {
     width: 1190px;
     margin: auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .left-category {
+    float: left;
     width: 158px;
     display: flex;
     flex-direction: column;
@@ -136,4 +211,533 @@ a {
     line-height: 32px;
     font-size: 14px;
     font-weight: 400;
+}
+
+#middle-core {
+    width: 520px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+#middle-tmall {
+    margin-top: 10px;
+    border-bottom: 3px solid #ff1648;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#middle-core-bottom {
+    width: 520px;
+    margin-top: 10px;
+    background-color: white;
+}
+
+#middle-sub-column {
+    width: 160px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+#right-thumbnails {
+    width: 290px;
+    margin-left: 10px;
+    margin-top: 10px;
+    background-color: white;
+}
+
+#account-operations {
+    display: flex;
+    justify-content: center;
+    margin: auto;
+}
+
+#account-operations div {
+    width: 92px;
+    height: 25px;
+    margin-left: 4px;
+    margin-right: 5px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 25px;
+    color: white;
+    text-align: center;
+    background-image: linear-gradient(to right, #ff5000 0, #ff6f06 100%);
+}
+
+#right-sub-domains {
+    width: 290px;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    text-align: center;
+}
+
+#right-sub-domains div {
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+#right-sub-domains div:first-child {
+    border-bottom: 2px solid orange;
+}
+
+#right-service-tiles {
+    width: 290px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.right-tile-block {
+    width: 71.5px;
+    height: 77px;
+}
+
+.right-tile-block span {
+    background: url(icon-list.png) 0 0 no-repeat;
+    width: 24px;
+    height: 24px;
+    display: block;
+    margin: auto;
+    margin-top: 12px;
+}
+
+.right-tile-description {
+    text-align: center;
+    font-size: 12px;
+}
+
+.right-1st-row {
+    border-top: 1px solid gainsboro;
+    border-bottom: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+}
+
+.right-1st-row-corner {
+    border-top: 1px solid gainsboro;
+    border-bottom: 1px solid gainsboro;
+}
+
+.right-2nd-row {
+    border-bottom: 1px solid gainsboro;
+    border-right: 1px solid gainsboro;
+}
+
+.right-2nd-row-corner {
+    border-bottom: 1px solid gainsboro;
+}
+
+.right-bottom-description {
+    display: flex;
+    justify-content: space-between;
+}
+
+.right-bottom-apps {
+    display: flex;
+    margin-top: 5px;
+    margin-left: 15px;
+}
+
+.right-bottom-apps img {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+.good-stuff {
+    width: 1190px;
+    margin: auto;
+    margin-top: 20px;
+    padding-top: 1px;
+    background-color: white;
+}
+
+.good-stuff-block {
+    width: 180px;
+    margin-right: 14px;
+}
+
+.good-stuff-block-p1 {
+    font-size: 16px;
+    width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.good-stuff-block-p2 {
+    font-size: 14px;
+    width: 180px;
+    margin-top: -10px;
+    color: #999;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.good-stuff-block-p3 {
+    margin-top: 10px;
+    width: 180px;
+    font-size: 14px;
+    color: #35b1ff;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.live {
+    width: 1190px;
+    margin: auto;
+    margin-top: 10px;
+    display: flex;
+    background-color: white;
+}
+
+.tri-img-left {
+    width: 180px;
+    height: 180px;
+    margin-right: -1px;
+}
+
+.tri-img-right {
+    width: 89px;
+    display: inline-block;
+}
+
+.tri-img-right img {
+    width: 89px;
+    height: 89px;
+}
+
+.tri-img-right img:first-child {
+    margin-bottom: 2px;
+}
+
+.tri-img-block {
+    width: 280px;
+}
+
+.tri-img-block p span {
+    font-size: 12px;
+    color: #999;
+    margin-left: 10px;
+}
+
+.tri-img-region {
+    width: 590px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#live-left-wrapper {
+    width: 580px;
+    margin-top: 10px;
+    margin-left: 25px;
+}
+
+#live-right-wrapper {
+    width: 580px;
+    margin-top: 13px;
+}
+
+.specialty {
+    width: 1190px;
+    margin: auto;
+    margin-top: 10px;
+    /* background-color: white; */
+    display: flex;
+}
+
+#spec-title {
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 48px;
+    margin-top: 5px;
+    margin-left: 32px;
+    display: flex;
+    align-items: center;
+}
+
+#specialty-right-ad {
+    display: inline-block;
+    background-color: white;
+    margin-left: 10px;
+    width: 338px;
+    height: 290px;
+}
+
+.spec-block {
+    width: 210px;
+    border-top: 1px solid gainsboro;
+}
+
+.spec-block-not-last {
+    border-right: 1px solid gainsboro;
+}
+
+.spec-block p {
+    padding-left: 20px;
+}
+
+.spec-block img {
+    padding-left: 26px;
+    width: 150px;
+    height: 150px;
+}
+
+.spec-block-title {
+    font-size: 22px;
+    line-height: 26px;
+}
+
+.spec-block-description {
+    font-size: 12px;
+    line-height: 22px;
+    margin-top: -20px;
+    color: gray;
+}
+
+.seller {
+    width: 1190px;
+    margin: auto;
+    margin-top: 10px;
+    background-color: white;
+}
+
+#seller-title {
+    margin-top: 10px;
+    margin-left: 32px;
+    line-height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+#seller-genre {
+    margin-left: 32px;
+    display: flex;
+}
+
+#seller-genre span {
+    font-size: 12px;
+    color: #999;
+    margin-right: 10px;
+}
+
+#seller-items {
+    margin-top: 10px;
+}
+
+.seller-block {
+    width: 197px;
+    padding-top: 19px;
+    padding-left: 19px;
+    padding-right: 19px;
+    padding-bottom: 10px;
+}
+
+#seller-table {
+    border-collapse: collapse;
+    border: 1px solid gainsboro;
+}
+
+#seller-table td {
+    border: 1px solid gainsboro;
+}
+
+.seller-image {
+    width: 197px;
+    height: 197px;
+}
+
+.seller-name {
+    font-size: 14px;
+}
+
+.seller-name img {
+    width: 28px;
+    height: 16px;
+}
+
+.seller-rating {
+    font-size: 12px;
+    color: #999;
+}
+
+.seller-price {
+    font-size: 22px;
+    color: orange;
+}
+
+.seller-old-price {
+    font-size: 12px;
+    color: #999;
+}
+
+.seller-sales {
+    font-size: 12px;
+    color: #999;
+    float: right;
+    clear: right;
+}
+
+#ad-under-seller {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+#ad-under-seller img {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.recommendation {
+    width: 1190px;
+    margin: auto;
+    margin-top: 10px;
+    background-color: white;
+}
+
+#recom-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+    margin-left: 32px;
+    line-height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+#recom-table {
+    border-collapse: collapse;
+    border: 1px solid gainsboro;
+}
+
+#recom-table td {
+    border: 1px solid gainsboro;
+}
+
+.recom-block {
+    width: 197px;
+    height: 310px;
+    padding-top: 19px;
+    padding-left: 19px;
+    padding-right: 19px;
+    padding-bottom: 5px;
+}
+
+.recom-img {
+    width: 199px;
+    height: 197px;
+}
+
+.recom-description {
+    font-size: 14px;
+    line-height: 22px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.recom-price {
+    font-size: 20px;
+    line-height: 24px;
+    color: orangered;
+}
+
+.recom-sales {
+    font-size: 12px;
+    color: #999;
+    float: right;
+    clear: right;
+}
+
+.info {
+    width: 1190px;
+    margin: auto;
+    margin-top: 20px;
+}
+
+#info-separate-line {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.line {
+    width: 50px;
+    height: 1px;
+    margin-left: 20px;
+    margin-right: 20px;
+    background-color: #ccc;
+}
+
+#info-items {
+    display: flex;
+    justify-content: top;
+}
+
+.info-block {
+    width: 280px;
+    margin-left: 5px;
+    margin-right: 10px;
+}
+
+.info-title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.info-details {
+    font-size: 12px;
+    color: #999;
+}
+
+.info-details span {
+    margin-right: 10px;
+}
+
+.foot {
+    width: 100%;
+    background-color: white;
+}
+
+#foot-content {
+    width: 1190px;
+    margin: auto;
+    font-size: 12px;
+}
+
+#foot-outlinks {
+    width: 1190px;
+    color: #aaa;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+}
+
+#foot-outlinks p span {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#legal-info p span {
+    margin-right: 5px;
+}
+
+#legal-imgs span {
+    height: 40px;
+    margin-right: 40px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-image: url(official-links.jpg);
 }

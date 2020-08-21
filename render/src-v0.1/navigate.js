@@ -44,4 +44,4 @@ async function navigate(url) {
     await page.goto(url);
 }
 
-navigate('https://www.qq.com');
+navigate('http://localhost:8000/taobao.com');
