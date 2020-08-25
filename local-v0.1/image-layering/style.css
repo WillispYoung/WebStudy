@@ -1,0 +1,51 @@
+body {
+    font-size: 12px;
+}
+
+#menu {
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #eee;
+}
+
+#menu-wrapper {
+    width: 1190px;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+#left-menu {
+    display: flex;
+}
+
+#left-menu div {
+    margin-right: 20px;
+}
+
+#right-menu {
+    display: flex;
+}
+
+#right-menu div {
+    margin-left: 10px;
+}
+
+.space-filler {
+    flex-grow: 1;
+}
+
+#ad-under-menu {
+    width: 100%;
+    background-color: orangered;
+}
+
+#search {
+    width: 100%;
+}
+
+#search-wrapper {
+    width: 1190px;
+    display: flex;
+}
