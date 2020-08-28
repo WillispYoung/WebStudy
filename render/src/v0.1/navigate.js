@@ -93,11 +93,16 @@ function navigateUserPrompt(url) {
     })
 }
 
-// navigateCloseOnLoad('https://www.taobao.com');
+navigateCloseOnLoad('https://www.taobao.com');
+// navigateCloseOnLoad('https://www.amazon.com/');
+// navigateCloseOnLoad('https://www.ebay.com/');
+// navigateCloseOnLoad('http://localhost:8000/taobao.com/')
 
 // navigateUserPrompt('https://observablehq.com/@kerryrodden/sequences-sunburst');
 // navigateUserPrompt('https://observablehq.com/@d3/index-chart');
 // navigateUserPrompt('https://observablehq.com/@d3/brushable-scatterplot-matrix');
-navigateUserPrompt('https://observablehq.com/@d3/streamgraph-transitions');
+// navigateUserPrompt('https://observablehq.com/@d3/streamgraph-transitions');
 
 // navigateUserPrompt('http://localhost:8000/image-layering/');
+
+// navigateUserPrompt('http://localhost:8000/stacked-to-groups-bars/');

@@ -106,5 +106,4 @@ dist
 #####################################
 #####################################
 
-render/traces/
-render/src*/traces/
+render/src/*/traces/
