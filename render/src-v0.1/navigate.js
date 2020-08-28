@@ -3,11 +3,11 @@ const EventEmitter = require('events');
 const delay = require('delay');
 const readline = require("readline");
 
-process.on('uncaughtException', function (error) {
+process.on('uncaughtException', function(error) {
     console.log(`Uncaught exceptionL ${error.message}`);
 });
 
-process.on('unhandledRejection', function (error) {
+process.on('unhandledRejection', function(error) {
     console.log(`Unhandled rejection: ${error.message}`);
 });
 
@@ -27,15 +27,25 @@ async function navigateCloseOnLoad(url) {
     var page = await browser.newPage();
     await page.setViewport({ width: 1600, height: 900 });
 
+    var client = await page.target().createCDPSession();
+    await client.send("Network.enable");
+    await client.send("Network.emulateNetworkConditions", {
+        offline: false,
+        latency: 50,
+        downloadThroughput: 300 * 1024,
+        uploadThroughput: 300 * 1024
+    });
+
     var filename = `traces/${formatDate()}.json`;
-    page.on('load', async () => {
+    page.on('load', async() => {
         console.log('Page loaded.');
-        await delay(3000);
+        await delay(500);
 
         console.log(`Saving trace data to ${filename}...`);
         await page.tracing.stop();
 
         console.log('Closing headless browser...\n');
+        await client.detach();
         await page.close();
         await browser.close();
     });
@@ -54,7 +64,7 @@ function navigateUserPrompt(url) {
         var page = await browser.newPage();
         await page.setViewport({ width: 1920, height: 1080 });
 
-        userInput.on('close', async () => {
+        userInput.on('close', async() => {
             console.log('Saving tracing data and closing browser...')
 
             await delay(1000);
@@ -77,12 +87,17 @@ function navigateUserPrompt(url) {
         output: process.stdout
     });
 
-    rl.question('Type "stop" to stop navigation: ', function (res) {
+    rl.question('Type "stop" to stop navigation: ', function(_) {
         userInput.emit('close', {});
         rl.close();
     })
 }
 
-// navigateCloseOnLoad('http://localhost:8000/taobao.com');
+// navigateCloseOnLoad('https://www.taobao.com');
 
-navigateUserPrompt('http://localhost:8000/image-layering/');
+// navigateUserPrompt('https://observablehq.com/@kerryrodden/sequences-sunburst');
+// navigateUserPrompt('https://observablehq.com/@d3/index-chart');
+// navigateUserPrompt('https://observablehq.com/@d3/brushable-scatterplot-matrix');
+navigateUserPrompt('https://observablehq.com/@d3/streamgraph-transitions');
+
+// navigateUserPrompt('http://localhost:8000/image-layering/');

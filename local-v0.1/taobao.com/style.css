@@ -72,6 +72,7 @@ a {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    will-change: transform;
 }
 
 #logo {
@@ -195,6 +196,7 @@ a {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    will-change: transform;
 }
 
 .left-category {
@@ -355,6 +357,7 @@ a {
     margin-top: 20px;
     padding-top: 1px;
     background-color: white;
+    will-change: transform;
 }
 
 .good-stuff-block {
@@ -399,6 +402,7 @@ a {
     margin-top: 10px;
     display: flex;
     background-color: white;
+    will-change: transform;
 }
 
 .tri-img-left {
@@ -454,6 +458,7 @@ a {
     margin-top: 10px;
     /* background-color: white; */
     display: flex;
+    will-change: transform;
 }
 
 #spec-title {
@@ -510,6 +515,7 @@ a {
     margin: auto;
     margin-top: 10px;
     background-color: white;
+    will-change: transform;
 }
 
 #seller-title {
@@ -604,6 +610,7 @@ a {
     margin: auto;
     margin-top: 10px;
     background-color: white;
+    will-change: transform;
 }
 
 #recom-title {
@@ -710,6 +717,7 @@ a {
 .foot {
     width: 100%;
     background-color: white;
+    will-change: transform;
 }
 
 #foot-content {
