@@ -39,11 +39,40 @@ class Task {
     }
 
     endtime() { return this.ts + this.dur; }
-    includes(e) { return this.ts < e.ts && this.endtime() > e.endtime(); }
+    includes(e) { return this.ts <= e.ts && this.endtime() >= e.endtime(); }
 
     sort() {
         this.children.sort((a, b) => a.ts - b.ts);
-        this.children.map(c => c.sort());
+        for (var c of this.children) c.sort();
+    }
+
+    isWellFormatted() {
+        var res = true;
+        for (var c of this.children) {
+            if (!this.includes(c)) {
+                res = false;
+                break;
+            }
+        }
+        if (res && this.children.length > 1) {
+            for (var i = 0; i < this.children.length - 1; i++) {
+                let c1 = this.children[i];
+                let c2 = this.children[i + 1];
+                if (c1.endtime() > c2.ts) {
+                    res = false;
+                    break;
+                }
+            }
+            if (res) {
+                for (var c of this.children) {
+                    if (!c.isWellFormatted()) {
+                        res = false;
+                        break;
+                    }
+                }
+            }
+        }
+        return res;
     }
 
     beginMainThreadFrame() {
@@ -86,6 +115,30 @@ class Task {
 
         return ctd;
     }
+
+    // As we have observed, `Layout` is the most time-consuming rendering task.
+    // Yet we need to find out, why and how is `Layout` time-consuming.
+    // Data to collect: start, end, caller.
+    getLayoutDetails() {
+        var ld = [];
+
+        for (var c of this.children) {
+            if (c.name === 'Layout')
+                ld.push({
+                    start: c.ts,
+                    dur: c.dur,
+                    end: c.endtime(),
+                    caller: this.name
+                });
+            else {
+                var cld = c.getLayoutDetails();
+                for (var item of cld)
+                    ld.push(item);
+            }
+        }
+
+        return ld;
+    }
 }
 
 class Thread {
@@ -104,6 +157,19 @@ class Thread {
 
         for (var i = 0; i < listLength; i++)
             dependency.push([]);
+
+        var count = 0;
+        for (var i = 0; i < listLength - 1; i++) {
+            let t1 = this.list[i];
+            for (var j = i + 1; j < listLength; j++) {
+                let t2 = this.list[j];
+                if (!t1.includes(t2) &&
+                    !t2.includes(t1) &&
+                    ((t1.ts < t2.ts && t1.endtime() > t2.ts) || (t2.ts < t1.ts && t2.endtime() > t1.ts)))
+                    count += 1;
+            }
+        }
+        console.log('Trace fidelity:', count, 'interesctions occured.');
 
         // Uncover dependency.
         for (var i = 0; i < listLength - 1; i++) {
@@ -127,15 +193,15 @@ class Thread {
             });
         }
         // Build task trees.
-        var description = new Set();
+        // var description = new Set();
         for (var i in dependency) {
             for (var j of dependency[i]) {
-                if (MainThreadDurationalTasks.indexOf(this.list[i].name) !== -1)
-                    description.add(`${this.list[i].name}->${this.list[j].name}`);
+                // if (MainThreadDurationalTasks.indexOf(this.list[i].name) !== -1)
+                //     description.add(`${this.list[i].name}->${this.list[j].name}`);
                 this.list[i].children.push(this.list[j]);
             }
         }
-        for (var i in this.list) {
+        for (var i = 0; i < listLength; i++) {
             if (!leafNodes.has(i))
                 this.trees.push(this.list[i]);
         }
@@ -145,7 +211,10 @@ class Thread {
 
         this.sortTrees();
 
+        console.log('Task tree well formatted:', this.isWellFormatted());
+
         // const fs = require('fs');
+        // fs.writeFileSync('trees.json', JSON.stringify({ trees: this.trees }));
         // description = Array.from(description);
         // description.sort();
         // fs.writeFileSync('dependency.json', JSON.stringify({ description }));
@@ -153,7 +222,30 @@ class Thread {
 
     sortTrees() {
         this.trees.sort((a, b) => a.ts - b.ts);
-        this.trees.map(t => t.sort());
+        for (var t of this.trees) t.sort();
+    }
+
+    isWellFormatted() {
+        var res = true;
+        for (var i = 0; i < this.trees.length - 1; i++) {
+            let t1 = this.trees[i];
+            let t2 = this.trees[i + 1];
+            if (t1.endtime() > t2.ts) {
+                console.log(`Trees: ${i}th node intersects with ${i+1}th node.`);
+                res = false;
+                break;
+            }
+        }
+        if (res) {
+            for (var i = 0; i < this.trees.length; i++) {
+                if (!this.trees[i].isWellFormatted()) {
+                    console.log(`Trees: ${i}th node is wrong.`);
+                    res = false;
+                    break;
+                }
+            }
+        }
+        return res;
     }
 }
 
@@ -198,20 +290,26 @@ class Trace {
     }
 
     taskDurationBeforeFrameUpdate() {
-        var res = [];
+        var res = { td: [], ld: [] };
         this.processes.forEach(p => {
             p.threads.forEach(t => {
                 if (t.name === 'CrRendererMain') {
                     t.buildTaskTrees();
 
                     var td = [];
+                    var ld = [];
                     for (var i = 0; i < MainThreadDurationalTasks.length; i++) td.push(0);
                     for (var tree of t.trees) {
                         let td_ = tree.getTaskDuration();
+                        let ld_ = tree.getLayoutDetails();
                         for (var i in td_) td[i] += td_[i];
+                        for (var v of ld_) ld.push(v);
                         if (tree.beginMainThreadFrame()) {
-                            res.push(td);
+                            res.td.push(td);
+                            res.ld.push(ld);
                             td = [];
+                            ld = [];
+
                             for (var i = 0; i < MainThreadDurationalTasks.length; i++) td.push(0);
                         }
                     }

@@ -16,7 +16,7 @@ legends = ['ParseHTML',
 
 
 def plot_task_duration(trace):
-    data = json.loads(open(trace, 'r').read())['res']
+    data = json.loads(open(trace, 'r').read())['td']
 
     print('Count of rendering:', len(data))
     task_durations = [[] for i in range(9)]
