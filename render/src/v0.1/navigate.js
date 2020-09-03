@@ -22,10 +22,11 @@ function formatDate() {
     return output;
 }
 
-async function navigateCloseOnLoad(url) {
+async function navigateCloseOnLoad(url, label) {
     var browser = await puppeteer.launch();
     var page = await browser.newPage();
     await page.setViewport({ width: 1600, height: 900 });
+    await page.setCacheEnabled(false);
 
     var client = await page.target().createCDPSession();
     await client.send("Network.enable");
@@ -36,7 +37,7 @@ async function navigateCloseOnLoad(url) {
         uploadThroughput: 300 * 1024
     });
 
-    var filename = `traces/${formatDate()}.json`;
+    var filename = `traces/${label}-${formatDate()}.json`;
     page.on('load', async() => {
         console.log('Page loaded.');
         await delay(500);
@@ -56,13 +57,14 @@ async function navigateCloseOnLoad(url) {
     await page.goto(url);
 }
 
-function navigateUserPrompt(url) {
+function navigateUserPrompt(url, label) {
     var userInput = new EventEmitter();
 
     async function navigate() {
         var browser = await puppeteer.launch({ headless: false });
         var page = await browser.newPage();
         await page.setViewport({ width: 1920, height: 1080 });
+        await page.setCacheEnabled(false);
 
         userInput.on('close', async() => {
             console.log('Saving tracing data and closing browser...')
@@ -75,7 +77,7 @@ function navigateUserPrompt(url) {
             console.log('Browser closed...');
         });
 
-        var filename = `traces/${formatDate()}.json`;
+        var filename = `traces/${label}-${formatDate()}.json`;
         await page.tracing.start({ path: `${filename}` });
         await page.goto(url);
     }
@@ -96,7 +98,7 @@ function navigateUserPrompt(url) {
 // navigateCloseOnLoad('https://www.taobao.com');
 // navigateCloseOnLoad('https://www.jd.com');
 // navigateCloseOnLoad('https://www.amazon.com/');
-// navigateCloseOnLoad('https://www.ebay.com/');
+// navigateCloseOnLoad('https://www.ebay.com/', 'eBay');
 // navigateCloseOnLoad('http://localhost:8000/taobao.com/')
 
 // navigateUserPrompt('https://observablehq.com/@kerryrodden/sequences-sunburst');

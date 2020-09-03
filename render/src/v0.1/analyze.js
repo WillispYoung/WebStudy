@@ -10,8 +10,8 @@ for (var i = 0; i < res.td.length; i++)
     raw.push(res.td[i][4]);
 raw.sort((a, b) => a - b);
 var l = raw.length;
-var top5 = raw.slice(l - 5, l);
-console.log('Top-5 Layout duration:', top5);
+var top5_dur = raw.slice(l - 5, l);
+// console.log('Top-5 Layout duration:', top5);
 
 var layout = [];
 for (var i = 0; i < res.td.length; i++) {
@@ -20,10 +20,11 @@ for (var i = 0; i < res.td.length; i++) {
 layout.sort((a, b) => a.v - b.v);
 
 var ll = layout.length;
-var top5 = layout.slice(ll - 5, ll);
+var top5_idx = layout.slice(ll - 5, ll);
 
-var output = [];
-for (v of top5) {
-    output.push(res.ld[v.idx].length);
+console.log('Index', '\t', 'total duration', '\t', 'sub-task duration');
+for (var i = 0; i < 5; i++) {
+    let sub_tasks = res.ld[top5_idx[i].idx].map(a => parseInt(a.dur / 1000));
+    sub_tasks.sort((a, b) => a - b);
+    console.log(top5_idx[i].idx, '\t', parseInt(top5_dur[i] / 1000), '\t\t\t', sub_tasks);
 }
-console.log('Number of Layout sub-tasks:', output);
