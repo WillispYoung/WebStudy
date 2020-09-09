@@ -108,3 +108,4 @@ dist
 
 render/traces/
 render/src/*/traces/
+layout/src/*/trace/
