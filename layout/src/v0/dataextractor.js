@@ -1,5 +1,6 @@
 const Trace = require('./model');
 const fs = require('fs');
+const delay = require('delay');
 
 // Data to extract:
 //   number of images, sizes of images ([w, h, w, h, ...])
@@ -65,18 +66,34 @@ function extractData(filename) {
     var layoutDuration = trace.getTop5LayoutDuration();
     targetData.top5Layout = layoutDuration;
 
+    rawData = undefined;
+    trace = undefined;
+
     return targetData;
 }
 
-function main() {
+async function main() {
     var files = fs.readdirSync('trace/');
     var finalResult = [];
+    var imageCounts = [], textCounts = [], cssCounts = [];
+    var count = 0;
     for (var f of files) {
+        let start = Date.now();
         let filename = 'trace/' + f;
         let res = extractData(filename);
         finalResult.push(res);
+
+        imageCounts.push(res.imageCount);
+        textCounts.push(res.textCount);
+        cssCounts.push(res.cssCount);
+
+        count += 1;
+        let end = Date.now();
+        console.log(count, end - start, f);
+        await delay(500);
     }
     fs.writeFileSync('res.json', JSON.stringify({ finalResult }));
+    fs.writeFileSync('counts.json', JSON.stringify({ imageCounts, textCounts, cssCounts }));
 }
 
 main();

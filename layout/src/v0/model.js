@@ -160,18 +160,18 @@ class Thread {
         for (var i = 0; i < listLength; i++)
             dependency.push([]);
 
-        var count = 0;
-        for (var i = 0; i < listLength - 1; i++) {
-            let t1 = this.list[i];
-            for (var j = i + 1; j < listLength; j++) {
-                let t2 = this.list[j];
-                if (!t1.includes(t2) &&
-                    !t2.includes(t1) &&
-                    ((t1.ts < t2.ts && t1.endtime() > t2.ts) || (t2.ts < t1.ts && t2.endtime() > t1.ts)))
-                    count += 1;
-            }
-        }
-        console.log('Trace fidelity:', count, 'interesctions occured.');
+        // var count = 0;
+        // for (var i = 0; i < listLength - 1; i++) {
+        //     let t1 = this.list[i];
+        //     for (var j = i + 1; j < listLength; j++) {
+        //         let t2 = this.list[j];
+        //         if (!t1.includes(t2) &&
+        //             !t2.includes(t1) &&
+        //             ((t1.ts < t2.ts && t1.endtime() > t2.ts) || (t2.ts < t1.ts && t2.endtime() > t1.ts)))
+        //             count += 1;
+        //     }
+        // }
+        // console.log('Trace fidelity:', count, 'interesctions occured.');
 
         // Uncover dependency.
         for (var i = 0; i < listLength - 1; i++) {
@@ -210,10 +210,11 @@ class Thread {
 
         dependency = undefined;
         leafNodes = undefined;
+        this.list = undefined;
 
         this.sortTrees();
 
-        console.log('Task tree well formatted:', this.isWellFormatted());
+        // console.log('Task tree well formatted:', this.isWellFormatted());
 
         // const fs = require('fs');
         // fs.writeFileSync('trees.json', JSON.stringify({ trees: this.trees }));

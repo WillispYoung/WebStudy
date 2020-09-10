@@ -90,7 +90,7 @@ async function navigate(url, label, networkCondition) {
 // E-Commerce:
 // navigate('https://www.taobao.com', 'Taobao', 8);
 // navigate('https://www.jd.com', 'JD', 8);
-// navigate('https://www.suning.com/', 8);
+// navigate('https://www.suning.com/', 'Suning', 8);
 // navigate('http://680.com/', '680', 8);
 // navigate('http://www.dangdang.com/', 'Dangdang', 8);
 // navigate('https://bj.meituan.com/', 'Meituan', 8);
@@ -98,3 +98,17 @@ async function navigate(url, label, networkCondition) {
 // navigate('https://cn.china.cn/', 'China', 8);
 // navigate('https://www.gome.com.cn/', 'Gome', 8);
 // navigate('https://www.vmall.com/', 'Huawei', 8);
+
+// News:
+// navigate('https://www.baidu.com', 'Baidu', 8);
+// navigate('https://www.qq.com', 'QQ', 8);
+// navigate('https://www.163.com', '163', 8);
+// navigate('https://www.thepaper.cn/', 'Pengpai', 8);
+// navigate('https://news.sina.com.cn/', 'Sina', 8);
+// navigate('http://news.sohu.com/', 'Sohu', 8);
+// navigate('http://news.ifeng.com/', 'Fenghuang', 8);
+// navigate('http://www.xinhuanet.com/', 'Xinhua', 8);
+// navigate('http://www.people.com.cn/', 'People', 8);
+// navigate('https://news.cctv.com/', 'CCTV', 8);
+
+// 
