@@ -1,6 +1,11 @@
-const Trace = require('./model');
 const fs = require('fs');
-const delay = require('delay');
+
+// Data to acquire: top-5 layout task duration.
+function getTop5LayoutDuration(traceEvents) {
+    var layoutTasks = traceEvents.filter(e => e.name === 'Layout').map(e => parseInt(e.dur / 1000));
+    layoutTasks.sort((a, b) => b - a);
+    return layoutTasks.slice(0, 5);
+}
 
 // Data to extract:
 //   number of images, sizes of images ([w, h, w, h, ...])
@@ -61,13 +66,9 @@ function extractData(filename) {
     targetData.tag = entries[0].split('/')[1];
     targetData.latency = parseInt(entries[1]);
     targetData.bandwidth = parseInt(entries[2]);
-
-    var trace = Trace.parseTrace(rawData.traceEvents);
-    var layoutDuration = trace.getTop5LayoutDuration();
-    targetData.top5Layout = layoutDuration;
+    targetData.top5Layout = getTop5LayoutDuration(rawData.traceEvents);
 
     rawData = undefined;
-    trace = undefined;
 
     return targetData;
 }
@@ -89,8 +90,7 @@ async function main() {
 
         count += 1;
         let end = Date.now();
-        console.log(count, end - start, f);
-        await delay(500);
+        console.log(count, '\t', end - start, '\t', f);
     }
     fs.writeFileSync('res.json', JSON.stringify({ finalResult }));
     fs.writeFileSync('counts.json', JSON.stringify({ imageCounts, textCounts, cssCounts }));
