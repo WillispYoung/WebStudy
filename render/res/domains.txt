@@ -1,27 +1,27 @@
 https://www.google.com/
 https://www.youtube.com/
 https://www.facebook.com/
-https://www.tmall.com/
-https://www.qq.com/
-https://www.baidu.com/
-https://www.sohu.com/
-https://www.taobao.com/
-https://www.jd.com/
+https://www.tmall.com/  +
+https://www.qq.com/  +
+https://www.baidu.com/  +
+https://www.sohu.com/  +
+https://www.taobao.com/  +
+https://www.jd.com/  +
 https://www.wikipedia.org/
 https://www.yahoo.com/
-https://www.360.cn/
+https://www.360.cn/  +
 https://www.amazon.com/
 https://zoom.us/
-https://www.sina.com.cn/
-https://weibo.com/
+https://www.sina.com.cn/  +
+https://weibo.com/  
 https://www.reddit.com/
 https://www.netflix.com/
 https://www.microsoft.com/
 https://www.office.com/
 https://vk.com/
-http://xinhuanet.com/
-https://www.okezone.com/
-https://www.csdn.net/
+http://xinhuanet.com/  +
+https://www.okezone.com/  
+https://www.csdn.net/  +
 https://www.blogger.com/
 https://www.tribunnews.com/
 https://www.instagram.com/
@@ -30,35 +30,35 @@ https://github.com/
 https://www.twitch.tv/
 https://stackoverflow.com/
 https://www.naver.com/
-https://www.bing.com/
+https://www.bing.com/  +
 https://www.livejasmin.com/
 https://www.aliexpress.com/
-http://www.china.com.cn/
-http://www.tianya.cn/
-https://www.apple.com/
-http://babytree.com/
-https://www.mama.cn/
+http://www.china.com.cn/  +
+http://www.tianya.cn/  +
+https://www.apple.com/  +
+http://babytree.com/  +
+https://www.mama.cn/  +
 https://www.ebay.com/
 https://chaturbate.com/
 https://www.adobe.com/
 https://www.salesforce.com/
 https://mail.ru/
 https://twitter.com/
-https://www.sogou.com/
+https://www.sogou.com/  +
 https://passport.yandex.ru/
-https://www.msn.com/
+https://www.msn.com/  +
 https://wordpress.com/
 https://ok.ru/
 https://www.aparat.com/
 https://www.dropbox.com/
 https://www.whatsapp.com/
-https://www.yy.com/
+https://www.yy.com/  +
 https://www.pornhub.com/
-https://www.linkedin.com/
+https://www.linkedin.com/  +
 https://imgur.com/
 https://medium.com/
 https://www.imdb.com/
-https://www.huanqiu.com/
+https://www.huanqiu.com/  +
 https://www.grid.id/
 https://www.instructure.com/
 https://aws.amazon.com/
@@ -79,7 +79,7 @@ https://www.fandom.com/
 https://www.roblox.com/
 https://www.1688.com/
 https://www.freepik.com/
-https://www.bilibili.com/
+https://www.bilibili.com/  +
 https://www.nytimes.com/
 https://www.pixnet.net/
 https://www.xvideos.com/

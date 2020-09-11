@@ -76,7 +76,7 @@ function extractData(filename) {
 async function main() {
     var files = fs.readdirSync('trace/');
     var finalResult = [];
-    var imageCounts = [], textCounts = [], cssCounts = [];
+    var nodeCounts = [], imageCounts = [], textCounts = [], cssCounts = [];
     var count = 0;
     for (var f of files) {
         let start = Date.now();
@@ -84,6 +84,7 @@ async function main() {
         let res = extractData(filename);
         finalResult.push(res);
 
+        nodeCounts.push(res.nodeCount);
         imageCounts.push(res.imageCount);
         textCounts.push(res.textCount);
         cssCounts.push(res.cssCount);
@@ -93,7 +94,7 @@ async function main() {
         console.log(count, '\t', end - start, '\t', f);
     }
     fs.writeFileSync('res.json', JSON.stringify({ finalResult }));
-    fs.writeFileSync('counts.json', JSON.stringify({ imageCounts, textCounts, cssCounts }));
+    fs.writeFileSync('counts.json', JSON.stringify({ nodeCounts, imageCounts, textCounts, cssCounts }));
 }
 
 main();

@@ -20,7 +20,7 @@ function formatDate() {
 const latencyOptions = [50, 100, 150];     // ms
 const bandwidthOptions = [300, 900, 1500]; // kB
 
-async function navigate(url, label, networkCondition) {
+async function navigate(url, label, networkCondition=8) {
     const computedStyles = ['background-image'];
 
     var browser = await puppeteer.launch();
@@ -111,4 +111,20 @@ async function navigate(url, label, networkCondition) {
 // navigate('http://www.people.com.cn/', 'People', 8);
 // navigate('https://news.cctv.com/', 'CCTV', 8);
 
-// 
+// Others
+// navigate('https://www.tmall.com/', 'Tmall', 8);
+// navigate('https://www.360.cn/', '360', 8);
+// navigate('https://www.csdn.net/', 'CSDN', 8);
+// navigate('https://cn.bing.com/', 'Bing', 8);
+// navigate('http://www.china.com.cn/', 'China-1', 8);
+// navigate('http://www.tianya.cn/', 'Tianya', 8);
+// navigate('https://www.apple.com/', 'Apple', 8);
+// navigate('http://babytree.com/', 'Babytree', 8);
+// navigate('https://www.mama.cn/', 'Mama');
+// navigate('https://www.sogou.com/', 'Sogou');
+// navigate('https://www.msn.cn/zh-cn', 'MSN');
+// navigate('https://www.yy.com/', 'YY');
+// navigate('https://www.linkedin.com/', 'Linkedin');
+// navigate('https://www.huanqiu.com/', 'Huanqiu');
+// navigate('https://www.bilibili.com/', 'Bilibili');
+// navigate('https://www.cnblogs.com/', 'CNBlogs');
