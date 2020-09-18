@@ -20,7 +20,7 @@ function formatDate() {
 const latencyOptions = [50, 100, 150];     // ms
 const bandwidthOptions = [300, 900, 1500]; // kB
 
-async function navigate(url, label, networkCondition=8) {
+async function navigate(url, label, networkCondition=2) {
     const computedStyles = ['background-image'];
 
     var browser = await puppeteer.launch();
@@ -128,3 +128,78 @@ async function navigate(url, label, networkCondition=8) {
 // navigate('https://www.huanqiu.com/', 'Huanqiu');
 // navigate('https://www.bilibili.com/', 'Bilibili');
 // navigate('https://www.cnblogs.com/', 'CNBlogs');
+
+// navigate('https://www.google.com/', 'Google');
+// navigate('https://www.youtube.com/', 'YouTube');
+// navigate('https://www.facebook.com/', 'Facebook');
+// navigate('https://www.wikipedia.org/', 'Wikipedia');
+// navigate('https://www.yahoo.com/', 'Yahoo');
+// navigate('https://www.amazon.com/', 'Amazon');
+// navigate('https://zoom.us/', 'Zoom');
+// navigate('https://www.reddit.com/', 'Reddit');
+// navigate('https://www.netflix.com/', 'Netflix');
+// navigate('https://www.microsoft.com/', 'Microsoft');
+// navigate('https://www.office.com/', 'Office');
+// navigate('https://vk.com/', 'Vk');
+// navigate('https://www.okezone.com/', 'OkeZone');
+// navigate('https://www.blogger.com/', 'Blogger');
+// navigate('https://www.tribunnews.com/', 'Tribunnews');
+// navigate('https://www.instagram.com/', 'Instagram');
+// navigate('https://bongacams.com/', 'Bongacams');
+// navigate('https://github.com/', 'Github');
+// navigate('https://www.twitch.tv/', 'Twitch');
+// navigate('https://stackoverflow.com/', 'Stackoverflow');
+// navigate('https://www.naver.com/', 'Naver')
+// navigate('https://www.livejasmin.com/', 'LiveJasmin')
+// navigate('https://www.aliexpress.com/', 'Aliexpress')
+// navigate('https://www.ebay.com/', 'eBay')
+// navigate('https://chaturbate.com/', 'Chaturbate')
+// navigate('https://www.adobe.com/', 'Adobe')
+// navigate('https://www.salesforce.com/', 'SalesForce')
+// navigate('https://mail.ru/', 'MailRu')
+// navigate('https://twitter.com/', 'Twitter')
+// navigate('https://passport.yandex.ru/', 'Yandex')
+// navigate('https://wordpress.com/', 'WordPress')
+// navigate('https://ok.ru/', 'OK')
+// navigate('https://www.aparat.com/', 'Aparat')
+// navigate('https://www.dropbox.com/', 'Dropbox')
+// navigate('https://www.whatsapp.com/', 'Whatsapp')
+// navigate('https://www.pornhub.com/', 'Pornhub')
+// navigate('https://imgur.com/', 'Imgur')
+// navigate('https://medium.com/', 'Medium')
+// navigate('https://www.imdb.com/', 'IMDB')
+// navigate('https://www.grid.id/', 'Grid')
+// navigate('https://www.instructure.com/', 'Instructure')
+// navigate('https://www.detik.com/', 'Detik')
+// navigate('https://www.udemy.com/', 'Udemy')
+// navigate('http://17ok.com/', '17OK')
+// navigate('https://www.worldometers.info/', 'Worldometers')
+// navigate('https://www.kompas.com/', 'Kompas')
+// navigate('https://www.w3schools.com/', 'W3school')
+// navigate('https://www.spotify.com/', 'Spotify')
+// navigate('https://edition.cnn.com/', 'CNN')
+// navigate('https://www.alibaba.com/', 'Alibaba')
+// navigate('https://www.rakuten.co.jp/', 'Rakuten')
+// navigate('https://www.bbc.com/', 'BBC')
+// navigate('https://padlet.com/', 'Padlet')
+// navigate('https://www.sindonews.com/', 'Sindonews')
+// navigate('https://www.fandom.com/', 'Fandom')
+// navigate('https://www.roblox.com/', 'Roblox')
+// navigate('https://www.1688.com/', '1688')
+// navigate('https://www.freepik.com/', 'Freepik')
+// navigate('https://www.nytimes.com/', 'NYTimes')
+// navigate('https://www.pixnet.net/', 'Pixnet')
+// navigate('https://www.xvideos.com/', 'Xvideos')
+// navigate('https://www.indiatimes.com/', 'Indiatimes')
+// navigate('https://www.uol.com.br/', 'UOL')
+// navigate('https://soundcloud.com/', 'Soundcloud')
+// navigate('http://www.jrj.com.cn/', 'JRJ')
+// navigate('https://www.liputan6.com/', 'Liputan6')
+// navigate('https://www.globo.com/', 'Globo')
+// navigate('https://www.etsy.com/', 'Etsy')
+// navigate('https://www.walmart.com/', 'Walmart')
+// navigate('https://www.onlinesbi.com/', 'Onlinesbi')
+// navigate('https://www.cnblogs.com/', 'CNblog')
+// navigate('https://stackexchange.com/', 'Stackexchange')
+// navigate('https://www.paypal.com/', 'Paypal')
+// navigate('http://thestartmagazine.com/', 'StartMaga')

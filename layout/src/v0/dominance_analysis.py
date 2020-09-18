@@ -45,30 +45,59 @@ def format_predictor(data, idx):
 output = open('da.txt', 'w')
 
 # Step 2: Calculate predictors' additional contribution (AC).
+dominance_matrix = [[0 for i in range(len(tag))] for i in range(len(tag))]
+
 for i in range(len(tag)-1):
     for j in range(i+1, len(tag)):
         output.write('Predictor: {}, {}\n'.format(tag[i], tag[j]))
 
         # First, compare predictors' additional contribution to empty set.
         # Which equals to the explainable variance of the regression on the predictor and criterion alone.
-        ac_i = explainable_variance(format_predictor(predictor, [i]), criterion)
-        ac_j = explainable_variance(format_predictor(predictor, [j]), criterion)
+        ac_i = explainable_variance(
+            format_predictor(predictor, [i]), criterion)
+        ac_j = explainable_variance(
+            format_predictor(predictor, [j]), criterion)
+
         output.write('{} {}\n'.format(ac_i, ac_j))
+        if ac_i > ac_j:
+            dominance_matrix[i][j] += 1
+        elif ac_j > ac_i:
+            dominance_matrix[j][i] += 1
 
         # Then, compare predictors' additional contribution across all non-empty sets that they are not included.
         # The ordering of predictors are not considered yet.
         for subset in all_subsets:
             if (not i in subset) and (not j in subset):
-                original = explainable_variance(format_predictor(predictor, subset), criterion)
+                original = explainable_variance(
+                    format_predictor(predictor, subset), criterion)
 
                 ss = copy.deepcopy(subset)
                 ss.append(i)
-                ac_i = explainable_variance(format_predictor(predictor, ss), criterion)
+                ac_i = explainable_variance(
+                    format_predictor(predictor, ss), criterion)
 
                 ss = copy.deepcopy(subset)
                 ss.append(j)
-                ac_j = explainable_variance(format_predictor(predictor, ss), criterion)
+                ac_j = explainable_variance(
+                    format_predictor(predictor, ss), criterion)
 
                 output.write('{} {} {}\n'.format(original, ac_i, ac_j))
-        
+
+                if ac_i > ac_j:
+                    dominance_matrix[i][j] += 1
+                elif ac_j > ac_i:
+                    dominance_matrix[j][i] += 1
+
         output.write('\n')
+
+
+for i in range(len(tag)-1):
+    for j in range(i+1, len(tag)):
+        v1 = dominance_matrix[i][j]
+        v2 = dominance_matrix[j][i]
+
+        prop = v1 / (v1+v2)
+        if prop >= 0.5:
+            print('{} {} {:.2f}'.format(tag[i], tag[j], prop))
+        else:
+            print('{} {} {:.2f}'.format(tag[j], tag[i], 1-prop))

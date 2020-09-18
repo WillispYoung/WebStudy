@@ -106,6 +106,6 @@ dist
 #####################################
 #####################################
 
-render/traces/
-render/src/*/traces/
-layout/src/*/trace/
+traces/
+trace/
+__pycache__/
