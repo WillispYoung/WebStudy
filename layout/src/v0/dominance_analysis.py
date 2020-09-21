@@ -7,7 +7,7 @@ from correlation import explainable_variance
 raw_data = json.loads(open('res.json', 'r').read())['finalResult']
 
 tag = ['latency', 'bandwidth', 'nodeCount', 'imageCount',
-       'textCount', 'cssRuleCount', 'usedCssCount']
+       'textCount', 'cssCount', 'cssRuleCount', 'usedCssCount']
 
 predictor = [[] for i in range(len(tag))]
 criterion = []
@@ -15,7 +15,8 @@ criterion = []
 for entry in raw_data:
     for i in range(len(tag)):
         predictor[i].append(entry[tag[i]])
-    criterion.append(max(entry['top5Layout']))
+    # criterion.append(max(entry['top5Layout']))
+    criterion.append(sum(entry['top5Layout']))
 
 # Dominance Analysis (DA)
 # Given all subset of predictors, if predictor A contributes more than predictor B, then A *completely* dominates B.
@@ -90,6 +91,9 @@ for i in range(len(tag)-1):
 
         output.write('\n')
 
+ac = explainable_variance(format_predictor(
+    predictor, range(len(tag))), criterion)
+print(ac)
 
 for i in range(len(tag)-1):
     for j in range(i+1, len(tag)):
