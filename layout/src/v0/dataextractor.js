@@ -45,6 +45,7 @@ function extractDataFromDomSnapshot(documents, strings) {
     texts = texts.map(idx => strings[idx]);
     res.textCount = texts.length;
     res.textSizes = texts.map(str => str.length);
+    res.textSegCount = doc.textBoxes.layoutIndex.length;
 
     return res;
 }

@@ -1,39 +1,42 @@
-from matplotlib import pyplot as pp
+from matplotlib import pyplot as plt
 import json
+import math
 
-data = json.loads(open('counts.json', 'r').read())
 
-c0 = set()  # node
-c1 = set()  # img  -> 300
-c2 = set()  # text -> 1400
-c3 = set()  # css
+raw_data = json.loads(open('res.json', 'r').read())['finalResult']
 
-legends = ['nodeCounts', 'imageCounts', 'textCounts', 'cssCounts']
+node = []           # nodeCount
+text = []           # textCount
+text_seg = []       # textSegCount
+used_css = []       # usedCssCount
+top5_layout = []    # top5Layout
 
-for v in data[legends[0]]:
-    c0.add(v)
-c0 = list(c0)
-c0.sort()
+for entry in raw_data:
+    node.append(entry['nodeCount'])
+    text.append(entry['textCount'])
+    text_seg.append(entry['textSegCount'])
+    used_css.append(entry['usedCssCount'])
+    top5_layout.append(sum(entry['top5Layout']))
 
-for v in data[legends[1]]:
-    c1.add(v)
-c1 = list(c1)
-c1.sort()
+plt.subplot(231)
+plt.title('Node count')
+plt.scatter(node, top5_layout)
 
-for v in data[legends[2]]:
-    c2.add(v)
-c2 = list(c2)
-c2.sort()
+plt.subplot(232)
+plt.title('Log node count')
+plt.scatter([math.log(v) for v in node], top5_layout)
 
-for v in data[legends[3]]:
-    c3.add(v)
-c3 = list(c3)
-c3.sort()
+plt.subplot(233)
+plt.title('Text count')
+plt.scatter(text, top5_layout)
 
-pp.plot(c0)
-pp.plot(c1)
-pp.plot(c2)
-pp.plot(c3)
+plt.subplot(234)
+plt.title('Text seg count')
+plt.scatter(text_seg, top5_layout)
 
-pp.legend(legends)
-pp.show()
+plt.subplot(235)
+plt.title('Used CSS')
+plt.scatter(used_css, top5_layout)
+
+
+plt.show()
