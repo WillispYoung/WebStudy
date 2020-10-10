@@ -8,12 +8,24 @@
 
 <body>
     <div>
-        <input id="url" type="text">
-        <button id="check">CHECK</button>
+        <div>
+            <input id="url" type="text">
+            <button id="check">CHECK</button>
+        </div>
+        <div>
+            <textarea id="log" cols="30" rows="10" style="resize: none;"></textarea>
+        </div>
+        <div>
+            <textarea id="suggestion" cols="30" rows="10" style="resize: none;"></textarea>
+        </div>
     </div>
-
     <div>
-        <textarea id="log" cols="30" rows="10" style="resize: none;"></textarea>
+        <div>
+            <ol id="metadata"></ol>
+        </div>
+        <div>
+            <canvas id="plot"></canvas>
+        </div>
     </div>
 
     <script src="script.js"></script>

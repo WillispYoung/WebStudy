@@ -48,7 +48,7 @@ async function navigate(url, event, notifier) {
         ruleUsage = undefined;
         fs.unlinkSync('trace.json');
 
-        notifier.emit('DATA', data);
+        notifier.emit('DATA', { data, event });
     });
 
     await client.send("CSS.startRuleUsageTracking");
@@ -74,7 +74,6 @@ function extract(data) {
     var taskTrace = Trace.parseTrace(data.traceEvents);
     res.taskDurations = taskTrace.taskDurationBeforeFrameUpdate().td;   // microseconds
 
-    console.log(res);
     return res;
 }
 
