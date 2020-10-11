@@ -15,12 +15,8 @@ const monitor = new EventEmitter();
 
 monitor.on('DATA', args => {
     var details = extract(args.data);
-    args.event.reply('asynchronous-reply', { type: 'METADATA', tag: 'NODE', data: details.nodeCount });
-    args.event.reply('asynchronous-reply', { type: 'METADATA', tag: 'IMAGE', data: details.imageCount });
-    args.event.reply('asynchronous-reply', { type: 'METADATA', tag: 'TEXT', data: details.textCount });
-    args.event.reply('asynchronous-reply', { type: 'METADATA', tag: 'CSS', data: details.cssCount });
-    args.event.reply('asynchronous-reply', { type: 'METADATA', tag: 'RULE', data: details.cssRuleCount });
-
+    var metadata = [details.nodeCount, details.imageCount, details.textCount, details.cssCount, details.cssRuleCount];
+    args.event.reply('asynchronous-reply', { type: 'METADATA', data: metadata });
     args.event.reply('asynchronous-reply', { type: 'PLOT', data: details.taskDurations });
 });
 
@@ -36,7 +32,7 @@ ipcMain.on('asynchronous-message', (event, args) => {
 
 function createWindow() {
     var window = new BrowserWindow({
-        width: 800,
+        width: 1000,
         height: 600,
         webPreferences: {
             nodeIntegration: true,
@@ -45,7 +41,7 @@ function createWindow() {
     });
 
     window.loadFile('system/main.html');
-    window.removeMenu();
+    // window.removeMenu();
     window.setTitle('Render Delay Check');
 }
 

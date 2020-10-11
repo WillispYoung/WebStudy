@@ -1,8 +1,3 @@
 body {
     display: flex;
 }
-
-#plot {
-    width: 500;
-    height: 300;
-}
