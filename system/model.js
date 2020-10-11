@@ -1,18 +1,36 @@
+const { Main } = require('electron');
+
 const MainThreadDurationalTasks = [
     'ParseHTML',
     'ParseAuthorStyleSheet',
     'EvaluateScript',
+    'FunctionCall',
     'UpdateLayoutTree',
     'Layout',
     'UpdateLayer',
     'UpdateLayerTree',
     'Paint',
-    'CompositeLayers'
+    'CompositeLayers',
+    'SideEffectVisualTasks'
 ];
 
 const MainThreadInstantTasks = [
     "InvalidateLayout",
     "ScheduleStyleRecalculation"
+];
+
+const SideEffectTrigger = [
+    "EvaluateScript",
+    "FunctionCall",
+    "network.mojom.URLLoaderClient"
+];
+
+const SideEffectVisualTasks = [
+    // "InvalidateLayout",
+    "Layout",
+    "ParseHTML",
+    // "ScheduleStyleRecalculation",
+    "UpdateLayoutTree"
 ];
 
 const ThreadNames = [
@@ -81,26 +99,13 @@ class Task {
             this.children[0].children[0].name === 'BeginMainThreadFrame';
     }
 
-    causesVisualChanges() {
-        if (MainThreadDurationalTasks.indexOf(this.name) >= 0) return true;
-
-        var cvc = false;
-        for (var c of this.children) {
-            if (c.causesVisualChanges()) {
-                cvc = true;
-                break;
-            }
-        }
-        return cvc;
-    }
-
-    getTaskDuration() {
+    getTaskDuration(parent = undefined) {
         var ctd = [];
         for (var i = 0; i < MainThreadDurationalTasks.length; i++) ctd.push(0);
 
         if (this.children.length > 0) {
             for (let c of this.children) {
-                let td_ = c.getTaskDuration();
+                let td_ = c.getTaskDuration(this);
                 for (var i = 0; i < td_.length; i++)
                     ctd[i] += td_[i];
             }
@@ -111,6 +116,15 @@ class Task {
             ctd[idx] = 0;
             let sum = ctd.reduce((a, b) => a + b);
             ctd[idx] = this.dur - sum;
+
+            // The side effect of JavaScript evaluation should be as greate as possible,
+            // which means that visibility-irrelevant scripts are very limited.
+            // Otherwise, script evaluation will only block rendering.
+            if (parent &&
+                SideEffectVisualTasks.indexOf(this.name) >= 0 &&
+                SideEffectTrigger.indexOf(parent.name) >= 0) {
+                ctd[MainThreadDurationalTasks.length - 1] += this.dur;
+            }
         }
 
         return ctd;
@@ -155,21 +169,7 @@ class Thread {
         var leafNodes = new Set();
         var listLength = this.list.length;
 
-        for (var i = 0; i < listLength; i++)
-            dependency.push([]);
-
-        // var count = 0;
-        // for (var i = 0; i < listLength - 1; i++) {
-        //     let t1 = this.list[i];
-        //     for (var j = i + 1; j < listLength; j++) {
-        //         let t2 = this.list[j];
-        //         if (!t1.includes(t2) &&
-        //             !t2.includes(t1) &&
-        //             ((t1.ts < t2.ts && t1.endtime() > t2.ts) || (t2.ts < t1.ts && t2.endtime() > t1.ts)))
-        //             count += 1;
-        //     }
-        // }
-        // console.log('Trace fidelity:', count, 'interesctions occured.');
+        for (var i = 0; i < listLength; i++) dependency.push([]);
 
         // Uncover dependency.
         for (var i = 0; i < listLength - 1; i++) {
@@ -185,6 +185,7 @@ class Thread {
                 }
             }
         }
+        
         // Remove multi-hop dependency.
         for (var i in dependency) {
             let inclusion = [...dependency[i]];
@@ -192,15 +193,18 @@ class Thread {
                 dependency[i] = dependency[i].filter(v => !dependency[k].includes(v));
             });
         }
+
         // Build task trees.
         // var description = new Set();
         for (var i in dependency) {
             for (var j of dependency[i]) {
                 // if (MainThreadDurationalTasks.indexOf(this.list[i].name) !== -1)
-                //     description.add(`${this.list[i].name}->${this.list[j].name}`);
+                // description.add(`${this.list[i].name}->${this.list[j].name}`);
+
                 this.list[i].children.push(this.list[j]);
             }
         }
+
         for (var i = 0; i < listLength; i++) {
             if (!leafNodes.has(i))
                 this.trees.push(this.list[i]);
@@ -298,14 +302,21 @@ class Trace {
                     t.buildTaskTrees();
 
                     var td = [];
-                    for (var i = 0; i < MainThreadDurationalTasks.length; i++) td.push(0);
+                    // Merge EvaluateScript and FuncitonCall.
+                    for (var i = 0; i < MainThreadDurationalTasks.length - 1; i++) td.push(0);
                     for (var tree of t.trees) {
                         let td_ = tree.getTaskDuration();
-                        for (var i in td_) td[i] += td_[i];
+                        for (var i in td_) {
+                            td[i] += td_[i];
+                            if (i < 3)
+                                td[i] += td_[i];
+                            else
+                                td[i - 1] += td_[i];
+                        }
                         if (tree.beginMainThreadFrame()) {
                             res.td.push(td);
-                            td = [];
 
+                            td = [];
                             for (var i = 0; i < MainThreadDurationalTasks.length; i++) td.push(0);
                         }
                     }

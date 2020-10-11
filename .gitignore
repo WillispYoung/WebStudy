@@ -109,3 +109,4 @@ dist
 traces/
 trace/
 __pycache__/
+measure/*.json

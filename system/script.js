@@ -41,13 +41,16 @@ ipcRenderer.on('asynchronous-reply', (event, args) => {
 
 function plotTaskDurations(data) {
     const PLOT_WIDTH = 60, PLOT_HEIGHT = 60, PLOT_GAP = 6;
-    const TAGS = ['Parse HTML', 'Parse CSS', 'Eval JS',
-        'Layout Tree', 'Layout', 'Layer', 'Layer Tree', 'Paint', 'Composite'];
+    const TAGS = [
+        'Parse HTML', 'Parse CSS', 'Eval JS',
+        'Layout Tree', 'Layout', 'Layer',
+        'Layer Tree', 'Paint', 'Composite', 'JS Side Effect'
+    ];
 
     var data_ = [];
     var MAX_VALUE = 0;
 
-    for (var i = 0; i < 9; i++) {
+    for (var i = 0; i < 10; i++) {
         context.beginPath();
         context.moveTo((PLOT_WIDTH + PLOT_GAP) * i + PLOT_GAP, PLOT_GAP);
         context.lineTo((PLOT_WIDTH + PLOT_GAP) * i + PLOT_GAP, PLOT_HEIGHT + PLOT_GAP);
@@ -63,7 +66,7 @@ function plotTaskDurations(data) {
         }
     }
 
-    for (var i = 0; i < 9; i++) {
+    for (var i = 0; i < 10; i++) {
         var L = data_[i].length;
         context.beginPath();
         for (var j = 0; j < L; j++) {
