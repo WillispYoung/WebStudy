@@ -1,5 +1,3 @@
-const { Main } = require('electron');
-
 const MainThreadDurationalTasks = [
     'ParseHTML',
     'ParseAuthorStyleSheet',
@@ -10,8 +8,7 @@ const MainThreadDurationalTasks = [
     'UpdateLayer',
     'UpdateLayerTree',
     'Paint',
-    'CompositeLayers',
-    'SideEffectVisualTasks'
+    'CompositeLayers'
 ];
 
 const MainThreadInstantTasks = [
@@ -99,13 +96,13 @@ class Task {
             this.children[0].children[0].name === 'BeginMainThreadFrame';
     }
 
-    getTaskDuration(parent = undefined) {
+    getTaskDuration() {
         var ctd = [];
         for (var i = 0; i < MainThreadDurationalTasks.length; i++) ctd.push(0);
 
         if (this.children.length > 0) {
             for (let c of this.children) {
-                let td_ = c.getTaskDuration(this);
+                let td_ = c.getTaskDuration();
                 for (var i = 0; i < td_.length; i++)
                     ctd[i] += td_[i];
             }
@@ -117,14 +114,14 @@ class Task {
             let sum = ctd.reduce((a, b) => a + b);
             ctd[idx] = this.dur - sum;
 
-            // The side effect of JavaScript evaluation should be as greate as possible,
-            // which means that visibility-irrelevant scripts are very limited.
-            // Otherwise, script evaluation will only block rendering.
-            if (parent &&
-                SideEffectVisualTasks.indexOf(this.name) >= 0 &&
-                SideEffectTrigger.indexOf(parent.name) >= 0) {
-                ctd[MainThreadDurationalTasks.length - 1] += this.dur;
-            }
+            // // The side effect of JavaScript evaluation should be as greate as possible,
+            // // which means that visibility-irrelevant scripts are very limited.
+            // // Otherwise, script evaluation will only block rendering.
+            // if (parent &&
+            //     SideEffectVisualTasks.indexOf(this.name) >= 0 &&
+            //     SideEffectTrigger.indexOf(parent.name) >= 0) {
+            //     ctd[MainThreadDurationalTasks.length - 1] += this.dur;
+            // }
         }
 
         return ctd;
@@ -185,7 +182,7 @@ class Thread {
                 }
             }
         }
-        
+
         // Remove multi-hop dependency.
         for (var i in dependency) {
             let inclusion = [...dependency[i]];
@@ -302,17 +299,10 @@ class Trace {
                     t.buildTaskTrees();
 
                     var td = [];
-                    // Merge EvaluateScript and FuncitonCall.
-                    for (var i = 0; i < MainThreadDurationalTasks.length - 1; i++) td.push(0);
+                    for (var i = 0; i < MainThreadDurationalTasks.length; i++) td.push(0);
                     for (var tree of t.trees) {
                         let td_ = tree.getTaskDuration();
-                        for (var i in td_) {
-                            td[i] += td_[i];
-                            if (i < 3)
-                                td[i] += td_[i];
-                            else
-                                td[i - 1] += td_[i];
-                        }
+                        for (var i in td_) td[i] += td_[i];
                         if (tree.beginMainThreadFrame()) {
                             res.td.push(td);
 

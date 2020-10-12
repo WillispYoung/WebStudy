@@ -2,6 +2,7 @@ const EventEmitter = require('events');
 const puppeteer = require('puppeteer');
 const delay = require('delay');
 const fs = require('fs');
+const { exception } = require('console');
 
 process.on('uncaughtException', function (error) {
     console.log(`Uncaught exception: ${error.message}`);
@@ -29,7 +30,7 @@ function randomFilename() {
     return res;
 }
 
-var i = 407;
+var i = 1405;
 var monitor = new EventEmitter();
 
 monitor.on('next', () => {
@@ -73,27 +74,34 @@ async function navigate(url) {
         } else {
             finalURLs.add(currentURL);
 
-            var domss = await client.send('DOMSnapshot.captureSnapshot', { computedStyles });
-            var css = await client.send("CSS.stopRuleUsageTracking");
+            try {
+                var domss = await client.send('DOMSnapshot.captureSnapshot', { computedStyles });
+                var css = await client.send("CSS.stopRuleUsageTracking");
 
-            await page.tracing.stop();
-            await client.detach();
-            await page.close();
-            await browser.close();
+                try {
+                    await page.tracing.stop();
 
-            var data = JSON.parse(fs.readFileSync('trace.json'));
-            data.documents = domss.documents;
-            data.strings = domss.strings;
-            data.ruleUsage = css.ruleUsage;
-            data.cssCount = cssCount;
-            domss = undefined;
-            ruleUsage = undefined;
+                    await delay(100);
+                    var data = JSON.parse(fs.readFileSync('trace.json'));
+                    data.documents = domss.documents;
+                    data.strings = domss.strings;
+                    data.ruleUsage = css.ruleUsage;
+                    data.cssCount = cssCount;
+                    domss = undefined;
+                    ruleUsage = undefined;
 
-            var filename = `trace/${randomFilename()}.json`;
-            while (fs.existsSync(filename)) filename = `trace/${randomFilename()}.json`;
-            fs.writeFileSync(filename, JSON.stringify(data));
+                    var filename = `trace/${randomFilename()}.json`;
+                    while (fs.existsSync(filename)) filename = `trace/${randomFilename()}.json`;
+                    fs.writeFileSync(filename, JSON.stringify(data));
 
-            data = undefined;
+                    data = undefined;
+                } catch (e) { }
+
+                await client.detach();
+                await page.close();
+                await browser.close();
+            } catch (e) { }
+
             console.log(url, i + 1);
 
             await delay(1000);
@@ -112,6 +120,8 @@ async function navigate(url) {
 
     await client.send("CSS.startRuleUsageTracking");
     await page.tracing.start({ path: 'trace.json' });
+
+    await delay(100);
     await page.goto(url);
 }
 
