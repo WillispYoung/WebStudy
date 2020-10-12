@@ -37,7 +37,7 @@ for obj in data:
 
     layout_ = []
     for arr in obj['duration']:
-        layout_.append(arr[5])
+        layout_.append(arr[4] + arr[5])
     layout.append(sum_of_top5(layout_))
 
 # Image 1: distribution of 5 factors, and scatter plots of these against sum of top-5 layout duration.
@@ -130,7 +130,9 @@ paint.sort()
 layer.sort()
 
 l = len(html)
-l = int(0.9*l)
+l = int(0.99*l)
+
+pp.subplot(121)
 
 pp.plot(html[:l])
 pp.plot(css[:l])
@@ -138,6 +140,17 @@ pp.plot(js[:l])
 pp.plot(layout[:l])
 pp.plot(paint[:l])
 pp.plot(layer[:l])
+
+pp.legend(['HTML', 'CSS', 'JS', 'Layout', 'Paint', 'Layer'])
+
+pp.subplot(122)
+
+pp.plot(html[l:])
+pp.plot(css[l:])
+pp.plot(js[l:])
+pp.plot(layout[l:])
+pp.plot(paint[l:])
+pp.plot(layer[l:])
 
 pp.legend(['HTML', 'CSS', 'JS', 'Layout', 'Paint', 'Layer'])
 
