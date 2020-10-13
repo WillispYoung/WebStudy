@@ -42,50 +42,68 @@ for obj in data:
 
 # Image 1: distribution of 5 factors, and scatter plots of these against sum of top-5 layout duration.
 
+
+def plot_general_points(x, y):
+    x1 = min(x)
+    x2 = max(x)
+    limit = x1 + 0.8*(x2-x1)
+    x_ = []
+    y_ = []
+    for i in range(len(x)):
+        if x1 <= x[i] and x[i] <= limit:
+            x_.append(x[i])
+            y_.append(y[i])
+    pp.scatter(x_, y_, s=1)
+
+
+pp.subplot(256)
+# pp.scatter(node, layout, s=1)
+plot_general_points(node, layout)
+
+pp.subplot(257)
+# pp.scatter(image, layout, s=1)
+plot_general_points(image, layout)
+
+pp.subplot(258)
+# pp.scatter(text, layout, s=1)
+plot_general_points(text, layout)
+
+pp.subplot(259)
+# pp.scatter(css, layout, s=1)
+plot_general_points(css, layout)
+
+pp.subplot(2, 5, 10)
+# pp.scatter(rule, layout, s=1)
+plot_general_points(rule, layout)
+
 pp.subplot(251)
 pp.title('node')
-_ = node.copy()
-_.sort()
-pp.plot(_)
+node.sort()
+pp.plot(node)
 
 pp.subplot(252)
 pp.title('image')
-_ = image.copy()
-_.sort()
-pp.plot(_)
+image.sort()
+pp.plot(image)
 
 pp.subplot(253)
 pp.title('text')
-_ = text.copy()
-_.sort()
-pp.plot(_)
+text.sort()
+pp.plot(text)
 
 pp.subplot(254)
-pp.title('css')
-_ = css.copy()
-_.sort()
-pp.plot(_)
+pp.title('css diff')
+diff = [css[i] - ucss[i] for i in range(len(css))]
+diff.sort()
+pp.plot(diff)
+css.sort()
+pp.plot(css)
+pp.legend(['diff', 'css'])
 
 pp.subplot(255)
 pp.title('rule')
-_ = rule.copy()
-_.sort()
-pp.plot(_)
-
-pp.subplot(256)
-pp.scatter(node, layout, s=1)
-
-pp.subplot(257)
-pp.scatter(image, layout, s=1)
-
-pp.subplot(258)
-pp.scatter(text, layout, s=1)
-
-pp.subplot(259)
-pp.scatter(css, layout, s=1)
-
-pp.subplot(2, 5, 10)
-pp.scatter(rule, layout, s=1)
+rule.sort()
+pp.plot(rule)
 
 pp.show()
 
@@ -143,6 +161,7 @@ pp.plot(layer[:l])
 
 pp.legend(['HTML', 'CSS', 'JS', 'Layout', 'Paint', 'Layer'])
 
+# Extreme cases.
 pp.subplot(122)
 
 pp.plot(html[l:])

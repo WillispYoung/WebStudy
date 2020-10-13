@@ -48,6 +48,7 @@ async function navigate(url, event, notifier) {
         ruleUsage = undefined;
         fs.unlinkSync('trace.json');
 
+        event.reply('asynchronous-reply', { type: 'LOG', data: 'Navigation finished.' });
         notifier.emit('DATA', { data, event });
     });
 

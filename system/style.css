@@ -1,3 +1,7 @@
 body {
     display: flex;
 }
+
+.highlight {
+    color: red;
+}

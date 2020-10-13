@@ -15,9 +15,7 @@ const monitor = new EventEmitter();
 
 monitor.on('DATA', args => {
     var details = extract(args.data);
-    var metadata = [details.nodeCount, details.imageCount, details.textCount, details.cssCount, details.cssRuleCount];
-    args.event.reply('asynchronous-reply', { type: 'METADATA', data: metadata });
-    args.event.reply('asynchronous-reply', { type: 'PLOT', data: details.taskDurations });
+    args.event.reply('asynchronous-reply', { type: 'DATA', data: details });
 });
 
 ipcMain.on('asynchronous-message', (event, args) => {
