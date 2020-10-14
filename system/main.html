@@ -22,28 +22,22 @@
         </div>
     </div>
     <div style="margin-top: 30px; display: flex;">
-        <div>
-            <div>
-                <textarea id="log" cols="30" rows="10" style="resize: none;"></textarea>
-            </div>
-            <div>
-                <textarea id="suggestion" cols="30" rows="10" style="resize: none;"></textarea>
-            </div>
+        <div style="display: flex; flex-direction: column;">
+            <p id="metadata-title"></p>
+            <div id="metadata"></div>
+            <p id="prediction"></p>
+            <div id="suggestion"></div>
         </div>
-        <div>
-            <div>
-                <p id="metadata-title"></p>
-                <div id="metadata"></div>
+        <div style="width: 600;">
+            <div style="width: 600;">
+                <p id="plot-title"></p>
             </div>
-            <div>
-                <p id="prediction"></p>
-            </div>
-        </div>
-        <div>
             <!-- Set width and height here, instead of in CSS, to avoid blurry plots. -->
             <canvas id="plot" width="600" height="400"></canvas>
         </div>
     </div>
+
+    <textarea id="log" cols="30" rows="10"></textarea>
 
     <script src="script.js"></script>
 </body>

@@ -1,5 +1,7 @@
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
+const delay = require('delay');
+const EventEmitter = require('events');
 
 const PRE_DATA = JSON.parse(fs.readFileSync('system/data.json'))['data'];
 const COEF = fs.readFileSync('system/coef.txt').toString().split('\n').slice(0, 6).map(v => parseFloat(v));
@@ -27,10 +29,18 @@ var log = document.getElementById('log');
 var suggestion = document.getElementById('suggestion');
 var metadata = document.getElementById('metadata');
 var prediction = document.getElementById('prediction');
+var plot_title = document.getElementById('plot-title');
 var canvas = document.getElementById('plot');
 var context = canvas.getContext('2d');
 
-checkButton.onclick = function () {
+var log_monitor = new EventEmitter();
+
+log_monitor.on('over', async() => {
+    await delay(1000);
+    log.value = "";
+})
+
+checkButton.onclick = function() {
     var url = linkInput.value;
     log.value = `Starting navigation...\n`;
     ipcRenderer.send('asynchronous-message', { type: 'NAVIGATE', url });
@@ -41,6 +51,7 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
         case "LOG":
             original = log.value;
             log.value = original + args.data + '\n';
+            if (args.data === 'Navigation finished.') log_monitor.emit('over');
             break;
         case "DATA":
             // Update metadata and comparison.
@@ -53,7 +64,7 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
                 args.data.cssRuleCount
             ];
             document.getElementById('metadata-title').innerHTML = "Metadata:";
-            metadata.innerHTML = "";  // Clear previous data.
+            metadata.innerHTML = ""; // Clear previous data.
             var tags = ['DOM nodes', 'images', 'texts', 'CSS files', 'used CSS files', 'CSS rules'];
             var opt_tags = [];
             for (var i = 0; i < 6; i++) {
@@ -84,21 +95,22 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
 
             // Give suggestion for optimization.
             if (opt_tags.length > 0) {
-                var sug_text = "The following attributes are greater than 70% pages:\n";
+                var sug_text = "The following attributes are greater than 70% pages:<br>";
                 for (var i = 0; i < opt_tags.length; i++)
-                    sug_text = sug_text + `  ${i + 1}: number of ${opt_tags[i]}${i === opt_tags.length - 1 ? '.' : ','}\n`
-                sug_text = sug_text + "Try to reduce the numbers of these attributes to reduce layout duration.\n";
-                suggestion.value = sug_text;
+                    sug_text = sug_text + `&nbsp;&nbsp;${i + 1}: number of ${opt_tags[i]}${i === opt_tags.length - 1 ? '.' : ','};<br>`
+                sug_text = sug_text + "Try to reduce the numbers of these attributes to reduce layout duration.<br>";
+                suggestion.innerHTML = sug_text;
             } else {
-                suggestion.value = "";
+                suggestion.innerHTML = "";
             }
-            
+
             // Update plots.
+            plot_title.innerHTML = "Task Durations Before Every Frame Update";
             context.clearRect(0, 0, canvas.width, canvas.height);
             plotTaskDurations(args.data.taskDurations);
             break;
 
-        // The following 2 cases are obsolete.
+            // The following 2 cases are obsolete.
         case "METADATA":
             document.getElementById('metadata-title').innerHTML = "Metadata:";
             metadata.innerHTML = "";
@@ -120,7 +132,10 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
 
 function plotTaskDurations(data) {
     // Place plots in 2 rows.
-    const PLOT_WIDTH = 160, PLOT_HEIGHT = 120, PLOT_GAP = 30, AXIS_TICK = 3;
+    const PLOT_WIDTH = 160,
+        PLOT_HEIGHT = 120,
+        PLOT_GAP = 30,
+        AXIS_TICK = 3;
     const TAGS = ['Parse HTML', 'Parse CSS', 'Eval JS', 'Layout', 'Layer', 'Paint'];
 
     var data_ = [];
@@ -166,7 +181,8 @@ function plotTaskDurations(data) {
         var L = data_[i].length;
         context.beginPath();
         for (var j = 0; j < L; j++) {
-            var x = 0, y = 0;
+            var x = 0,
+                y = 0;
             if (i < 3) {
                 x = (PLOT_WIDTH + PLOT_GAP) * i + PLOT_GAP + PLOT_WIDTH * j / L;
                 y = PLOT_HEIGHT + PLOT_GAP - 0.8 * PLOT_HEIGHT * data_[i][j] / MAX_VALUE - 2; // Avoid overlapping the X axis.

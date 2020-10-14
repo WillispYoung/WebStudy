@@ -53,3 +53,19 @@
     font-size: 16px;
     background-color: tomato;
 }
+
+#log {
+    resize: none;
+    position: absolute;
+    top: 0px;
+    right: 10px;
+    border: none;
+    color: grey;
+    font-size: 12px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#plot-title {
+    margin: auto;
+    text-align: center;
+}
