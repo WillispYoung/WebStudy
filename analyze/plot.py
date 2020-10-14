@@ -42,7 +42,6 @@ for obj in data:
 
 # Image 1: distribution of 5 factors, and scatter plots of these against sum of top-5 layout duration.
 
-
 def plot_general_points(x, y):
     x1 = min(x)
     x2 = max(x)
@@ -92,7 +91,7 @@ text.sort()
 pp.plot(text)
 
 pp.subplot(254)
-pp.title('css diff')
+pp.title('css(diff)')
 diff = [css[i] - ucss[i] for i in range(len(css))]
 diff.sort()
 pp.plot(diff)
@@ -106,8 +105,6 @@ rule.sort()
 pp.plot(rule)
 
 pp.show()
-
-# Composition of top-10 render tasks.
 
 # Image 2: distribution of sum of top 5 task duration for 6 types of tasks.
 
@@ -139,6 +136,12 @@ for obj in data:
     layout.append(sum_of_top5(layout_))
     paint.append(sum_of_top5(paint_))
     layer.append(sum_of_top5(layer_))
+    # html.append(sum(html_))
+    # css.append(sum(css_))
+    # js.append(sum(js_))
+    # layout.append(sum(layout_))
+    # paint.append(sum(paint_))
+    # layer.append(sum(layer_))
 
 html.sort()
 css.sort()

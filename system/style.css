@@ -1,7 +1,55 @@
-body {
-    display: flex;
-}
-
 .highlight {
     color: red;
+}
+
+#input_wrapper {
+    margin: auto;
+    display: flex;
+    width: 400px;
+    height: 30px;
+    border: 2px solid orange;
+    border-radius: 15px;
+}
+
+#url {
+    width: 270px;
+    height: 30px;
+    margin-left: 10px;
+    border: none;
+    appearance: none;
+    font-size: 16px;
+}
+
+#url:focus {
+    border: none;
+    appearance: none;
+    outline: none;
+}
+
+#check {
+    width: 120px;
+    height: 30px;
+    border: none;
+    appearance: none;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    background-color: orange;
+    color: white;
+    font-weight: bold;
+}
+
+#check:focus {
+    border: none;
+    appearance: none;
+    outline: none;
+    font-size: 16px;
+    background-color: tomato;
+}
+
+#check:hover {
+    border: none;
+    appearance: none;
+    outline: none;
+    font-size: 16px;
+    background-color: tomato;
 }

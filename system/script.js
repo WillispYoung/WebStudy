@@ -57,15 +57,13 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
             var tags = ['DOM nodes', 'images', 'texts', 'CSS files', 'used CSS files', 'CSS rules'];
             var opt_tags = [];
             for (var i = 0; i < 6; i++) {
-                var li = document.createElement('li');
                 var text = document.createElement("p");
-                li.appendChild(text);
+                metadata.appendChild(text);
 
                 var mp = getMetadataPercentile(metadata_[i], i);
                 if (mp >= 70) opt_tags.push(tags[i]);
                 var s = `<p>Number of ${tags[i]}: ${metadata_[i]} > <span class='highlight'>${mp}%</span> pages.</p>`;
                 text.outerHTML = s;
-                metadata.appendChild(li);
             }
             // Give layout duration prediction.
             var layout = [];
@@ -95,7 +93,6 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
                 suggestion.value = "";
             }
             
-
             // Update plots.
             context.clearRect(0, 0, canvas.width, canvas.height);
             plotTaskDurations(args.data.taskDurations);
