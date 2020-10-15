@@ -3,11 +3,11 @@ const EventEmitter = require('events');
 
 const { navigate, extract } = require('./util.js');
 
-process.on('uncaughtException', function (error) {
+process.on('uncaughtException', function(error) {
     console.log(`Uncaught exception: ${error.message}`);
 });
 
-process.on('unhandledRejection', function (error) {
+process.on('unhandledRejection', function(error) {
     console.log(`Unhandled rejection: ${error.message}`);
 });
 
@@ -31,7 +31,7 @@ ipcMain.on('asynchronous-message', (event, args) => {
 function createWindow() {
     var window = new BrowserWindow({
         width: 1000,
-        height: 600,
+        height: 700,
         webPreferences: {
             nodeIntegration: true,
             worldSafeExecuteJavaScript: true
@@ -39,7 +39,7 @@ function createWindow() {
     });
 
     window.loadFile('system/main.html');
-    // window.removeMenu();
+    window.removeMenu();
     window.setTitle('Render Delay Check');
 }
 

@@ -73,7 +73,7 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
 
                 var mp = getMetadataPercentile(metadata_[i], i);
                 if (mp >= 70) opt_tags.push(tags[i]);
-                var s = `<p>Number of ${tags[i]}: ${metadata_[i]} > <span class='highlight'>${mp}%</span> pages.</p>`;
+                var s = `<p>Number of ${tags[i]}: <span class="soft-highlight">${metadata_[i]}</span> > <span class='highlight'>${mp}%</span> pages.</p>`;
                 text.outerHTML = s;
             }
             // Give layout duration prediction.
@@ -90,18 +90,26 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
             for (var i = 0; i < 6; i++) predicted += COEF[i] * metadata_[i];
             predicted = Math.floor(predicted / 1000);
 
-            prediction.outerHTML = `<p id="prediction">Sum of top-5 layout task durations: ${sum_of_top5} ms, predicted: <span class='highlight'>${predicted}</span> ms.</p>`;
+            prediction.outerHTML = `<p id="prediction">Sum of Top-5 Layout Task Durations: <span class="soft-highlight">${sum_of_top5}</span> ms.<br> Predicted (Multiple Regression): <span class='highlight'>${predicted}</span> ms.</p>`;
             prediction = document.getElementById('prediction');
 
             // Give suggestion for optimization.
+            suggestion.innerHTML = ""; // Clear previous suggestion.
             if (opt_tags.length > 0) {
-                var sug_text = "The following attributes are greater than 70% pages:<br>";
-                for (var i = 0; i < opt_tags.length; i++)
-                    sug_text = sug_text + `&nbsp;&nbsp;${i + 1}: number of ${opt_tags[i]}${i === opt_tags.length - 1 ? '.' : ','};<br>`
-                sug_text = sug_text + "Try to reduce the numbers of these attributes to reduce layout duration.<br>";
-                suggestion.innerHTML = sug_text;
-            } else {
-                suggestion.innerHTML = "";
+                var p1 = document.createElement('p');
+                suggestion.appendChild(p1);
+                p1.innerHTML = "Attributes that are greater than 70% pages:";
+
+                for (var i = 0; i < opt_tags.length; i++) {
+                    var p_ = document.createElement('p');
+                    suggestion.appendChild(p_);
+                    p_.className = "indent";
+                    p_.innerHTML = `${i + 1}: number of ${opt_tags[i]}${i === opt_tags.length - 1 ? '.' : ','}`;
+                }
+
+                var p_end = document.createElement('p');
+                suggestion.appendChild(p_end);
+                p_end.innerHTML = "Try to reduce the numbers of these attributes to reduce layout duration.";
             }
 
             // Update plots.

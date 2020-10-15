@@ -2,6 +2,14 @@
     color: red;
 }
 
+.soft-highlight {
+    color: steelblue;
+}
+
+.indent {
+    margin-left: 20px;
+}
+
 #input_wrapper {
     margin: auto;
     display: flex;
@@ -65,7 +73,27 @@
     font-family: 'Courier New', Courier, monospace;
 }
 
+#log:focus {
+    border: none;
+}
+
 #plot-title {
     margin: auto;
     text-align: center;
+}
+
+p {
+    margin: 4px;
+}
+
+#metadata {
+    margin-left: 20px;
+}
+
+#prediction {
+    margin-top: 10px;
+}
+
+#suggestion {
+    margin-top: 10px;
 }
