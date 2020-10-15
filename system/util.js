@@ -19,7 +19,7 @@ async function navigate(url, event, notifier) {
     var cssCount = 0;
     client.on('CSS.styleSheetAdded', () => { cssCount += 1; });
 
-    page.on('load', async () => {
+    page.on('load', async() => {
         var end = Date.now();
         event.reply('asynchronous-reply', { type: 'LOG', data: `Page loaded after ${end - start} ms...` });
 
@@ -73,7 +73,7 @@ function extract(data) {
 
     // Render data.
     var taskTrace = Trace.parseTrace(data.traceEvents);
-    res.taskDurations = taskTrace.taskDurationBeforeFrameUpdate().td;   // microseconds
+    res.taskDurations = taskTrace.taskDurationBeforeFrameUpdate().td; // microseconds
 
     return res;
 }

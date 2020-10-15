@@ -30,8 +30,8 @@ var suggestion = document.getElementById('suggestion');
 var metadata = document.getElementById('metadata');
 var prediction = document.getElementById('prediction');
 var plot_title = document.getElementById('plot-title');
-var canvas = document.getElementById('plot');
-var context = canvas.getContext('2d');
+var svg = document.getElementById('plot');
+var plot_description = document.getElementById('plot-description');
 
 var log_monitor = new EventEmitter();
 
@@ -72,10 +72,16 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
                 metadata.appendChild(text);
 
                 var mp = getMetadataPercentile(metadata_[i], i);
-                if (mp >= 70) opt_tags.push(tags[i]);
-                var s = `<p>Number of ${tags[i]}: <span class="soft-highlight">${metadata_[i]}</span> > <span class='highlight'>${mp}%</span> pages.</p>`;
-                text.outerHTML = s;
+                if (mp >= 70) {
+                    opt_tags.push(tags[i]);
+                    var s = `<p>Number of ${tags[i]}: <span class="soft-highlight">${metadata_[i]}</span> > <span class='highlight'>${mp}%</span> pages.</p>`;
+                    text.outerHTML = s;
+                } else {
+                    var s = `<p>Number of ${tags[i]}: <span class="soft-highlight">${metadata_[i]}</span> > ${mp}% pages.</p>`;
+                    text.outerHTML = s;
+                }
             }
+
             // Give layout duration prediction.
             var layout = [];
             for (var arr of args.data.taskDurations)
@@ -104,7 +110,7 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
                     var p_ = document.createElement('p');
                     suggestion.appendChild(p_);
                     p_.className = "indent";
-                    p_.innerHTML = `${i + 1}: number of ${opt_tags[i]}${i === opt_tags.length - 1 ? '.' : ','}`;
+                    p_.innerHTML = `${i + 1}: Number of ${opt_tags[i]}${i === opt_tags.length - 1 ? '.' : ','}`;
                 }
 
                 var p_end = document.createElement('p');
@@ -114,104 +120,86 @@ ipcRenderer.on('asynchronous-reply', (_, args) => {
 
             // Update plots.
             plot_title.innerHTML = "Task Durations Before Every Frame Update";
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            plotTaskDurations(args.data.taskDurations);
-            break;
-
-            // The following 2 cases are obsolete.
-        case "METADATA":
-            document.getElementById('metadata-title').innerHTML = "Metadata:";
-            metadata.innerHTML = "";
-            var tags = ['DOM nodes', 'images', 'texts', 'CSS files', 'CSS rules'];
-            for (var i = 0; i < 5; i++) {
-                var li = document.createElement('li');
-                li.appendChild(document.createTextNode(`Number of ${tags[i]}: ${args.data[i]}`));
-                metadata.appendChild(li);
-            }
-            break;
-        case "PLOT":
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            plotTaskDurations(args.data);
+            svg.innerHTML = "";
+            plot_description.innerHTML = "";
+            plotTaskDurations_(args.data.taskDurations);
             break;
         default:
             break;
     }
 });
 
-function plotTaskDurations(data) {
-    // Place plots in 2 rows.
-    const PLOT_WIDTH = 160,
-        PLOT_HEIGHT = 120,
-        PLOT_GAP = 30,
-        AXIS_TICK = 3;
+// SVG drawing.
+function plotTaskDurations_(data) {
+    const WIDTH = 160;
+    const HEIGHT = 120;
+    const GAP = 30;
+    const AXIS_TICK = 3;
     const TAGS = ['Parse HTML', 'Parse CSS', 'Eval JS', 'Layout', 'Layer', 'Paint'];
 
-    var data_ = [];
     var MAX_VALUE = 0;
-
-    context.translate(0.5, 0.5); // Avoid blurry.
-    context.strokeStyle = '#000';
-    for (var i = 0; i < TAGS.length; i++) {
-        context.beginPath();
-        if (i < 3) {
-            context.moveTo((PLOT_WIDTH + PLOT_GAP) * i + PLOT_GAP + AXIS_TICK, PLOT_GAP);
-            context.lineTo((PLOT_WIDTH + PLOT_GAP) * i + PLOT_GAP, PLOT_GAP);
-            context.lineTo((PLOT_WIDTH + PLOT_GAP) * i + PLOT_GAP, PLOT_HEIGHT + PLOT_GAP);
-            context.lineTo((PLOT_WIDTH + PLOT_GAP) * (i + 1), PLOT_HEIGHT + PLOT_GAP);
-            context.lineTo((PLOT_WIDTH + PLOT_GAP) * (i + 1), PLOT_HEIGHT + PLOT_GAP - AXIS_TICK);
-        } else {
-            context.moveTo((PLOT_WIDTH + PLOT_GAP) * (i - 3) + PLOT_GAP + AXIS_TICK, PLOT_HEIGHT + 2 * PLOT_GAP);
-            context.lineTo((PLOT_WIDTH + PLOT_GAP) * (i - 3) + PLOT_GAP, PLOT_HEIGHT + 2 * PLOT_GAP);
-            context.lineTo((PLOT_WIDTH + PLOT_GAP) * (i - 3) + PLOT_GAP, 2 * (PLOT_HEIGHT + PLOT_GAP));
-            context.lineTo((PLOT_WIDTH + PLOT_GAP) * (i - 2), 2 * (PLOT_HEIGHT + PLOT_GAP));
-            context.lineTo((PLOT_WIDTH + PLOT_GAP) * (i - 2), 2 * (PLOT_HEIGHT + PLOT_GAP) - AXIS_TICK);
-        }
-        context.lineWidth = 1;
-        context.stroke();
-        context.closePath();
-
-        data_.push([]);
-    }
-
+    var formatted_data = [];
     for (var arr of data) {
-        data_[0].push(arr[0]);
-        data_[1].push(arr[1]);
-        data_[2].push(arr[2] + arr[3]);
-        data_[3].push(arr[4] + arr[5]);
-        data_[4].push(arr[6] + arr[7] + arr[9]);
-        data_[5].push(arr[8]);
-        // data_[6].push(0);   // TODO.
-        MAX_VALUE = Math.max(MAX_VALUE, arr.reduce((a, b) => Math.max(a, b)), 0);
+        var entry = [];
+        entry.push(arr[0]);
+        entry.push(arr[1]);
+        entry.push(arr[2] + arr[3]);
+        entry.push(arr[4] + arr[5]);
+        entry.push(arr[6] + arr[7] + arr[9]);
+        entry.push(arr[8]);
+        formatted_data.push(entry);
+
+        MAX_VALUE = Math.max(MAX_VALUE, entry.reduce((a, b) => Math.max(a, b)));
     }
 
-    context.font = '12px Arial';
+    var description = document.createElement("p");
+    plot_description.appendChild(description);
+    description.innerHTML = `Count of Frame Update: ${data.length}, Maximum Task Duration: ${Math.floor(MAX_VALUE/1000)} ms.`;
+
     for (var i = 0; i < TAGS.length; i++) {
-        var L = data_[i].length;
-        context.beginPath();
+        var row = Math.floor(i / 3);
+        var column = i % 3;
+
+        // Draw axis.
+        var axis = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        var axis_points = [
+            column * (WIDTH + GAP) + GAP + AXIS_TICK, row * (HEIGHT + GAP) + GAP,
+            column * (WIDTH + GAP) + GAP, row * (HEIGHT + GAP) + GAP,
+            column * (WIDTH + GAP) + GAP, (row + 1) * (HEIGHT + GAP),
+            (column + 1) * (WIDTH + GAP), (row + 1) * (HEIGHT + GAP),
+            (column + 1) * (WIDTH + GAP), (row + 1) * (HEIGHT + GAP) - AXIS_TICK
+        ];
+        var axis_points_attr = "";
+        for (var v of axis_points) axis_points_attr = axis_points_attr + v.toString() + ' ';
+        axis.setAttribute('points', axis_points_attr);
+        axis.style = "fill:none; stroke:black; stroke-width:1;";
+        svg.appendChild(axis);
+
+        // Draw plot title.
+        var title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        title.setAttribute('x', column * (WIDTH + GAP) + GAP);
+        title.setAttribute('y', (row + 1) * (HEIGHT + GAP) + 15);
+        title.innerHTML = TAGS[i];
+        title.style = "color: black;";
+        svg.appendChild(title);
+
+        // Draw data line.
+        var data_line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        var line_points = "";
+        var x0 = column * (WIDTH + GAP) + GAP;
+        var y0 = (row + 1) * (HEIGHT + GAP);
+        line_points = line_points + x0.toString() + " ";
+        line_points = line_points + y0.toString() + " ";
+
+        var L = formatted_data.length; // count of frame update.
         for (var j = 0; j < L; j++) {
-            var x = 0,
-                y = 0;
-            if (i < 3) {
-                x = (PLOT_WIDTH + PLOT_GAP) * i + PLOT_GAP + PLOT_WIDTH * j / L;
-                y = PLOT_HEIGHT + PLOT_GAP - 0.8 * PLOT_HEIGHT * data_[i][j] / MAX_VALUE - 2; // Avoid overlapping the X axis.
-            } else {
-                x = (PLOT_WIDTH + PLOT_GAP) * (i - 3) + PLOT_GAP + PLOT_WIDTH * j / L;
-                y = 2 * (PLOT_HEIGHT + PLOT_GAP) - 0.8 * PLOT_HEIGHT * data_[i][j] / MAX_VALUE - 2;
-            }
-
-            if (j === 0)
-                context.moveTo(x, y);
-            else
-                context.lineTo(x, y);
+            var x = x0 + WIDTH * (j + 1) / L;
+            var y = y0 - HEIGHT * formatted_data[j][i] / MAX_VALUE;
+            line_points = line_points + x.toString() + " ";
+            line_points = line_points + y.toString() + " ";
         }
-
-        if (i < 3)
-            context.fillText(TAGS[i], (PLOT_WIDTH + PLOT_GAP) * i + PLOT_GAP, PLOT_HEIGHT + 1.5 * PLOT_GAP);
-        else
-            context.fillText(TAGS[i], (PLOT_WIDTH + PLOT_GAP) * (i - 3) + PLOT_GAP, 2 * PLOT_HEIGHT + 2.5 * PLOT_GAP);
-
-        context.strokeStyle = '#C0C';
-        context.stroke();
-        context.closePath();
+        data_line.setAttribute('points', line_points);
+        data_line.style = "fill:none; stroke:purple; stroke-width:2;"
+        svg.appendChild(data_line);
     }
 }

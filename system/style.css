@@ -50,8 +50,6 @@
     border: none;
     appearance: none;
     outline: none;
-    font-size: 16px;
-    background-color: tomato;
 }
 
 #check:hover {
@@ -70,14 +68,22 @@
     border: none;
     color: grey;
     font-size: 12px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #log:focus {
     border: none;
+    appearance: none;
+    outline: none;
 }
 
 #plot-title {
+    margin: auto;
+    text-align: center;
+}
+
+#plot-description {
+    width: 600;
     margin: auto;
     text-align: center;
 }

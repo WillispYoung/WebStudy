@@ -17,7 +17,7 @@
     </div>
     <div style="width: 100%; margin-top: 20px;">
         <div id="input_wrapper">
-            <input id="url" type="text">
+            <input id="url" type="text" spellcheck="false">
             <button id="check">CHECK</button>
         </div>
     </div>
@@ -36,12 +36,14 @@
             <div style="width: 600;">
                 <p id="plot-title"></p>
             </div>
-            <!-- Set width and height here, instead of in CSS, to avoid blurry plots. -->
-            <canvas id="plot" width="600" height="400"></canvas>
+            <div>
+                <svg id="plot" width="600" height="330"></svg>
+            </div>
+            <div id="plot-description"></div>
         </div>
     </div>
 
-    <textarea id="log" cols="30" rows="10"></textarea>
+    <textarea id="log" cols="30" rows="10" readonly></textarea>
 
     <script src="script.js"></script>
 </body>
