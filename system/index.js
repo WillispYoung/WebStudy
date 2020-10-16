@@ -39,7 +39,7 @@ function createWindow() {
     });
 
     window.loadFile('system/main.html');
-    // window.removeMenu();
+    window.removeMenu();
     window.setTitle('Render Delay Check');
 }
 

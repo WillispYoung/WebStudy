@@ -11,7 +11,9 @@ X = []
 Y = []
 
 for obj in data:
-    X.append(obj['metadata'])
+    arr = obj['metadata'][:3]
+    arr.append(obj['metadata'][-1])
+    X.append(arr)
     layout = []
     for arr in obj['duration']:
         layout.append(arr[4] + arr[5])

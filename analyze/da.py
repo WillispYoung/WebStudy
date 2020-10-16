@@ -27,14 +27,17 @@ def explainable_variance(X, Y):
     return SSY_ / SSY
 
 
-tag = ['node', 'image', 'text', 'css', 'ucss', 'rule']
+tag = ['node', 'image', 'text', 'rule']
 raw_data = json.loads(open('data.json', 'r').read())['data']
 
 predictor = []
 criterion = []
 
 for obj in raw_data:
-    predictor.append(obj['metadata'])
+    arr = obj['metadata'][:3]
+    arr.append(obj['metadata'][-1])
+    predictor.append(arr)
+    
     layout = []
     for arr in obj['duration']:
         layout.append(arr[4] + arr[5])
