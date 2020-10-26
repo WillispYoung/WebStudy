@@ -108,6 +108,5 @@ dist
 
 traces/
 trace/
+forum/
 __pycache__/
-measure/trace/*.json
-measure/forum/*.json
