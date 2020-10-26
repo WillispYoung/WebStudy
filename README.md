@@ -3,12 +3,16 @@ Study on modern web.
 
 ---
 
-### Week Goal [10.12~10.18]
+### Weekly Goal [10.12~10.18]
 1. Finish dominance analysis [DONE].
 2. Beautify the system [DONE]. Use SVG instead of canvas [DONE].
 
-### Week Goal [10.19~10.25]
-1. Find something *interesting* of this work. 
+### Weekly Goal [10.19~10.25]
+1. Find something *interesting* of this work. [DELAYED]
+
+### Weekly Goal [10.26~11.01]
+1. HTML document generation.
+2. JavaScirpt concurrent execution.
 
 ### Delayed Goals
 1. JavaScript side effect and optimization-feasibility analysis.
