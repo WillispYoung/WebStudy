@@ -2,18 +2,17 @@ const EventEmitter = require('events');
 const puppeteer = require('puppeteer');
 const delay = require('delay');
 const fs = require('fs');
-const { exception } = require('console');
 
-process.on('uncaughtException', function (error) {
+process.on('uncaughtException', function(error) {
     console.log(`Uncaught exception: ${error.message}`);
 });
 
-process.on('unhandledRejection', function (error) {
+process.on('unhandledRejection', function(error) {
     console.log(`Unhandled rejection: ${error.message}`);
 });
 
 // URL start points.
-var urls = fs.readFileSync('domains-xtd.txt').toString().split('\n');
+var urls = fs.readFileSync('forum-domains-xtd.txt').toString().split('\n');
 
 // URL end points.
 var finalURLs = new Set();
@@ -30,7 +29,7 @@ function randomFilename() {
     return res;
 }
 
-var i = 1405;
+var i = 2320;
 var monitor = new EventEmitter();
 
 monitor.on('next', () => {
@@ -90,17 +89,17 @@ async function navigate(url) {
                     domss = undefined;
                     ruleUsage = undefined;
 
-                    var filename = `trace/${randomFilename()}.json`;
-                    while (fs.existsSync(filename)) filename = `trace/${randomFilename()}.json`;
+                    var filename = `forum/${randomFilename()}.json`;
+                    while (fs.existsSync(filename)) filename = `forum/${randomFilename()}.json`;
                     fs.writeFileSync(filename, JSON.stringify(data));
 
                     data = undefined;
-                } catch (e) { }
+                } catch (e) {}
 
                 await client.detach();
                 await page.close();
                 await browser.close();
-            } catch (e) { }
+            } catch (e) {}
 
             console.log(url, i + 1);
 
@@ -109,11 +108,11 @@ async function navigate(url) {
         }
     }
 
-    var timer = setTimeout(async function () {
+    var timer = setTimeout(async function() {
         stopCaption();
     }, 20000);
 
-    page.on('load', async () => {
+    page.on('load', async() => {
         clearTimeout(timer);
         stopCaption();
     });

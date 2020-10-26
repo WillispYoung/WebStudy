@@ -13,12 +13,12 @@ const fs = require('fs');
 // }
 
 // Run from base directory.
-var files = fs.readdirSync('measure/trace/');
+var files = fs.readdirSync('measure/forum/');
 var formatted = [];
 
 var count = 0;
 for (var f of files) {
-    let filename = 'measure/trace/' + f;
+    let filename = 'measure/forum/' + f;
     let data = JSON.parse(fs.readFileSync(filename));
     let res = extract(data);
     var output = {

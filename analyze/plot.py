@@ -7,7 +7,7 @@ data = json.loads(open('data.json', 'r').read())['data']
 
 def sum_of_top5(arr):
     arr.sort(reverse=True)
-    return int(sum(arr[:5]) / 1000)
+    return sum(arr[:5])
 
 
 # Distribution of:

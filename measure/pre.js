@@ -3,16 +3,16 @@ const puppeteer = require('puppeteer');
 const delay = require('delay');
 const fs = require('fs');
 
-process.on('uncaughtException', function (error) {
+process.on('uncaughtException', function(error) {
     console.log(`Uncaught exception: ${error.message}`);
 });
 
-process.on('unhandledRejection', function (error) {
+process.on('unhandledRejection', function(error) {
     console.log(`Unhandled rejection: ${error.message}`);
 });
 
 // URL start points.
-var urls = fs.readFileSync('domains.txt').toString().split('\r\n');
+var urls = fs.readFileSync('forum-domains.txt').toString().split('\r\n');
 var extendedURLs = new Set(urls);
 urls = Array.from(extendedURLs);
 
@@ -26,7 +26,7 @@ monitor.on('next', () => {
         i += 1;
         navigate(urls[i], monitor);
     } else {
-        for (var s of urls) fs.appendFileSync('domains-xtd.txt', s + '\n');
+        for (var s of urls) fs.appendFileSync('forum-domains-xtd.txt', s + '\n');
         process.exit();
     }
 });
@@ -40,10 +40,10 @@ async function navigate(url) {
     await page.setViewport({ width: 1600, height: 900 });
     await page.setCacheEnabled(false);
 
-    page.on('load', async () => {
+    page.on('load', async() => {
         var links = await page.$$eval('a', as => as.map(a => a.href));
         links = Array.from(links);
-        links = links.slice(0, 50);
+        links = links.slice(0, 100);
         for (var l of links) {
             if (extendedURLs.has(l)) continue;
             else {
