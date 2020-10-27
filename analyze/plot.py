@@ -2,9 +2,6 @@ from matplotlib import pyplot as pp
 import json
 
 
-data = json.loads(open('data.json', 'r').read())['data']
-
-
 def sum_of_top5(arr):
     arr.sort(reverse=True)
     return sum(arr[:5])
@@ -19,13 +16,18 @@ def sum_of_top5(arr):
 # And their relationships with layout task duration in the form of
 # scatter plot.
 
+data = json.loads(open('data.json', 'r').read())['data']
+
 node = []
 image = []
 text = []
 css = []
 ucss = []
 rule = []
+char = []
 layout = []
+
+max_char = 0
 
 for obj in data:
     node.append(obj['metadata'][0])
@@ -34,11 +36,24 @@ for obj in data:
     css.append(obj['metadata'][3])
     ucss.append(obj['metadata'][4])
     rule.append(obj['metadata'][5])
+    char.append(obj['metadata'][6])
+
+    max_char = max(max_char, obj['metadata'][6])
 
     layout_ = []
     for arr in obj['duration']:
         layout_.append(arr[4] + arr[5])
-    layout.append(sum_of_top5(layout_))
+    if len(layout_) > 0:
+        layout.append(max(layout_))
+    else:
+        layout.append(0)
+
+print(max_char)
+
+for i in range(len(layout)):
+    if char[i] < 0.2 * max_char:
+        pp.plot(char[i], layout[i]/1000, marker='.', ms=2)
+pp.show()
 
 # Image 1: distribution of 5 factors, and scatter plots of these against sum of top-5 layout duration.
 

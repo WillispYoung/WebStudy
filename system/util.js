@@ -83,7 +83,8 @@ function extractDataFromDomSnapshot(documents, strings) {
     var res = {
         nodeCount: doc.nodes.parentIndex.length,
         imageCount: 0,
-        textCount: 0
+        textCount: 0,
+        charCount: 0
     };
 
     var layoutCount = doc.layout.nodeIndex.length;
@@ -105,7 +106,7 @@ function extractDataFromDomSnapshot(documents, strings) {
     var texts = doc.layout.text.filter(idx => idx !== -1);
     texts = texts.map(idx => strings[idx]);
     res.textCount = texts.length;
-    res.textSegCount = doc.textBoxes.layoutIndex.length;
+    for (var t of texts) res.charCount += t.length;
 
     return res;
 }

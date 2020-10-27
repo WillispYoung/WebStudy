@@ -3,7 +3,7 @@ const fs = require('fs');
 
 // Output format for each file:
 // { 
-//    metadata: [nodeCount, imageCount, textCount, cssCount, usedCssCount, cssRuleCount]
+//    metadata: [nodeCount, imageCount, textCount, cssCount, usedCssCount, cssRuleCount, charCount]
 //    duration: [
 //        [task1, task2, task3, ...], 
 //        [], 
@@ -24,7 +24,8 @@ for (var f of files) {
     var output = {
         metadata: [
             res.nodeCount, res.imageCount, res.textCount,
-            res.cssCount, res.usedCssCount, res.cssRuleCount
+            res.cssCount, res.usedCssCount, res.cssRuleCount,
+            res.charCount
         ],
         duration: res.taskDurations
     };

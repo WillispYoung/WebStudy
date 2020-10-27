@@ -15,9 +15,9 @@ doc.write('</head>\n')
 
 doc.write('<body>\n')
 
-w1 = 300        # first-level width
+w1 = 50        # first-level width
 w2 = 3          # second-level width
-depth = 5
+depth = 4
 
 NESTABLE_TAGS = ['div', 'p', 'span', 'span', 'span']
 CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890       ,.+-*/()!@#$%^&~'
@@ -53,7 +53,7 @@ def add_tag(d):
 
 
 for i in range(w1):
-    print(i+1)
+    # print(i+1)
 
     idx = random.randint(0, len(NESTABLE_TAGS)-1)
     tag = NESTABLE_TAGS[idx]
