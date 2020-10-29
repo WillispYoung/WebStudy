@@ -12,7 +12,6 @@
 7. Measure the influence/importance of text layout in the total layout.
 8. Measure the difference between segmented loading and all-in-once loading.
 9. Implement the algorithm to determine the cluster/genre of HTML blocks.
-10. Code restructure.
 
 --------------------------------------------------------------------------------
 

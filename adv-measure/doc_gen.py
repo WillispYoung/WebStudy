@@ -10,7 +10,7 @@ doc.write('<html>\n')
 
 doc.write('<head>\n')
 doc.write('<title>Python Generated Web Page</title>\n')
-doc.write('<style>*{border: 1px solid red}</style>')
+# doc.write('<style>*{border: 1px solid red}</style>')
 doc.write('</head>\n')
 
 doc.write('<body>\n')
