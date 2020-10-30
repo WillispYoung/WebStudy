@@ -1,6 +1,7 @@
 # Generate simple HTML document purely consists of texts.
 
 import random
+import sys
 
 
 doc = open('index.html', 'w')
@@ -15,7 +16,7 @@ doc.write('</head>\n')
 
 doc.write('<body>\n')
 
-char_num = 10000
+char_num = int(sys.argv[1])
 
 CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890       ,.+-*/()!@#$%^&~'
 L = len(CHARS)
@@ -25,6 +26,8 @@ for _ in range(char_num):
     idx = random.randint(0, L-1)
     content += CHARS[idx]
 content += '\n'
+
+print(len(content.split(' ')))
 
 doc.write(content)
 

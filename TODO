@@ -9,8 +9,10 @@
 4. HTML document generation. [DONE]
 5. JavaScirpt concurrent execution. [CANCELED]
 6. JavaScript side effect and optimization-feasibility analysis. [CANCELED]
-7. Measure the influence/importance of text layout in the total layout.
-8. Measure the difference between segmented loading and all-in-once loading.
+7. Measure the influence/importance of text layout in the total layout. [DONE]
+
+========================== 11.02 ~ 11.08 ========================================
+8. Measure the difference between segmented loading and all-in-once loading. 
 9. Implement the algorithm to determine the cluster/genre of HTML blocks.
 
 --------------------------------------------------------------------------------

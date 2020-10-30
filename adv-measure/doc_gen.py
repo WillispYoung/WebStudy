@@ -15,18 +15,20 @@ doc.write('</head>\n')
 
 doc.write('<body>\n')
 
-w1 = 50        # first-level width
-w2 = 3          # second-level width
-depth = 4
+w1 = 1000        # first-level width
+w2 = 4         # second-level width
+depth = 2
 
 NESTABLE_TAGS = ['div', 'p', 'span', 'span', 'span']
 CHARS = 'abcdefghijklmnopqrstuvwxyz1234567890       ,.+-*/()!@#$%^&~'
 
 char_num = 0
+word_num = 0
 
 def rand_text():
     global char_num
-    l = random.randint(20, 100)
+    global word_num
+    l = random.randint(1, 3)
     char_num += l
 
     s = ''
@@ -35,6 +37,7 @@ def rand_text():
         idx = random.randint(0, L-1)
         s += CHARS[idx]
     s += '\n'
+    word_num += len(s.split(' '))
     return s
 
 
@@ -69,4 +72,4 @@ doc.write('</html>')
 
 doc.close()
 
-print(w1, w2, depth, char_num)
+print(w1, w2, depth, char_num, word_num)

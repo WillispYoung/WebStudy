@@ -16,7 +16,7 @@ def sum_of_top5(arr):
 # And their relationships with layout task duration in the form of
 # scatter plot.
 
-data = json.loads(open('data.json', 'r').read())['data']
+data = json.loads(open('data1.json', 'r').read())['data']
 
 node = []
 image = []
@@ -50,9 +50,16 @@ for obj in data:
 
 print(max_char)
 
-for i in range(len(layout)):
-    if char[i] < 0.2 * max_char:
-        pp.plot(char[i], layout[i]/1000, marker='.', ms=2)
+# for i in range(len(layout)):
+#     if char[i] < 0.2 * max_char:
+#         pp.plot(char[i], layout[i]/1000, marker='.', ms=2)
+l = len(char)
+char.sort()
+char = char[:int(0.99*l)]
+pp.hist(char, 50)
+pp.title('Distribution of Character Numbers in Web Pages')
+pp.xlabel('Number of Characters')
+pp.ylabel('Number of Web Pages')
 pp.show()
 
 # Image 1: distribution of 5 factors, and scatter plots of these against sum of top-5 layout duration.

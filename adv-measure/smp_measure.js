@@ -10,7 +10,15 @@ async function navigate() {
     await page.setViewport({ width: 1600, height: 900 });
     await page.setCacheEnabled(false);
 
-    page.on('load', async() => {
+    var client = await page.target().createCDPSession();
+    await client.send("DOM.enable");
+    await client.send("DOMSnapshot.enable");
+
+    page.on('load', async () => {
+        await delay(100);
+        var domss = await client.send('DOMSnapshot.captureSnapshot', { computedStyles: [] });
+        console.log(domss.documents[0].textBoxes.layoutIndex.length);
+        
         await delay(100);
         await page.tracing.stop();
 
@@ -22,7 +30,7 @@ async function navigate() {
         var data = JSON.parse(fs.readFileSync('trace.json'));
         var ult = data.traceEvents.filter(e => e.name === 'UpdateLayoutTree').map(e => e.dur).reduce((a, b) => a + b);
         var layout = data.traceEvents.filter(e => e.name === 'Layout').map(e => e.dur).reduce((a, b) => a + b);
-        console.log(Math.floor((ult + layout) / 1000));
+        console.log(Math.floor(layout / 1000), Math.floor(ult / 1000));
     });
 
     await page.tracing.start({ path: 'trace.json' });
