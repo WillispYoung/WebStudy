@@ -79,21 +79,49 @@ function determineElementGenre(documents, strings) {
     }
 
     // Determine same-genre relationship.
-    var sameGenreMatrix = [];
+    var sameGenreMatrix = [];       // Default 0, True 1, False -1.
     for (var i = 0; i < inLayoutIndex.length; i++) {
         var entry = [];
         for (var j = 0; j < inLayoutIndex.length; j++)
-            entry.push(false);
+            entry.push(0);
         sameGenreMatrix.push(entry);
+    }
+
+    // 8px is the HTML's default margin.
+    function sameRow(y1, h1, y2, h2) {
+        return Math.abs(y1 - y2) <= 8 && Math.abs(y1 + h1 - y2 - h2) <= 8;
+    }
+
+    function sameColumn(x1, w1, x2, w2) {
+        return Math.abs(x1 - x2) <= 8 && Math.abs(x1 + w1 - x2 - w2) <= 8;
+    }
+
+    function similarSize(w1, h1, w2, h2) {
+        let s1 = w1 * h1;
+        let s2 = w2 * h2;
+        return (s1 < s2 ? s1 / s2 : s2 / s1) >= 0.9;
+    }
+
+    // Two elements are identified as of same genre when:
+    // 1. they are displayed in a same row or column, and
+    // 2. they have similar sizes, and
+    // 3. they have similar inner structure, or
+    // 4. they share another element that is of same genre.
+    function getRelationship(i, j) {
+        if (sameGenreMatrix[i][j] !== 0) return sameGenreMatrix[i][j];
+
+        let b1 = nodes[i].bounds;
+        let b2 = nodes[j].bounds;
+
+        if (similarSize(b1[2], b1[3], b2[2], b2[3]) &&
+            (sameRow(b1[1], b1[3], b2[1], b2[3]) || sameColumn(b1[0], b1[2], b2[0], b2[2]))) {
+
+        }
     }
 
     for (var i = 0; i < inLayoutIndex.length - 1; i++) {
         for (var j = i + 1; j < inLayoutIndex.length; j++) {
-            // Two elements are identified as of same genre when:
-            // 1. they are displayed in a same row or column, and
-            // 2. they have similar sizes, and
-            // 3. they have similar inner structure, or
-            // 4. they share another element that is of same genre.
+            
         }
     }
 }
