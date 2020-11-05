@@ -44,11 +44,11 @@ for obj in data:
     for arr in obj['duration']:
         layout_.append(arr[4] + arr[5])
     if len(layout_) > 0:
-        layout.append(max(layout_))
+        layout.append(max(layout_)/1000)
     else:
         layout.append(0)
 
-print(max_char)
+# print(max_char)
 
 # for i in range(len(layout)):
 #     if char[i] < 0.2 * max_char:
@@ -59,6 +59,18 @@ char = char[:int(0.99*l)]
 pp.hist(char, 50)
 pp.title('Distribution of Character Numbers in Web Pages')
 pp.xlabel('Number of Characters')
+pp.ylabel('Number of Web Pages')
+pp.show()
+
+pp.hist(layout, 60)
+pp.title('Distribution of Layout Task Duration')
+pp.xlabel('Task Duration (ms)')
+pp.ylabel('Number of Web Pages')
+pp.show()
+
+pp.hist(text, 50)
+pp.title('Distribution of Text Numbers in Web Pages')
+pp.xlabel('Number of Text Nodes')
 pp.ylabel('Number of Web Pages')
 pp.show()
 
