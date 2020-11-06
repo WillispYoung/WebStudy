@@ -3,7 +3,7 @@ const NODE_TYPE = ['Element', 'Attr', 'Text', 'CDATASection', 'EntityReference',
     'DocumentFragment', 'Notation'];
 
 class CoordinateNode {
-    constructor(type, name, value,) {
+    constructor(type, name, value) {
         this.type = type;       // Node type, integer.
         this.name = name;       // Node name, string.
         this.value = value;     // NodeValue | TextValue | InputValue, string.
@@ -14,7 +14,8 @@ class CoordinateNode {
     }
 }
 
-function determineElementGenre(documents, strings) {
+const delay = require('delay');
+async function determineElementSimilarity(documents, strings) {
     var doc = documents[0];
     var inLayoutIndex = doc.layout.nodeIndex;
 
@@ -27,6 +28,7 @@ function determineElementGenre(documents, strings) {
     var nodes = [];
     var pivots = [];
     for (var i = 0; i < inLayoutIndex.length; i++) {
+        let idx = doc.layout.nodeIndex[i];
         let name = getString(doc.nodes.nodeName[idx]);
         let type = NODE_TYPE[doc.nodes.nodeType[idx]];
         let value = getString(doc.nodes.nodeValue[idx]) |
@@ -55,7 +57,7 @@ function determineElementGenre(documents, strings) {
 
     var inclusion = [];
     for (var i = 0; i < inLayoutIndex.length; i++)
-        includes.push([]);
+        inclusion.push([]);
 
     for (var i = 0; i < inLayoutIndex.length - 1; i++) {
         for (var j = i + 1; j < inLayoutIndex.length; j++) {
@@ -116,7 +118,7 @@ function determineElementGenre(documents, strings) {
     // 4. they share another element that is of same genre (transitivity).
 
     // Determine the similarity between outer nodes.
-    function getAbsoluteSimilarity(i, j) {
+    async function getAbsoluteSimilarity(i, j) {
         if (absoluteSimilarity[i][j] !== 0) return absoluteSimilarity[i][j];
 
         // Transitivity.
@@ -171,9 +173,10 @@ function determineElementGenre(documents, strings) {
     }
 
     // Determine the similarity between inner structures.
-    function getRelativeSimilarity(i, j) {
+    async function getRelativeSimilarity(i, j) {
         if (relativeSimilarity[i][j] !== 0) return relativeSimilarity[i][j];
 
+        // Use the offsets to the pivot instead of absolute coordinates.
         let b1 = [...nodes[i].bounds];
         b1[0] -= pivots[i][0];
         b1[1] -= pivots[i][1];
@@ -219,3 +222,7 @@ function determineElementGenre(documents, strings) {
         }
     }
 }
+
+const fs = require('fs');
+var data = JSON.parse(fs.readFileSync('trace.json'));
+determineElementSimilarity(data.documents, data.strings);

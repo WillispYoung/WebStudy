@@ -112,3 +112,5 @@ trace/
 forum/
 __pycache__/
 adv-measure/res/
+
+optimization/*.json
