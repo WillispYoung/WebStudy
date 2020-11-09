@@ -3,67 +3,73 @@ const NODE_TYPE = ['Element', 'Attr', 'Text', 'CDATASection', 'EntityReference',
     'DocumentFragment', 'Notation'];
 
 class CoordinateNode {
-    constructor(type, name, value) {
+    constructor(type, name, value, dindex, index, bounds) {
         this.type = type;       // Node type, integer.
         this.name = name;       // Node name, string.
         this.value = value;     // NodeValue | TextValue | InputValue, string.
 
-        this.index = -1;            // Index in the node list.
-        this.bounds = undefined;    // Post-layout coordinates, [x, y, w, h].
-        this.innerNodes = [];       // Geographically inner nodes.
+        this.dindex = dindex;   // Index in the DOM tree.
+        this.index = index;     // Index in the node list.
+
+        // Post-layout coordinates.
+        this.bounds = bounds;
+        this.x = bounds[0];
+        this.y = bounds[1];
+        this.width = bounds[2];
+        this.height = bounds[3];
+        this.spanX = this.x + this.width;
+        this.spanY = this.y + this.height;
+
+        // Used in relative similarity.
+        this.pivotX = 0;
+        this.pivotY = 0;
+
+        // Geographically inner nodes. Stores indexes.
+        this.innerNodes = [];
     }
 }
 
-const delay = require('delay');
-async function determineElementSimilarity(documents, strings) {
+function determineElementSimilarity(documents, strings) {
     var doc = documents[0];
-    var inLayoutIndex = doc.layout.nodeIndex;
 
     // Allocate CoordinateNodes from DOM snapshot.
     function getString(idx) {
-        if (idx < 0 || idx >= strings.length) return '';
-        else return strings[idx];
+        return (idx < 0 || idx >= strings.length) ? '' : strings[idx];
     }
 
     var nodes = [];
-    var pivots = [];
-    for (var i = 0; i < inLayoutIndex.length; i++) {
-        let idx = doc.layout.nodeIndex[i];
-        let name = getString(doc.nodes.nodeName[idx]);
-        let type = NODE_TYPE[doc.nodes.nodeType[idx]];
-        let value = getString(doc.nodes.nodeValue[idx]) |
-            getString(doc.nodes.textValue[idx]) |
-            getString(doc.nodes.inputValue[idx]);
+    for (let i = 0; i < doc.layout.nodeIndex.length; i++) {
+        let dindex = doc.layout.nodeIndex[i];
+        let type = NODE_TYPE[doc.nodes.nodeType[dindex]];
+        let name = getString(doc.nodes.nodeName[dindex]);
+        let value = getString(doc.nodes.nodeValue[dindex]) |
+            getString(doc.nodes.textValue[dindex]) |
+            getString(doc.nodes.inputValue[dindex]);
+        let bounds = doc.layout.bounds[i];
 
-        var n = new CoordinateNode(type, name, value);
-        n.bounds = doc.layout.bounds[i];
-        n.index = i;
-        nodes.push(n);
-
-        pivots.push([0, 0]);
+        var n = new CoordinateNode(type, name, value, dindex, i, bounds);
+        if (n.width > 0 && n.height > 0) nodes.push(n);
     }
 
+    console.log('Actual in Layout node count:', nodes.length, '.');
+
     // Discover direct coordinate coverage.
-    function covers(n1, n2) {
-        let b1 = n1.bounds;
-        let b2 = n2.bounds;
-        if (b1[0] <= b2[0] && b1[1] <= b2[1] &&
-            b1[0] + b1[2] >= b2[0] + b2[2] &&
-            b1[1] + b1[3] >= b2[1] + b2[3])
-            return true;
-        else
-            return false;
+    function covers(i, j) {
+        return nodes[i].x <= nodes[j].x &&
+            nodes[i].y <= nodes[j].y &&
+            nodes[i].x + nodes[i].width >= nodes[j].x + nodes[j].width &&
+            nodes[i].y + nodes[i].height >= nodes[j].y + nodes[j].height;
     }
 
     var inclusion = [];
-    for (var i = 0; i < inLayoutIndex.length; i++)
+    for (var i = 0; i < nodes.length; i++)
         inclusion.push([]);
 
-    for (var i = 0; i < inLayoutIndex.length - 1; i++) {
-        for (var j = i + 1; j < inLayoutIndex.length; j++) {
-            if (covers(nodes[i], nodes[j]))
+    for (var i = 0; i < nodes.length - 1; i++) {
+        for (var j = i + 1; j < nodes.length; j++) {
+            if (covers(i, j))
                 inclusion[i].push(j);
-            else if (covers(nodes[j], nodes[i]))
+            else if (covers(j, i))
                 inclusion[j].push(i);
         }
     }
@@ -76,39 +82,46 @@ async function determineElementSimilarity(documents, strings) {
             })
         }
 
+        nodes[i].innerNodes = [...inclusion[i]];
         for (var j of inclusion[i]) {
-            nodes[i].innerNodes.push(nodes[j]);
-            pivots[j] = nodes[i].bounds.slice(0, 2);
+            nodes[j].pivotX = nodes[i].x;
+            nodes[j].pivotY = nodes[i].y;
         }
     }
 
     // Determine same-genre relationship.
     var absoluteSimilarity = [];          // Default 0, True 1, False -1.
     var relativeSimilarity = [];          // Default 0, True 1, False -1.
-    for (var i = 0; i < inLayoutIndex.length; i++) {
+    for (var i = 0; i < nodes.length; i++) {
         var entry = [];
-        for (var j = 0; j < inLayoutIndex.length; j++)
+        for (var j = 0; j < nodes.length; j++)
             entry.push(0);
         absoluteSimilarity.push(entry);
-        relativeSimilarity.push(entry);
+        relativeSimilarity.push([...entry]);
     }
 
     // 8px is the HTML's default margin.
     // Here we take half this margin as minimum offset.
     const MIN_OFFSET = 4;
-    function closeCoordinates(list1, list2) {
-        if (list1.length !== list2.length) return false;
-        for (let i = 0; i < list1.length; i++) {
-            if (Math.abs(list1[i] - list2[i]) > MIN_OFFSET)
-                return false;
-        }
-        return true;
-    }
+    function closeCoordinates(i, j, abs) {
+        // Check absolute close coordinates.
+        if (abs) {
+            // s1 = nodes[i].width * nodes[i].height;
+            // s2 = nodes[j].width * nodes[j].height;
+            // similarSize = (s1 > s2 ? s2 / s1 : s1 / s2) >= 0.9;
+            sameRow = Math.abs(nodes[i].x - nodes[j].x) <= MIN_OFFSET && Math.abs(nodes[i].spanX - nodes[j].spanX) <= MIN_OFFSET;
+            sameColumn = Math.abs(nodes[i].y - nodes[j].y) <= MIN_OFFSET && Math.abs(nodes[i].spanY - nodes[j].spanY) <= MIN_OFFSET;
+            similarSize = Math.abs(nodes[i].width - nodes[j].width) <= MIN_OFFSET && Math.abs(nodes[i].height - nodes[j].height) <= MIN_OFFSET;
 
-    function similarSize(w1, h1, w2, h2) {
-        let s1 = w1 * h1;
-        let s2 = w2 * h2;
-        return (s1 < s2 ? s1 / s2 : s2 / s1) >= 0.9;
+            return similarSize && (sameRow || sameColumn);
+        }
+        // Check relative close coordinates.
+        else {
+            return Math.abs(nodes[i].width - nodes[j].width) <= MIN_OFFSET &&
+                Math.abs(nodes[i].height - nodes[j].height) <= MIN_OFFSET &&
+                Math.abs(nodes[i].x - nodes[i].pivotX - nodes[j].x + nodes[j].pivotX) <= MIN_OFFSET &&
+                Math.abs(nodes[i].y - nodes[i].pivotY - nodes[j].y + nodes[j].pivotY) <= MIN_OFFSET;
+        }
     }
 
     // Two elements are ident1ified as of same genre when:
@@ -118,50 +131,25 @@ async function determineElementSimilarity(documents, strings) {
     // 4. they share another element that is of same genre (transitivity).
 
     // Determine the similarity between outer nodes.
-    async function getAbsoluteSimilarity(i, j) {
+    function getAbsoluteSimilarity(i, j) {
         if (absoluteSimilarity[i][j] !== 0) return absoluteSimilarity[i][j];
 
-        // Transitivity.
-        for (let k = 0; j < inLayoutIndex.length; k++) {
-            if (k !== i && k !== j) {
-                let v1 = getAbsoluteSimilarity(i, k);
-                absoluteSimilarity[i][k] = v1;
-                absoluteSimilarity[k][i] = v1;
-
-                let v2 = getAbsoluteSimilarity(j, k);
-                absoluteSimilarity[j][k] = v2;
-                absoluteSimilarity[k][j] = v2;
-
-                if (v1 === 1 && v2 === 1) return 1;
-            }
-        }
-
-        // Direct comparison.
-        let b1 = nodes[i].bounds;
-        let b2 = nodes[j].bounds;
-        if (similarSize(b1[2], b1[3], b2[2], b2[3]) &&
-            (closeCoordinates([b1[1], b1[3]], [b2[1], b2[3]]) ||        // Same row.
-                closeCoordinates([b1[0], b1[2]], [b2[0], b2[2]]))) {    // Same column.
+        if (closeCoordinates(i, j, true)) {
             // Outer shapes are similar, then compares their inner structures.
             if (nodes[i].innerNodes.length !== nodes[j].innerNodes.length) return -1;
             if (nodes[i].innerNodes.length === 0) return 1;
 
-            // Find a Bipartite matching relaitonship between i and j's inner nodes.
-            let targetIndex = new Set();
-            for (let k = 0; k < nodes[i].innerNodes.length; k++) targetIndex.add(k);
-
-            for (let k = 0; k < nodes[i].innerNodes.length; k++) {
+            let target = new Set(nodes[j].innerNodes);
+            for (let i_ of nodes[i].innerNodes) {
                 let matchFound = false;
-                for (let v of targetIndex) {
-                    let i1 = nodes[i].innerNodes[k].index;
-                    let i2 = nodes[j].innerNodes[v].index;
-                    let rs = getRelativeSimilarity(i1, i2);
-                    relativeSimilarity[i1][i2] = rs;
-                    relativeSimilarity[i2][i1] = rs;
+                for (let j_ of target) {
+                    let rs = getRelativeSimilarity(i_, j_);
+                    relativeSimilarity[i_][j_] = rs;
+                    relativeSimilarity[j_][i_] = rs;
 
                     if (rs === 1) {
                         matchFound = true;
-                        targetIndex.delete(v);
+                        target.delete(j_);
                         break;
                     }
                 }
@@ -169,41 +157,30 @@ async function determineElementSimilarity(documents, strings) {
             }
             return 1;
         }
-        else return -1;
+        else
+            return -1;
     }
 
     // Determine the similarity between inner structures.
-    async function getRelativeSimilarity(i, j) {
+    function getRelativeSimilarity(i, j) {
+        if (absoluteSimilarity[i][j] === 1) return 1;
         if (relativeSimilarity[i][j] !== 0) return relativeSimilarity[i][j];
 
-        // Use the offsets to the pivot instead of absolute coordinates.
-        let b1 = [...nodes[i].bounds];
-        b1[0] -= pivots[i][0];
-        b1[1] -= pivots[i][1];
-
-        let b2 = [...nodes[j].bounds];
-        b2[0] -= pivots[j][0];
-        b2[1] -= pivots[j][1];
-
-        if (closeCoordinates(b1, b2)) {
+        if (closeCoordinates(i, j, false)) {
             if (nodes[i].innerNodes.length !== nodes[j].innerNodes.length) return -1;
             if (nodes[i].innerNodes.length === 0) return 1;
 
-            let targetIndex = new Set();
-            for (let k = 0; k < nodes[i].innerNodes.length; k++) targetIndex.add(k);
-
-            for (let k = 0; k < nodes[i].innerNodes.length; k++) {
-                let matchFound = false;
-                for (let v of targetIndex) {
-                    let i1 = nodes[i].innerNodes[k].index;
-                    let i2 = nodes[j].innerNodes[v].index;
-                    let rs = getRelativeSimilarity(i1, i2);
-                    relativeSimilarity[i1][i2] = rs;
-                    relativeSimilarity[i2][i1] = rs;
+            let target = new Set(nodes[j].innerNodes);
+            for (let i_ of nodes[i].innerNodes) {
+                matchFound = false;
+                for (let j_ of target) {
+                    let rs = getRelativeSimilarity(i_, j_);
+                    relativeSimilarity[i_][j_] = rs;
+                    relativeSimilarity[j_][i_] = rs;
 
                     if (rs === 1) {
                         matchFound = true;
-                        targetIndex.delete(v);
+                        target.delete(j_);
                         break;
                     }
                 }
@@ -214,15 +191,92 @@ async function determineElementSimilarity(documents, strings) {
         else return -1;
     }
 
-    for (var i = 0; i < inLayoutIndex.length - 1; i++) {
-        for (var j = i + 1; j < inLayoutIndex.length; j++) {
+    count_ = 0;
+    for (var i = 0; i < nodes.length - 1; i++) {
+        for (var j = i + 1; j < nodes.length; j++) {
             let as = getAbsoluteSimilarity(i, j)
             absoluteSimilarity[i][j] = as;
             absoluteSimilarity[j][i] = as;
+
+            if (as === 1) count_ += 1;
         }
     }
+    console.log(`Similarity computed. ${count_}`);
+
+    // Check transitivity.
+    for (let i = 0; i < nodes.length - 1; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            if (absoluteSimilarity[i][j] !== 1) {
+                for (let k = 0; k < nodes.length; k++) {
+                    if (k !== i && k !== j &&
+                        absoluteSimilarity[i][k] === 1 &&
+                        absoluteSimilarity[k][j] === 1) {
+                        absoluteSimilarity[i][j] = 1;
+                        absoluteSimilarity[j][i] = 1;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    console.log('Transitivity checked.');
+
+    // Aggregate similarity information.
+    var clusters = [];
+    for (let i = 0; i < nodes.length - 1; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            if (absoluteSimilarity[i][j] === 1) {
+                destinationFound = false;
+                for (let cl of clusters) {
+                    if (cl.includes(i) && !cl.includes(j)) {
+                        destinationFound = true;
+                        cl.push(j);
+                        break;
+                    }
+                    else if (cl.includes(j) && !cl.includes(i)) {
+                        destinationFound = true;
+                        cl.push(i);
+                        break;
+                    }
+                    else if (cl.includes(i) && cl.includes(j)) {
+                        destinationFound = true;
+                        break;
+                    }
+                }
+                if (!destinationFound) {
+                    let cl = [i, j];
+                    clusters.push(cl);
+                }
+            }
+        }
+    }
+
+    return { nodes, clusters };
 }
 
 const fs = require('fs');
-var data = JSON.parse(fs.readFileSync('trace.json'));
-determineElementSimilarity(data.documents, data.strings);
+var data = JSON.parse(fs.readFileSync('optimization/trace.json'));
+var res = determineElementSimilarity(data.documents, data.strings);
+
+const { app, BrowserWindow, ipcMain } = require('electron');
+
+function createWindow() {
+    var window = new BrowserWindow({
+        width: 1000,
+        height: 700,
+        webPreferences: {
+            nodeIntegration: true,
+            worldSafeExecuteJavaScript: true
+        }
+    });
+
+    window.loadFile('optimization/main.html');
+    // window.removeMenu();
+    window.setTitle('Element Cluster Check');
+}
+
+ipcMain.on('asynchronous-message', (event, _) => {
+    event.reply('asynchronous-reply', { res });
+});
+
+app.whenReady().then(createWindow);

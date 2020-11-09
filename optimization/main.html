@@ -1,0 +1,35 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+</head>
+
+<body>
+    <svg id="plot" width="1000" height="700"></svg>
+    <script>
+        const { ipcRenderer } = require('electron');
+        const canvas = document.getElementById('plot');
+
+        ipcRenderer.send('asynchronous-message', {});
+
+        ipcRenderer.on('asynchronous-reply', (_, data) => {
+            var nodes = data.res.nodes;
+            var clusters = data.res.clusters;
+
+            for (let cl of clusters) {
+                for (let idx of cl) {
+                    var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', nodes[idx].x);
+                    rect.setAttribute('y', nodes[idx].y);
+                    rect.setAttribute('width', nodes[idx].width);
+                    rect.setAttribute('height', nodes[idx].height);
+                    rect.style = 'stroke: steelblue; stroke-width: 1px; fill: none;';
+                    canvas.appendChild(rect);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

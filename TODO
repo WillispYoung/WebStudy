@@ -12,8 +12,12 @@
 7. Measure the influence/importance of text layout in the total layout. [DONE]
 
 ========================== 11.02 ~ 11.08 ========================================
-8. Measure the difference between segmented loading and all-in-once loading. 
-9. Implement the algorithm to determine the cluster/genre of HTML blocks.
+8. Measure the difference between segmented loading and all-in-once loading. [CANCELED]
+9. Implement the algorithm to determine the cluster/genre of HTML blocks. [DONE]
+
+========================== 11.09 ~ 11.15 ========================================
+10. Verify element clustering result.
+11. Non-linear fitting on layout task duration.
 
 --------------------------------------------------------------------------------
 
