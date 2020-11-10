@@ -15,18 +15,37 @@
 
         ipcRenderer.on('asynchronous-reply', (_, data) => {
             var nodes = data.res.nodes;
+            var top = data.res.top;
             var clusters = data.res.clusters;
 
-            for (let cl of clusters) {
-                for (let idx of cl) {
+            var maxX = 0, maxY = 0;
+            nodes.forEach(n => {
+                maxX = Math.max(maxX, n.spanX);
+                maxY = Math.max(maxY, n.spanY);
+            });
+            canvas.setAttribute('width', maxX);
+            canvas.setAttribute('height', maxY);
+
+            // TODO:
+            // 1. Assign different colors for each cluster. [DONE]
+            // 2. Determine inner cluster (necessary content structure) of an element [DONE].
+            const COLOR_SET = [
+                '#FFFFCC', '#FFCC00', '#CC99090', '#663300', '#FF6600', '#663333', '#CC6666', '#FF6666', '#FF0000', '#FFFF99',
+                '#FFCC66', '#FF9900', '#FF9966', '#CC3300', '#996666', '#660000', '#FF3300', '#FF6666', '#FFCC33',
+                '#CC6600', '#FF6633', '#996633', '#CC9999', '#FF3333', '#990000', '#CC9966', '#FFFF33', '#CC9933', '#993300'
+            ];
+            var ccount = 0;
+            for (let ci of top) {
+                for (let idx of clusters[ci]) {
                     var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     rect.setAttribute('x', nodes[idx].x);
                     rect.setAttribute('y', nodes[idx].y);
                     rect.setAttribute('width', nodes[idx].width);
                     rect.setAttribute('height', nodes[idx].height);
-                    rect.style = 'stroke: steelblue; stroke-width: 1px; fill: none;';
+                    rect.style = `stroke: ${COLOR_SET[ccount % COLOR_SET.length]}; stroke-width: 1px; fill: none;`;
                     canvas.appendChild(rect);
                 }
+                ccount += 1;
             }
         });
     </script>

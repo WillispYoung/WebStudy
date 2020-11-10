@@ -51,7 +51,7 @@ function determineElementSimilarity(documents, strings) {
         if (n.width > 0 && n.height > 0) nodes.push(n);
     }
 
-    console.log('Actual in Layout node count:', nodes.length, '.');
+    console.log(`Actual in Layout node: ${nodes.length}.`);
 
     // Discover direct coordinate coverage.
     function covers(i, j) {
@@ -201,7 +201,7 @@ function determineElementSimilarity(documents, strings) {
             if (as === 1) count_ += 1;
         }
     }
-    console.log(`Similarity computed. ${count_}`);
+    console.log(`Similarity computed: ${count_}.`);
 
     // Check transitivity.
     for (let i = 0; i < nodes.length - 1; i++) {
@@ -251,7 +251,42 @@ function determineElementSimilarity(documents, strings) {
         }
     }
 
-    return { nodes, clusters };
+    // Determine cluster containing relationship.
+    // Contained clusters are removed from return value.
+    // One cluster contains another cluster, only if:
+    // Every element in the latter cluster is covered by one element in the former cluster.
+    var top = new Set();        // Index of top-level clusters.
+    for (let i = 0; i < clusters.length; i++) top.add(i);
+
+    function containCluster(i, j) {
+        for (let j_ of clusters[j]) {
+            let topFound = false;
+            for (let i_ of clusters[i]) {
+                if (nodes[i_].x <= nodes[j_].x &&
+                    nodes[i_].y <= nodes[j_].y &&
+                    nodes[i_].spanX >= nodes[j_].spanX &&
+                    nodes[i_].spanY >= nodes[j_].spanY) {
+                    topFound = true;
+                    break;
+                }
+            }
+            if (!topFound) return false;
+        }
+        return true;
+    }
+
+    for (let i = 0; i < clusters.length; i++) {
+        if (!top.has(i)) continue;
+        for (let j = 0; j != i && j < clusters.length; j++) {
+            if (!top.has(j)) continue;
+            if (containCluster(i, j)) top.delete(j);
+        }
+    }
+
+    console.log('Top-level clusters computed.');
+
+    // top ----> clusters ----> nodes.
+    return { nodes, clusters, top };
 }
 
 const fs = require('fs');
@@ -271,7 +306,7 @@ function createWindow() {
     });
 
     window.loadFile('optimization/main.html');
-    // window.removeMenu();
+    window.removeMenu();
     window.setTitle('Element Cluster Check');
 }
 
