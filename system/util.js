@@ -84,10 +84,12 @@ function extractDataFromDomSnapshot(documents, strings) {
         nodeCount: doc.nodes.parentIndex.length,
         imageCount: 0,
         textCount: 0,
-        charCount: 0
+        charCount: 0,
+        inLayoutCount: 0
     };
 
     var layoutCount = doc.layout.nodeIndex.length;
+    res.inLayoutCount = layoutCount;
     for (var i = 0; i < layoutCount; i++) {
         var idx = doc.layout.nodeIndex[i];
         var nameIndex = doc.nodes.nodeName[idx];

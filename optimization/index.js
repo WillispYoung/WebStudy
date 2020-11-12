@@ -307,7 +307,7 @@ function createWindow() {
 
     window.loadFile('optimization/main.html');
     window.removeMenu();
-    window.setTitle('Element Cluster Check');
+    window.setTitle(`Element Cluster Check: ${data.strings[data.documents[0].baseURL]}`);
 }
 
 ipcMain.on('asynchronous-message', (event, _) => {
