@@ -45,17 +45,18 @@ function v0() {
 }
 
 function v1() {
-    var files = fs.readdirSync('measure/trace/');
+    var folder = '../measure/trace/';
+    var files = fs.readdirSync(folder);
     var formatted = [];
 
     for (var f of files) {
-        let filename = 'measure/trace/' + f;
+        let filename = folder + f;
         let data = JSON.parse(fs.readFileSync(filename));
         let res = extract(data);
         formatted.push({ ilc: res.inLayoutCount, tds: res.taskDurations });
     }
 
-    fs.writeFileSync('analyze/data2.json', JSON.stringify({ data: formatted }));
+    fs.writeFileSync('data-trace.json', JSON.stringify({ data: formatted }));
 }
 
 v1();

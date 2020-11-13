@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const NODE_TYPE = ['Element', 'Attr', 'Text', 'CDATASection', 'EntityReference',
     'Entity', 'ProcessingInstruction', 'Comment', 'Document', 'DocumentType',
     'DocumentFragment', 'Notation'];
@@ -51,7 +53,7 @@ function determineElementSimilarity(documents, strings) {
         if (n.width > 0 && n.height > 0) nodes.push(n);
     }
 
-    console.log(`Actual in Layout node: ${nodes.length}.`);
+    // console.log(`Actual in Layout node: ${nodes.length}.`);
 
     // Discover direct coordinate coverage.
     function covers(i, j) {
@@ -88,6 +90,7 @@ function determineElementSimilarity(documents, strings) {
             nodes[j].pivotY = nodes[i].y;
         }
     }
+    inclusion = undefined;
 
     // Determine same-genre relationship.
     var absoluteSimilarity = [];          // Default 0, True 1, False -1.
@@ -191,17 +194,14 @@ function determineElementSimilarity(documents, strings) {
         else return -1;
     }
 
-    count_ = 0;
     for (var i = 0; i < nodes.length - 1; i++) {
         for (var j = i + 1; j < nodes.length; j++) {
             let as = getAbsoluteSimilarity(i, j)
             absoluteSimilarity[i][j] = as;
             absoluteSimilarity[j][i] = as;
-
-            if (as === 1) count_ += 1;
         }
     }
-    console.log(`Similarity computed: ${count_}.`);
+    // console.log(`Similarity computed.`);
 
     // Check transitivity.
     for (let i = 0; i < nodes.length - 1; i++) {
@@ -219,7 +219,7 @@ function determineElementSimilarity(documents, strings) {
             }
         }
     }
-    console.log('Transitivity checked.');
+    // console.log('Transitivity checked.');
 
     // Aggregate similarity information.
     var clusters = [];
@@ -250,6 +250,8 @@ function determineElementSimilarity(documents, strings) {
             }
         }
     }
+    absoluteSimilarity = undefined;
+    relativeSimilarity = undefined;
 
     // Determine cluster containing relationship.
     // Contained clusters are removed from return value.
@@ -282,38 +284,46 @@ function determineElementSimilarity(documents, strings) {
             if (containCluster(i, j)) top.delete(j);
         }
     }
-
-    console.log('Top-level clusters computed.');
+    // console.log('Top-level clusters computed.');
 
     // top ----> clusters ----> nodes.
     return { nodes, clusters, top };
 }
 
-module.exports = determineElementSimilarity;
+var folder = '../measure/trace/';
+var files = fs.readdirSync(folder);
+var output = [];
 
-const fs = require('fs');
-var data = JSON.parse(fs.readFileSync('optimization/trace.json'));
-var res = determineElementSimilarity(data.documents, data.strings);
+// For each trace file, ouput：
+//   1. Quantity of elements;
+//   2. Total covering area of each cluster.
+// Data form: { eq: [], tca: [] }.
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+let count = 0;
+for (var f of files) {
+    let filename = folder + f;
+    let data = JSON.parse(fs.readFileSync(filename));
 
-function createWindow() {
-    var window = new BrowserWindow({
-        width: 1000,
-        height: 700,
-        webPreferences: {
-            nodeIntegration: true,
-            worldSafeExecuteJavaScript: true
+    let start = Date.now();
+    let result = determineElementSimilarity(data.documents, data.strings);
+    let end = Date.now();
+
+    let eq = [], tca = [];
+    for (let ci of result.top) {
+        eq.push(result.clusters[ci].length);
+        let s = 0;
+        for (let idx of result.clusters[ci]) {
+            s += result.nodes[idx].width * result.nodes[idx].height;
         }
-    });
+        tca.push(s);
+    }
+    output.push({ eq, tca });
 
-    window.loadFile('optimization/main.html');
-    window.removeMenu();
-    window.setTitle(`Element Cluster Check: ${data.strings[data.documents[0].baseURL]}`);
+    data = undefined;
+    result = undefined;
+
+    count += 1;
+    console.log(filename, end - start, count);
 }
 
-ipcMain.on('asynchronous-message', (event, _) => {
-    event.reply('asynchronous-reply', { res });
-});
-
-app.whenReady().then(createWindow);
+fs.writeFileSync('des.json', JSON.stringify({ data: output }));
