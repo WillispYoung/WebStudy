@@ -6,6 +6,7 @@ const NODE_TYPE = ['Element', 'Attr', 'Text', 'CDATASection', 'EntityReference',
 
 class CoordinateNode {
     constructor(type, name, value, dindex, index, bounds) {
+        // DOM attributes.
         this.type = type;       // Node type, integer.
         this.name = name;       // Node name, string.
         this.value = value;     // NodeValue | TextValue | InputValue, string.
@@ -26,7 +27,7 @@ class CoordinateNode {
         this.pivotX = 0;
         this.pivotY = 0;
 
-        // Geographically inner nodes. Stores indexes.
+        // Geographically internal nodes. Stores indexes.
         this.innerNodes = [];
     }
 }
@@ -53,7 +54,7 @@ function determineElementSimilarity(documents, strings) {
         if (n.width > 0 && n.height > 0) nodes.push(n);
     }
 
-    // console.log(`Actual in Layout node: ${nodes.length}.`);
+    // console.log(`\tActual in Layout node: ${nodes.length}.`);
 
     // Discover direct coordinate coverage.
     function covers(i, j) {
@@ -90,7 +91,6 @@ function determineElementSimilarity(documents, strings) {
             nodes[j].pivotY = nodes[i].y;
         }
     }
-    inclusion = undefined;
 
     // Determine same-genre relationship.
     var absoluteSimilarity = [];          // Default 0, True 1, False -1.
@@ -194,31 +194,34 @@ function determineElementSimilarity(documents, strings) {
         else return -1;
     }
 
+    count_ = 0;
     for (var i = 0; i < nodes.length - 1; i++) {
         for (var j = i + 1; j < nodes.length; j++) {
             let as = getAbsoluteSimilarity(i, j)
             absoluteSimilarity[i][j] = as;
             absoluteSimilarity[j][i] = as;
+
+            if (as === 1) count_ += 1;
         }
     }
-    // console.log(`Similarity computed.`);
+    // console.log(`\tSimilarity computed: ${count_}.`);
 
     // Check transitivity.
-    for (let i = 0; i < nodes.length - 1; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-            if (absoluteSimilarity[i][j] !== 1) {
-                for (let k = 0; k < nodes.length; k++) {
-                    if (k !== i && k !== j &&
-                        absoluteSimilarity[i][k] === 1 &&
-                        absoluteSimilarity[k][j] === 1) {
-                        absoluteSimilarity[i][j] = 1;
-                        absoluteSimilarity[j][i] = 1;
-                        break;
-                    }
-                }
-            }
-        }
-    }
+    // for (let i = 0; i < nodes.length - 1; i++) {
+    //     for (let j = i + 1; j < nodes.length; j++) {
+    //         if (absoluteSimilarity[i][j] !== 1) {
+    //             for (let k = 0; k < nodes.length; k++) {
+    //                 if (k !== i && k !== j &&
+    //                     absoluteSimilarity[i][k] === 1 &&
+    //                     absoluteSimilarity[k][j] === 1) {
+    //                     absoluteSimilarity[i][j] = 1;
+    //                     absoluteSimilarity[j][i] = 1;
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
     // console.log('Transitivity checked.');
 
     // Aggregate similarity information.
@@ -250,8 +253,6 @@ function determineElementSimilarity(documents, strings) {
             }
         }
     }
-    absoluteSimilarity = undefined;
-    relativeSimilarity = undefined;
 
     // Determine cluster containing relationship.
     // Contained clusters are removed from return value.
@@ -277,14 +278,19 @@ function determineElementSimilarity(documents, strings) {
         return true;
     }
 
-    for (let i = 0; i < clusters.length; i++) {
+    for (let i = 0; i < clusters.length - 1; i++) {
         if (!top.has(i)) continue;
-        for (let j = 0; j != i && j < clusters.length; j++) {
+        for (let j = i + 1; j < clusters.length; j++) {
             if (!top.has(j)) continue;
             if (containCluster(i, j)) top.delete(j);
+            else if (containCluster(j, i)) {
+                top.delete(i);
+                break;
+            }
         }
     }
-    // console.log('Top-level clusters computed.');
+
+    // console.log(`\tTop-level clusters computed: ${top.size}/${clusters.length}.`);
 
     // top ----> clusters ----> nodes.
     return { nodes, clusters, top };
@@ -295,7 +301,7 @@ var files = fs.readdirSync(folder);
 var output = [];
 
 // For each trace file, ouput：
-//   1. Quantity of elements;
+//   1. Quantity of elements in each cluster;
 //   2. Total covering area of each cluster.
 // Data form: { eq: [], tca: [] }.
 
@@ -308,6 +314,12 @@ for (var f of files) {
     let result = determineElementSimilarity(data.documents, data.strings);
     let end = Date.now();
 
+    // let singleNodes = new Set();
+    // for (let i = 0; i < result.nodes.length; i++) singleNodes.add(i);
+    // for (let cl of result.clusters)
+    //     for (let idx of cl)
+    //         singleNodes.delete(idx);
+
     let eq = [], tca = [];
     for (let ci of result.top) {
         eq.push(result.clusters[ci].length);
@@ -317,6 +329,10 @@ for (var f of files) {
         }
         tca.push(s);
     }
+    // for (let idx of singleNodes) {
+    //     eq.push(1);
+    //     tca.push(result.nodes[idx].width * result.nodes[idx].height);
+    // }
     output.push({ eq, tca });
 
     data = undefined;

@@ -204,22 +204,22 @@ function determineElementSimilarity(documents, strings) {
     console.log(`Similarity computed: ${count_}.`);
 
     // Check transitivity.
-    for (let i = 0; i < nodes.length - 1; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-            if (absoluteSimilarity[i][j] !== 1) {
-                for (let k = 0; k < nodes.length; k++) {
-                    if (k !== i && k !== j &&
-                        absoluteSimilarity[i][k] === 1 &&
-                        absoluteSimilarity[k][j] === 1) {
-                        absoluteSimilarity[i][j] = 1;
-                        absoluteSimilarity[j][i] = 1;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    console.log('Transitivity checked.');
+    // for (let i = 0; i < nodes.length - 1; i++) {
+    //     for (let j = i + 1; j < nodes.length; j++) {
+    //         if (absoluteSimilarity[i][j] !== 1) {
+    //             for (let k = 0; k < nodes.length; k++) {
+    //                 if (k !== i && k !== j &&
+    //                     absoluteSimilarity[i][k] === 1 &&
+    //                     absoluteSimilarity[k][j] === 1) {
+    //                     absoluteSimilarity[i][j] = 1;
+    //                     absoluteSimilarity[j][i] = 1;
+    //                     break;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    // console.log('Transitivity checked.');
 
     // Aggregate similarity information.
     var clusters = [];
@@ -275,21 +275,23 @@ function determineElementSimilarity(documents, strings) {
         return true;
     }
 
-    for (let i = 0; i < clusters.length; i++) {
+    for (let i = 0; i < clusters.length - 1; i++) {
         if (!top.has(i)) continue;
-        for (let j = 0; j != i && j < clusters.length; j++) {
+        for (let j = i + 1; j < clusters.length; j++) {
             if (!top.has(j)) continue;
             if (containCluster(i, j)) top.delete(j);
+            else if (containCluster(j, i)) {
+                top.delete(i);
+                break;
+            }
         }
     }
 
-    console.log('Top-level clusters computed.');
+    console.log(`Top-level clusters computed: ${top.size}/${clusters.length}.`);
 
     // top ----> clusters ----> nodes.
     return { nodes, clusters, top };
 }
-
-module.exports = determineElementSimilarity;
 
 const fs = require('fs');
 var data = JSON.parse(fs.readFileSync('optimization/trace.json'));
@@ -308,7 +310,7 @@ function createWindow() {
     });
 
     window.loadFile('optimization/main.html');
-    window.removeMenu();
+    // window.removeMenu();
     window.setTitle(`Element Cluster Check: ${data.strings[data.documents[0].baseURL]}`);
 }
 

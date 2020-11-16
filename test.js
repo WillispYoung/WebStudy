@@ -9,7 +9,7 @@ for (let i = 0; i < 10; i++) {
     }
 }
 
-// Array Copy.
+// Array deep copy.
 let arr = [1, 2, 3];
 let arr_ = [...arr];
 console.log(arr_);
