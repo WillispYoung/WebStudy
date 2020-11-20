@@ -17,7 +17,7 @@ for entry in data:
     if len(entry['eq']) > 0:
         cluster_quantity.append(log(len(entry['eq'])))
         maximum_element_quantity.append(log(max(entry['eq'])))
-        minimum_element_quantity.append(log(min(entry['eq'])))
+        # minimum_element_quantity.append(min(entry['eq']))
         maximum_cluster_area.append(log(max(entry['tca']) / VIEWPORT_SIZE))
         minimum_cluster_area.append(log(min(entry['tca']) / VIEWPORT_SIZE))
 

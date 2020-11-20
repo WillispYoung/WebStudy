@@ -309,8 +309,9 @@ function createWindow() {
         }
     });
 
+    console.log(data.strings[data.documents[0].baseURL]);
     window.loadFile('optimization/main.html');
-    // window.removeMenu();
+    window.removeMenu();
     window.setTitle(`Element Cluster Check: ${data.strings[data.documents[0].baseURL]}`);
 }
 

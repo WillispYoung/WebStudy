@@ -19,7 +19,6 @@
 10. Verify element clustering result. [DONE]
 11. Non-linear fitting on layout task duration. [DONE] 
 
---------------------------------------------------------------------------------
-
-DELAYED
-1. Give more detailed optimization suggestions.
+========================== 11.16 ~ 11.22 ========================================
+12. Separated non-liner fitting on ULT and layout duration.
+13. Demonstration of optimization scheme. 
