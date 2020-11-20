@@ -25,7 +25,7 @@ def explainable_variance(origin, prediction):
 # Criterion data form: [y1, y2, ... , yn]
 def OLS(y, x1, x2, x3, x4, x5, x6):
     data_frame = pandas.DataFrame({'Y': y, 'X1': x1, 'X2': x2, 'X3': x3, 'X4': x4, 'X5': x5, 'X6': x6})
-    result = formula.ols(formula='Y ~ X1 + X2 + X3 + X4 + X5 + X6', data=data_frame).fit()
+    result = formula.ols(formula='Y ~ X4 + X5 + X6', data=data_frame).fit()
     print(result.summary())
     print()
 
@@ -143,7 +143,7 @@ def separated_nonlinear_fitting():
     ilc_n2logn = [v**2 * math.log(v) for v in ilc]
 
     predictors = [[ilc[i], ilc_log[i], ilc_nlogn[i], ilc_n2[i], ilc_log2[i], ilc_n2logn[i]] for i in range(len(ilc))]
-    linear_regression_remove_10_percent_outliers(predictors, ult)
+    # linear_regression_remove_10_percent_outliers(predictors, ult)
     linear_regression_remove_10_percent_outliers(predictors, layout)
 
 
