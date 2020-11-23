@@ -24,8 +24,9 @@ def explainable_variance(origin, prediction):
 # Predictor data form: [[list for variable X1], [list for variable X2], ...]
 # Criterion data form: [y1, y2, ... , yn]
 def OLS(y, x1, x2, x3, x4, x5, x6):
-    data_frame = pandas.DataFrame({'Y': y, 'X1': x1, 'X2': x2, 'X3': x3, 'X4': x4, 'X5': x5, 'X6': x6})
-    result = formula.ols(formula='Y ~ X4 + X5 + X6', data=data_frame).fit()
+    data_frame = pandas.DataFrame(
+        {'Y': y, 'X1': x1, 'X2': x2, 'X3': x3, 'X4': x4, 'X5': x5, 'X6': x6})
+    result = formula.ols(formula='Y ~ X1 + X2 + X6', data=data_frame).fit()
     print(result.summary())
     print()
 
@@ -44,6 +45,8 @@ def linear_regression_remove_10_percent_outliers(predictors, criterion):
 
     predictors_ = [predictors[v[1]] for v in residual]
     criterion_ = [criterion[v[1]] for v in residual]
+    # predictors_ = predictors
+    # criterion_ = criterion
 
     x1 = [v[0] for v in predictors_]
     x2 = [v[1] for v in predictors_]
@@ -119,6 +122,9 @@ def plot_ilc_to_ltd():
 def separated_nonlinear_fitting():
     numerical_data = json.loads(open('data-trace.json', 'r').read())['data']
 
+    image = []
+    text = []
+    char = []
     ilc = []
     ult = []        # UpdateLayoutTree.
     layout = []
@@ -126,6 +132,9 @@ def separated_nonlinear_fitting():
     for item in numerical_data:
         if len(item['tds']) > 0:
             ilc.append(item['ilc'])
+            image.append(item['image'])
+            text.append(item['text'])
+            char.append(item['char'])
             list_ult = []
             list_layout = []
             for arr in item['tds']:
@@ -133,18 +142,16 @@ def separated_nonlinear_fitting():
                 list_layout.append(arr[5] / 1000)
             list_ult.sort(reverse=True)
             list_layout.sort(reverse=True)
-            ult.append(sum(list_ult[:5]))
-            layout.append(sum(list_layout[:5]))
+            ult.append(sum(list_ult[:10]))
+            layout.append(sum(list_layout[:10]))
 
-    ilc_n2 = [v**2 for v in ilc]
     ilc_log = [math.log(v) for v in ilc]
-    ilc_log2 = [math.log(v)**2 for v in ilc]
     ilc_nlogn = [v * math.log(v) for v in ilc]
-    ilc_n2logn = [v**2 * math.log(v) for v in ilc]
 
-    predictors = [[ilc[i], ilc_log[i], ilc_nlogn[i], ilc_n2[i], ilc_log2[i], ilc_n2logn[i]] for i in range(len(ilc))]
-    # linear_regression_remove_10_percent_outliers(predictors, ult)
-    linear_regression_remove_10_percent_outliers(predictors, layout)
+    predictors = [[ilc[i], ilc_log[i], ilc_nlogn[i], image[i], text[i], char[i]]
+                  for i in range(len(ilc))]
+    linear_regression_remove_10_percent_outliers(predictors, ult)
+    # linear_regression_remove_10_percent_outliers(predictors, layout)
 
 
 separated_nonlinear_fitting()

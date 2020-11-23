@@ -53,7 +53,13 @@ function v1() {
         let filename = folder + f;
         let data = JSON.parse(fs.readFileSync(filename));
         let res = extract(data);
-        formatted.push({ ilc: res.inLayoutCount, tds: res.taskDurations });
+        formatted.push({
+            image: res.imageCount,
+            text: res.textCount,
+            char: res.charCount,
+            ilc: res.inLayoutCount,
+            tds: res.taskDurations
+        });
     }
 
     fs.writeFileSync('data-trace.json', JSON.stringify({ data: formatted }));
