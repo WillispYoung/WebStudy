@@ -1,6 +1,7 @@
 import copy
 import json
 import math
+import itertools
 from matplotlib import pyplot
 from sklearn import linear_model
 
@@ -23,12 +24,50 @@ def explainable_variance(origin, prediction):
 
 # Predictor data form: [[list for variable X1], [list for variable X2], ...]
 # Criterion data form: [y1, y2, ... , yn]
+# A fitting equation is explainable, only when all the variables have (1) positive coefficients
+# and (2) p-values that are smaller than 0.05; the significance of an equation is characterized by
+# r-squared value (the greater the better) and condition number (the smaller the better).
 def OLS(y, x1, x2, x3, x4, x5, x6):
-    data_frame = pandas.DataFrame(
-        {'Y': y, 'X1': x1, 'X2': x2, 'X3': x3, 'X4': x4, 'X5': x5, 'X6': x6})
-    result = formula.ols(formula='Y ~ X1 + X2 + X6', data=data_frame).fit()
-    print(result.summary())
-    print()
+    data_frame = pandas.DataFrame({'Y': y, 'X1': x1, 'X2': x2, 'X3': x3, 'X4': x4, 'X5': x5, 'X6': x6})
+    # result = formula.ols(formula='Y ~ X1 + X2 + X6', data=data_frame).fit()
+    # print(list(result.params))
+    # print(result.summary().tables[0].as_csv())
+    # print(result.summary().tables[1].as_csv())
+    # print(result.summary().tables[2].as_csv())
+    # https://www.statsmodels.org/devel/generated/statsmodels.regression.linear_model.RegressionResults.html
+    # print(result.condition_number, result.rsquared, list(result.pvalues), list(result.tvalues))
+
+    variables = ['X1', 'X2', 'X3', 'X4', 'X5', 'X6']
+    combinations = []
+    for i in range(len(variables)-1):
+        subset = itertools.combinations(variables, i+1)
+        for vs in subset:
+            combinations.append(list(vs))
+
+    overall_results = []
+    for vc in combinations:
+        rightside_formula = ''
+        for i in range(len(vc)):
+            if i > 0:
+                rightside_formula = rightside_formula + ' + '
+            rightside_formula = rightside_formula + vc[i]
+        result = formula.ols(formula='Y ~ ' + rightside_formula, data=data_frame).fit()
+        overall_results.append([vc, list(result.params), list(result.pvalues), result.rsquared, result.condition_number])
+    
+    def equation_filter(res):
+        for i in range(1, len(res[1])):
+            if res[1][i] < 0:
+                return False
+        for i in range(1, len(res[2])):
+            if res[2][i] > 0.05:
+                return False
+        return True
+
+    explainable_equations = list(filter(equation_filter, overall_results))
+    explainable_equations.sort(key=lambda l: l[3], reverse=True)      # sort by r-squared value.
+
+    for ee in explainable_equations:
+        print(ee)
 
 
 # Predictor data form: [[x11, x21, x31, ...], ... , [x1n, x2n, x3n, ...]]
@@ -45,8 +84,6 @@ def linear_regression_remove_10_percent_outliers(predictors, criterion):
 
     predictors_ = [predictors[v[1]] for v in residual]
     criterion_ = [criterion[v[1]] for v in residual]
-    # predictors_ = predictors
-    # criterion_ = criterion
 
     x1 = [v[0] for v in predictors_]
     x2 = [v[1] for v in predictors_]
@@ -150,8 +187,8 @@ def separated_nonlinear_fitting():
 
     predictors = [[ilc[i], ilc_log[i], ilc_nlogn[i], image[i], text[i], char[i]]
                   for i in range(len(ilc))]
-    linear_regression_remove_10_percent_outliers(predictors, ult)
-    # linear_regression_remove_10_percent_outliers(predictors, layout)
+    # linear_regression_remove_10_percent_outliers(predictors, ult)
+    linear_regression_remove_10_percent_outliers(predictors, layout)
 
 
 separated_nonlinear_fitting()

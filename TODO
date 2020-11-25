@@ -21,4 +21,5 @@
 
 ========================== 11.16 ~ 11.29 ========================================
 12. Separated non-liner fitting on ULT and layout duration. [DONE]
-13. Demonstration of optimization scheme. 
+13. Automatic fitting funciton selection. [DONE]
+14. Demonstration of optimization scheme. 
