@@ -1,24 +1,21 @@
-const NODE_TYPE = ['Element', 'Attr', 'Text', 'CDATASection', 'EntityReference',
-    'Entity', 'ProcessingInstruction', 'Comment', 'Document', 'DocumentType',
-    'DocumentFragment', 'Notation'];
+// Optimization difficulty: it's easy to get the DOM information from HTML files (as provided by browser),
+// yet it's hard to map DOM locaiton to HTML code location (so that we know what codes should be removed).
+// Moreover, code location is meaningless when DOM is changed (DOM nodes are added) with JavaScript (in 
+// this case we need to locate the JavaScript code that is responsible, which is difficult). We propose to
+// highlight what elements can be removed in the browser, using a simple extension.
 
 class CoordinateNode {
-    constructor(type, name, value, dindex, index, bounds) {
-        this.type = type;       // Node type, integer.
-        this.name = name;       // Node name, string.
-        this.value = value;     // NodeValue | TextValue | InputValue, string.
-
-        this.dindex = dindex;   // Index in the DOM tree.
-        this.index = index;     // Index in the node list.
+    constructor(element, rect) {
+        // Corresponding DOM element.
+        this.element = element;
 
         // Post-layout coordinates.
-        this.bounds = bounds;
-        this.x = bounds[0];
-        this.y = bounds[1];
-        this.width = bounds[2];
-        this.height = bounds[3];
-        this.spanX = this.x + this.width;
-        this.spanY = this.y + this.height;
+        this.x = rect.x;
+        this.y = rect.y;
+        this.width = rect.width;
+        this.height = rect.height;
+        this.right = rect.right;
+        this.bottom = rect.bottom;
 
         // Used in relative similarity.
         this.pivotX = 0;
@@ -29,36 +26,13 @@ class CoordinateNode {
     }
 }
 
-function determineElementSimilarity(documents, strings) {
-    var doc = documents[0];
-
-    // Allocate CoordinateNodes from DOM snapshot.
-    function getString(idx) {
-        return (idx < 0 || idx >= strings.length) ? '' : strings[idx];
-    }
-
-    var nodes = [];
-    for (let i = 0; i < doc.layout.nodeIndex.length; i++) {
-        let dindex = doc.layout.nodeIndex[i];
-        let type = NODE_TYPE[doc.nodes.nodeType[dindex]];
-        let name = getString(doc.nodes.nodeName[dindex]);
-        let value = getString(doc.nodes.nodeValue[dindex]) |
-            getString(doc.nodes.textValue[dindex]) |
-            getString(doc.nodes.inputValue[dindex]);
-        let bounds = doc.layout.bounds[i];
-
-        var n = new CoordinateNode(type, name, value, dindex, i, bounds);
-        if (n.width > 0 && n.height > 0) nodes.push(n);
-    }
-
-    console.log(`Actual in Layout node: ${nodes.length}.`);
-
+function determineElementSimilarity(nodes) {
     // Discover direct coordinate coverage.
     function covers(i, j) {
         return nodes[i].x <= nodes[j].x &&
             nodes[i].y <= nodes[j].y &&
-            nodes[i].x + nodes[i].width >= nodes[j].x + nodes[j].width &&
-            nodes[i].y + nodes[i].height >= nodes[j].y + nodes[j].height;
+            nodes[i].right >= nodes[j].right &&
+            nodes[i].bottom >= nodes[j].bottom;
     }
 
     var inclusion = [];
@@ -104,15 +78,14 @@ function determineElementSimilarity(documents, strings) {
     // Here we take half this margin as minimum offset.
     const MIN_OFFSET = 4;
     function closeCoordinates(i, j, abs) {
-        // Check absolute close coordinates.
+        // Check absolutely close coordinates.
         if (abs) {
             // s1 = nodes[i].width * nodes[i].height;
             // s2 = nodes[j].width * nodes[j].height;
             // similarSize = (s1 > s2 ? s2 / s1 : s1 / s2) >= 0.9;
-            sameRow = Math.abs(nodes[i].x - nodes[j].x) <= MIN_OFFSET && Math.abs(nodes[i].spanX - nodes[j].spanX) <= MIN_OFFSET;
-            sameColumn = Math.abs(nodes[i].y - nodes[j].y) <= MIN_OFFSET && Math.abs(nodes[i].spanY - nodes[j].spanY) <= MIN_OFFSET;
+            sameRow = Math.abs(nodes[i].x - nodes[j].x) <= MIN_OFFSET && Math.abs(nodes[i].right - nodes[j].right) <= MIN_OFFSET;
+            sameColumn = Math.abs(nodes[i].y - nodes[j].y) <= MIN_OFFSET && Math.abs(nodes[i].bottom - nodes[j].bottom) <= MIN_OFFSET;
             similarSize = Math.abs(nodes[i].width - nodes[j].width) <= MIN_OFFSET && Math.abs(nodes[i].height - nodes[j].height) <= MIN_OFFSET;
-
             return similarSize && (sameRow || sameColumn);
         }
         // Check relatively close coordinates.
@@ -124,7 +97,7 @@ function determineElementSimilarity(documents, strings) {
         }
     }
 
-    // Two elements are ident1ified as of same genre when:
+    // Two elements are identified as of same genre when:
     // 1. they are displayed in a same row or column, and
     // 2. they have similar sizes, and
     // 3. they have similar inner structure, or
@@ -203,24 +176,6 @@ function determineElementSimilarity(documents, strings) {
     }
     console.log(`Similarity computed: ${count_}.`);
 
-    // Check transitivity. Seems not necessary.
-    // for (let i = 0; i < nodes.length - 1; i++) {
-    //     for (let j = i + 1; j < nodes.length; j++) {
-    //         if (absoluteSimilarity[i][j] !== 1) {
-    //             for (let k = 0; k < nodes.length; k++) {
-    //                 if (k !== i && k !== j &&
-    //                     absoluteSimilarity[i][k] === 1 &&
-    //                     absoluteSimilarity[k][j] === 1) {
-    //                     absoluteSimilarity[i][j] = 1;
-    //                     absoluteSimilarity[j][i] = 1;
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // console.log('Transitivity checked.');
-
     // Aggregate similarity information.
     var clusters = [];
     for (let i = 0; i < nodes.length - 1; i++) {
@@ -290,34 +245,39 @@ function determineElementSimilarity(documents, strings) {
     console.log(`Top-level clusters computed: ${top.size}/${clusters.length}.`);
 
     // Data reference: top --> clusters --> nodes.
-    return { nodes, clusters, top };
+    return { clusters, top };
 }
 
-const fs = require('fs');
-var data = JSON.parse(fs.readFileSync('optimization/trace.json'));
-var res = determineElementSimilarity(data.documents, data.strings);
+var elements = document.body.getElementsByTagName('*');
+var nodes = [];
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+for (let elem of elements) {
+    let rect = elem.getBoundingClientRect();
+    if (rect) {
+        var cn = new CoordinateNode(elem, rect);
+        nodes.push(cn);
+    }
+}
 
-function createWindow() {
-    var window = new BrowserWindow({
-        width: 1000,
-        height: 700,
-        webPreferences: {
-            nodeIntegration: true,
-            worldSafeExecuteJavaScript: true
+var sim = determineElementSimilarity(nodes);
+
+// Reduce elements according to the overall distribution.
+const ELEMENT_QUANTITY_TICKS = [3, 10, 29, 86, 252];
+const CLUSTER_COVERAGE_TICKS = [0.0983, 0.0566, 0.326, 1.876, 10.802];
+const COLOR_LEVEL = ['green', 'yellow', 'red'];
+
+for (let cluster of sim.clusters) {
+    var idx = -1;
+    for (let i = 3; i > 0; i--) {
+        if (cluster.length > ELEMENT_QUANTITY_TICKS[i]) {
+            idx = i - 1;
+            break;
         }
-    });
-
-    // console.log(data.strings[data.documents[0].baseURL]);
-    
-    window.loadFile('optimization/main.html');
-    window.removeMenu();
-    window.setTitle(`Element Cluster Check: ${data.strings[data.documents[0].baseURL]}`);
+    }
+    if (idx >= 0) {
+        var toRemove = cluster.slice(ELEMENT_QUANTITY_TICKS[idx + 1]);
+        for (let idx_ of toRemove) {
+            nodes[idx_].element.style.border = `2px solid ${COLOR_LEVEL[idx]}`;
+        }
+    }
 }
-
-ipcMain.on('asynchronous-message', (event, _) => {
-    event.reply('asynchronous-reply', { res });
-});
-
-app.whenReady().then(createWindow);
