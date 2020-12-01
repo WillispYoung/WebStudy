@@ -33,13 +33,36 @@ for entry in data:
 # pyplot.title('Cluster Quantity')
 
 # pyplot.subplot(232)
-# pyplot.hist(maximum_element_quantity, bins=60)
+maximum_element_quantity.sort()
+mean = numpy.mean(maximum_element_quantity)
+stdd = numpy.std(maximum_element_quantity)
+nd = normal_distribution(maximum_element_quantity)
+max1 = 70
+max2 = max(nd)
+nd = [max1 * v / max2 for v in nd]
+pyplot.hist(maximum_element_quantity, bins=60, color='gray')
+pyplot.plot(maximum_element_quantity, nd, linewidth='2')
+pyplot.plot([mean-2*stdd, mean-2*stdd], [0, 10], linewidth='4', color='red')
+pyplot.plot([mean-stdd, mean-stdd], [0, 44], linewidth='4', color='red')
+pyplot.plot([mean, mean], [0, 70], linewidth='4', color='red')
+pyplot.plot([mean+stdd, mean+stdd], [0, 44], linewidth='4', color='red')
+pyplot.plot([mean+2*stdd, mean+2*stdd], [0, 10], linewidth='4', color='red')
 # pyplot.title('Maximum Element Quantity')
+# pyplot.xlabel('单类元素最大数量的对数值')
+# pyplot.ylabel('网页频次')
+pyplot.show()
 
 # pyplot.subplot(233)
+# maximum_cluster_area.sort()
+# nd = normal_distribution(maximum_cluster_area)
+# max1 = 80
+# max2 = max(nd)
+# nd = [max1 * v / max2 for v in nd]
 # pyplot.hist(maximum_cluster_area, bins=60)
+# pyplot.plot(maximum_cluster_area, nd)
 # pyplot.hist(minimum_cluster_area, bins=60)
 # pyplot.title('Cluster Area')
+# pyplot.show()
 
 # pyplot.subplot(234)
 # pyplot.scatter(cluster_quantity, maximum_element_quantity, s=1)
@@ -56,11 +79,13 @@ mean = numpy.mean(maximum_element_quantity)
 stdd = numpy.std(maximum_element_quantity)
 print('Element quantity')
 print(mean, stdd)
-print(exp(mean-2*stdd), exp(mean-stdd), exp(mean), exp(mean+stdd), exp(mean+2*stdd))
+print(exp(mean-2*stdd), exp(mean-stdd),
+      exp(mean), exp(mean+stdd), exp(mean+2*stdd))
 print()
 
 mean = numpy.mean(maximum_cluster_area)
 stdd = numpy.std(maximum_cluster_area)
 print('Cluster area:')
 print(mean, stdd)
-print(exp(mean-2*stdd), exp(mean-stdd), exp(mean), exp(mean+stdd), exp(mean+2*stdd))
+print(exp(mean-2*stdd), exp(mean-stdd),
+      exp(mean), exp(mean+stdd), exp(mean+2*stdd))
