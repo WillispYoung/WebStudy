@@ -44,7 +44,7 @@ function clusterElements() {
         homogeneity.push(entry);
     }
 
-    const MIN_OFFSET = 8;
+    const MIN_OFFSET = 4;
     function similarPosition(r1, r2) {
         return Math.abs(r1.width - r2.width) <= MIN_OFFSET &&
             Math.abs(r1.height - r2.height) <= MIN_OFFSET &&
@@ -54,8 +54,8 @@ function clusterElements() {
     function similarComposition(n1, n2) {
         if (n1.tagName !== n2.tagName) return -1;
 
-        let cn1 = n1.childNodes;
-        let cn2 = n2.childNodes;
+        let cn1 = n1.children;
+        let cn2 = n2.children;
 
         if (cn1.length !== cn2.length) return -1;
 
@@ -72,8 +72,8 @@ function clusterElements() {
     // Internal elements: recursively similar tag composition.
     function determineHomogeneity(i, j) {
         // Ignore comparison between parent and child nodes.
-        if (visibleElements[i].isSameNode(visibleElements[j].parentNode) ||
-            visibleElements[j].isSameNode(visibleElements[i].parentNode)) return -1;
+        if (visibleElements[i].isSameNode(visibleElements[j].parentElement) ||
+            visibleElements[j].isSameNode(visibleElements[i].parentElement)) return -1;
 
         if (homogeneity[i][j] !== 0) return homogeneity[i][j];
 
@@ -84,8 +84,8 @@ function clusterElements() {
 
         if (similarPosition(ri, rj)) {
             // What about pure text or span nodes?
-            let ci = visibleElements[i].childNodes;
-            let cj = visibleElements[j].childNodes;
+            let ci = visibleElements[i].children;
+            let cj = visibleElements[j].children;
 
             if (ci.length !== cj.length) return -1;
 
@@ -127,12 +127,12 @@ function clusterElements() {
 
     console.log('Transitivity checking:', end - start, 'ms.');
 
-    var clusters = [];
+    var simpleClusters = [];
     for (let i = 0; i < visibleElements.length - 1; i++) {
         for (let j = i + 1; j < visibleElements.length; j++) {
             if (homogeneity[i][j] === 1) {
                 let destinationFound = false;
-                for (let cl of clusters) {
+                for (let cl of simpleClusters) {
                     if (cl.includes(i) && !cl.includes(j)) {
                         destinationFound = true;
                         cl.push(j);
@@ -150,20 +150,60 @@ function clusterElements() {
                 }
                 if (!destinationFound) {
                     let cl = [i, j];
-                    clusters.push(cl);
+                    simpleClusters.push(cl);
                 }
             }
         }
     }
 
-    clusters.sort((a, b) => b.length - a.length);
-    console.log('Number of clusters:', clusters.length, ', Maximum cluster size:', clusters[0].length, '.');
+    simpleClusters.sort((a, b) => b.length - a.length);
 
-    if (clusters.length > 0) {
-        for (let idx of clusters[0]) {
+    console.log('Number of clusters:', simpleClusters.length, ', Maximum cluster size:', simpleClusters[0].length);
+
+    if (simpleClusters.length > 0) {
+        for (let idx of simpleClusters[0])
             visibleElements[idx].style.border = '3px solid red';
-        }
     }
+
+    // Further divide clusters (span across multiple screens) into compact clusters.
+    // DOES NOT SEEM NECESSARY AND MEANINGFUL!
+    // const VIEWPORT_HEIGHT = window.innerHeight;
+
+    // var compactClusters = [];
+    // for (let sc of simpleClusters) {
+    //     sc.sort((i, j) => visibleElements[i].getBoundingClientRect().top - visibleElements[j].getBoundingClientRect().top);
+
+    //     let lastUpperBound = -1, sliceStart = 0;
+    //     for (let i = 0; i < sc.length; i++) {
+    //         let r = visibleElements[sc[i]].getBoundingClientRect();
+
+    //         if (lastUpperBound === -1)
+    //             lastUpperBound = r.top;
+    //         else {
+    //             if (r.top - lastUpperBound < VIEWPORT_HEIGHT / 2)
+    //                 lastUpperBound = r.top;
+    //             else {
+    //                 compactClusters.push(sc.slice(sliceStart, i));
+
+    //                 sliceStart = i;
+    //                 lastUpperBound = r.top;
+    //             }
+    //         }
+    //     }
+
+    //     if (sc.length - sliceStart > 1)
+    //         compactClusters.push(sc.slice(sliceStart));
+    // }
+
+    // compactClusters.sort((a, b) => b.length - a.length);
+
+    // console.log('Number of clusters:', compactClusters.length, ', Maximum cluster size:', compactClusters[0].length, '.');
+
+    // if (compactClusters.length > 0) {
+    //     for (let idx of compactClusters[0]) {
+    //         visibleElements[idx].style.border = '3px solid red';
+    //     }
+    // }
 }
 
 setTimeout(clusterElements, 5000);
