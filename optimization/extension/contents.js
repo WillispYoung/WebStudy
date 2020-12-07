@@ -131,24 +131,24 @@ function clusterElements() {
     for (let i = 0; i < visibleElements.length - 1; i++) {
         for (let j = i + 1; j < visibleElements.length; j++) {
             if (homogeneity[i][j] === 1) {
-                let destinationFound = false;
+                let targetFound = false;
                 for (let cl of simpleClusters) {
                     if (cl.includes(i) && !cl.includes(j)) {
-                        destinationFound = true;
+                        targetFound = true;
                         cl.push(j);
                         break;
                     }
                     else if (cl.includes(j) && !cl.includes(i)) {
-                        destinationFound = true;
+                        targetFound = true;
                         cl.push(i);
                         break;
                     }
                     else if (cl.includes(i) && cl.includes(j)) {
-                        destinationFound = true;
+                        targetFound = true;
                         break;
                     }
                 }
-                if (!destinationFound) {
+                if (!targetFound) {
                     let cl = [i, j];
                     simpleClusters.push(cl);
                 }
@@ -206,4 +206,78 @@ function clusterElements() {
     // }
 }
 
-setTimeout(clusterElements, 5000);
+function test() {
+    var allElements = document.body.getElementsByTagName('*');
+
+    for (let element of allElements) {
+        console.log('Tag:', element.tagName, ', Class:', element.classList, ', ID:', element.id);
+    }
+}
+
+function clusterByClassName() {
+    var allElements = document.body.getElementsByTagName('*');
+
+    var allClassNames = [];
+    var simpleClusters = [];            // Ignore elements without className.
+
+    function isVisible(e) {
+        return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+    }
+
+    for (let element of allElements) {
+        if (isVisible(element)) {
+            if (element.className.length > 0) {
+                let cns = element.className.split(' ');
+                for (let name of cns) {
+                    let idx = allClassNames.indexOf(name);
+                    if (idx >= 0) {
+                        simpleClusters[idx].push(element);
+                    } else {
+                        allClassNames.push(name);
+                        simpleClusters.push([element]);
+                    }
+                }
+            } else {
+                var cascadingClassName = element.tagName;
+                var possibleClassedParent = element.parentElement;
+
+                // Find first classed parent node.
+                while (!possibleClassedParent.isSameNode(document.body)) {
+                    if (possibleClassedParent.className.length > 0) {
+                        let cns = possibleClassedParent.className.split(' ');
+                        for (let name of cns) {
+                            let fullname = name + ' ' + cascadingClassName;
+                            let idx = allClassNames.indexOf(fullname);
+                            if (idx >= 0) {
+                                simpleClusters[idx].push(element);
+                            } else {
+                                allClassNames.push(fullname);
+                                simpleClusters.push([element]);
+                            }
+                        }
+                        break;
+                    } else {
+                        cascadingClassName = possibleClassedParent.tagName + ' ' + cascadingClassName;
+                        possibleClassedParent = possibleClassedParent.parentElement;
+                    }
+                }
+            }
+        }
+    }
+
+    var stats = [];
+
+    for (let i = 0; i < allClassNames.length; i++) {
+        stats.push([i, allClassNames[i], simpleClusters[i].length]);
+    }
+
+    stats.sort((a, b) => b[2] - a[2]);
+
+    console.log('Maximum cluster size:', stats[0][2], ', Class name:', stats[0][1], '.');
+
+    for (let element of simpleClusters[stats[0][0]]) {
+        element.style.border = '3px solid red';
+    }
+}
+
+setTimeout(clusterByClassName, 5000);
