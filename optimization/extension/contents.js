@@ -218,7 +218,7 @@ function clusterByClassName() {
     var allElements = document.body.getElementsByTagName('*');
 
     var allClassNames = [];
-    var simpleClusters = [];            // Ignore elements without className.
+    var simpleClusters = [];
 
     function isVisible(e) {
         return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
@@ -226,8 +226,8 @@ function clusterByClassName() {
 
     for (let element of allElements) {
         if (isVisible(element)) {
-            if (element.className.length > 0) {
-                let cns = element.className.split(' ');
+            if (element.className.trim().length > 0) {
+                let cns = element.className.trim().split(/\s+/);
                 for (let name of cns) {
                     let idx = allClassNames.indexOf(name);
                     if (idx >= 0) {
@@ -241,10 +241,10 @@ function clusterByClassName() {
                 var cascadingClassName = element.tagName;
                 var possibleClassedParent = element.parentElement;
 
-                // Find first classed parent node.
+                // Find first classed parent node until reach document.body.
                 while (!possibleClassedParent.isSameNode(document.body)) {
-                    if (possibleClassedParent.className.length > 0) {
-                        let cns = possibleClassedParent.className.split(' ');
+                    if (possibleClassedParent.className.trim().length > 0) {
+                        let cns = possibleClassedParent.className.trim().split(/\s+/);
                         for (let name of cns) {
                             let fullname = name + ' ' + cascadingClassName;
                             let idx = allClassNames.indexOf(fullname);
@@ -273,6 +273,7 @@ function clusterByClassName() {
 
     stats.sort((a, b) => b[2] - a[2]);
 
+    // console.log(stats);
     console.log('Maximum cluster size:', stats[0][2], ', Class name:', stats[0][1], '.');
 
     for (let element of simpleClusters[stats[0][0]]) {
@@ -280,4 +281,8 @@ function clusterByClassName() {
     }
 }
 
-setTimeout(clusterByClassName, 5000);
+chrome.runtime.onMessage.addListener(
+    function (request, sender) {
+        setTimeout(clusterByClassName, 1000);
+    }
+);
