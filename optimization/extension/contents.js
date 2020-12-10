@@ -220,8 +220,12 @@ function clusterByClassName() {
     var allClassNames = [];
     var simpleClusters = [];
 
+    // function isVisible(e) {
+    //     return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+    // }
+
     function isVisible(e) {
-        return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
+        return e.offsetWidth > 0 && e.offsetHeight > 0;
     }
 
     for (let element of allElements) {

@@ -23,6 +23,9 @@
 12. Separated non-liner fitting on ULT and layout duration. [DONE]
 13. Automatic fitting funciton selection. [DONE]
 
-========================== 11.30 ~ 12.06 ========================================
+========================== 11.30 ~ 12.13 ========================================
 14. Combine both DOM similarity and coordinate similarity. [DONE]
-15. Demonstration of optimization scheme. 
+15. Further refine cluster result. [CENCELED]
+16. Batch clusering with new criteria.
+16. Web page replay.
+17. Demonstration of optimization scheme. 

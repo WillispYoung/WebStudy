@@ -296,50 +296,62 @@ function determineElementSimilarity(documents, strings) {
     return { nodes, clusters, top };
 }
 
-var folder = '../measure/trace/';
-var files = fs.readdirSync(folder);
-var output = [];
+function batchDES() {
+    var folder = '../measure/trace/';
+    var files = fs.readdirSync(folder);
+    var output = [];
 
-// For each trace file, ouput：
-//   1. Quantity of elements in each cluster;
-//   2. Total covering area of each cluster.
-// Data form: { eq: [], tca: [] }.
+    // For each trace file, ouput：
+    //   1. Quantity of elements in each cluster;
+    //   2. Total covering area of each cluster.
+    // Data form: { eq: [], tca: [] }.
 
-let count = 0;
-for (var f of files) {
-    let filename = folder + f;
-    let data = JSON.parse(fs.readFileSync(filename));
+    let count = 0;
+    for (var f of files) {
+        let filename = folder + f;
+        let data = JSON.parse(fs.readFileSync(filename));
 
-    let start = Date.now();
-    let result = determineElementSimilarity(data.documents, data.strings);
-    let end = Date.now();
+        let start = Date.now();
+        let result = determineElementSimilarity(data.documents, data.strings);
+        let end = Date.now();
 
-    // let singleNodes = new Set();
-    // for (let i = 0; i < result.nodes.length; i++) singleNodes.add(i);
-    // for (let cl of result.clusters)
-    //     for (let idx of cl)
-    //         singleNodes.delete(idx);
+        // let singleNodes = new Set();
+        // for (let i = 0; i < result.nodes.length; i++) singleNodes.add(i);
+        // for (let cl of result.clusters)
+        //     for (let idx of cl)
+        //         singleNodes.delete(idx);
 
-    let eq = [], tca = [];
-    for (let ci of result.top) {
-        eq.push(result.clusters[ci].length);
-        let s = 0;
-        for (let idx of result.clusters[ci]) {
-            s += result.nodes[idx].width * result.nodes[idx].height;
+        let eq = [], tca = [];
+        for (let ci of result.top) {
+            eq.push(result.clusters[ci].length);
+            let s = 0;
+            for (let idx of result.clusters[ci]) {
+                s += result.nodes[idx].width * result.nodes[idx].height;
+            }
+            tca.push(s);
         }
-        tca.push(s);
+        // for (let idx of singleNodes) {
+        //     eq.push(1);
+        //     tca.push(result.nodes[idx].width * result.nodes[idx].height);
+        // }
+        output.push({ eq, tca });
+
+        data = undefined;
+        result = undefined;
+
+        count += 1;
+        console.log(filename, end - start, count);
     }
-    // for (let idx of singleNodes) {
-    //     eq.push(1);
-    //     tca.push(result.nodes[idx].width * result.nodes[idx].height);
-    // }
-    output.push({ eq, tca });
 
-    data = undefined;
-    result = undefined;
-
-    count += 1;
-    console.log(filename, end - start, count);
+    fs.writeFileSync('des.json', JSON.stringify({ data: output }));
 }
 
-fs.writeFileSync('des.json', JSON.stringify({ data: output }));
+function clusterByClassName(document, strings) {
+
+}
+
+function batchCCN() {
+
+}
+
+batchCCN();
