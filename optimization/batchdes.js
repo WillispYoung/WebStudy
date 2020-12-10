@@ -347,11 +347,99 @@ function batchDES() {
 }
 
 function clusterByClassName(document, strings) {
+    class DOMNode {
+        constructor(cns, bounds) {
+            this.classNames = cns;
+            this.bounds = bounds;
+        }
+    }
 
+    var layoutNodes = [];
+    for (let i = 0; i < document.layout.nodeIndex.length; i++) {
+        var nodeIndex = document.layout.nodeIndex[i];
+
+        var fullnames = [];
+        var attributeFound = false;
+        for (let j = 0; j < document.nodes.attributes[nodeIndex].length; j++) {
+            if (strings[document.nodes.attributes[nodeIndex][j]] === 'class') {
+                let cns = strings[document.nodes.attributes[nodeIndex][j + 1]];
+                if (cns) {
+                    fullnames = cns.trim().split(/\s+/);
+                    attributeFound = true;
+                }
+            }
+        }
+
+        if (!attributeFound) {
+            var suffix = strings[document.nodes.nodeName[nodeIndex]].replace(' ', '');
+            var parentIndex = document.nodes.parentIndex[nodeIndex];
+            let classedParentFound = false;
+            while (parentIndex >= 0) {
+                for (let j = 0; j < document.nodes.attributes[parentIndex].length; j++) {
+                    if (strings[document.nodes.attributes[parentIndex][j]] === 'class') {
+                        let cns = strings[document.nodes.attributes[parentIndex][j + 1]];
+                        if (cns) {
+                            for (let cn of cns.trim().split(/\s+/))
+                                fullnames.push(cn + ' ' + suffix);
+                            classedParentFound = true;
+                            break;
+                        }
+                    }
+                }
+                if (classedParentFound) break;
+                else {
+                    suffix = strings[document.nodes.nodeName[parentIndex]].replace(' ', '') + ' ' + suffix;
+                    parentIndex = document.nodes.parentIndex[parentIndex];
+                }
+            }
+
+            if (!classedParentFound) fullnames.push(suffix);
+        }
+
+        var node = new DOMNode(fullnames, document.layout.bounds[i]);
+        layoutNodes.push(node);
+    }
+
+    var allClassNames = [];
+    var simpleClusters = [];
+    for (let ln of layoutNodes) {
+        for (let name of ln.classNames) {
+            var idx = allClassNames.indexOf(name);
+            if (idx >= 0) simpleClusters[idx].push(ln);
+            else {
+                allClassNames.push(name);
+                simpleClusters.push([ln]);
+            }
+        }
+    }
+
+    var stats = [];
+
+    for (let i = 0; i < allClassNames.length; i++) {
+        stats.push([i, allClassNames[i], simpleClusters[i].length]);
+    }
+
+    stats.sort((a, b) => b[2] - a[2]);
+
+    console.log('Maximum cluster size:', stats[0][2], ', Class name:', stats[0][1], '.');
+
+    return { allClassNames, simpleClusters };
 }
 
 function batchCCN() {
+    var folder = '../measure/trace/';
+    var files = fs.readdirSync(folder);
+    var output = [];
 
+    for (var f of files) {
+        let filename = folder + f;
+        let data = JSON.parse(fs.readFileSync(filename));
+
+        let res = clusterByClassName(data.documents[0], data.strings);
+        output.push(res);
+    }
+
+    fs.writeFileSync('ccn.json', JSON.stringify({ data: output }));
 }
 
 batchCCN();
