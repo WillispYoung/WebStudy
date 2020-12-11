@@ -286,7 +286,24 @@ function clusterByClassName() {
 }
 
 chrome.runtime.onMessage.addListener(
-    function (request, sender) {
-        setTimeout(clusterByClassName, 1000);
+    function (request) {
+        switch (request.name) {
+            case 'CLUSTER':
+                setTimeout(clusterByClassName, 1000);
+                break;
+            case 'SAVEDOM':
+                var file = new Blob([document.documentElement.outerHTML.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')]);
+                var a = document.createElement('a'), url = URL.createObjectURL(file);
+                a.href = url;
+                a.download = `${window.location.hostname}.html`;
+                document.body.appendChild(a);
+                a.click();
+
+                setTimeout(function () {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+                break;
+        }
     }
 );

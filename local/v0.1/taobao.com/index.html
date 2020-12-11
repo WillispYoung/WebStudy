@@ -1,0 +1,884 @@
+<html>
+
+<head>
+    <title>Taobao Replica</title>
+    <link rel="icon" href="icon.png">
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+</head>
+
+<body>
+    <div class="menu">
+        <div class="left">
+            <div class="regions">
+                <select>
+                    <option value="0">中国大陆</option>
+                    <option value="1">其他地区</option>
+                </select>
+                <span>&#8595;</span>
+            </div>
+            <div class="login-register">
+                <a href="#">亲，请登录</a>
+                <a href="#">免费注册</a>
+            </div>
+            <div class="mobile">
+                <a href="#">手机逛淘宝</a>
+            </div>
+        </div>
+        <div class="space-filler"></div>
+        <div class="right">
+            <div class="user-center">
+                <a href="#">我的淘宝</a><span>&#8595;</span>
+            </div>
+            <div class="cart">&#128722;购物车&#8595;</div>
+            <div class="mark">&#9734;收藏夹&#8595;</div>
+            <div class="menu-category">商品分类</div>
+            <div>|</div>
+            <div class="menu-seller-center">千牛卖家中心&#8595;</div>
+            <div class="customer-service">联系客服&#8595;</div>
+            <div class="navigation">&#9868;网站导航&#8595;</div>
+        </div>
+    </div>
+    <div class="ad-under-menu">
+        <img src="ad-under-menu.png" alt="AD under menu.">
+    </div>
+    <div class="search-wrapper" style="width: 100%; margin-top: 30px;">
+        <div class="search">
+            <div id="logo"><img src="logo.png"></div>
+            <div class="search-box">
+                <div id="filter-above-search-box">
+                    <div>宝贝</div>
+                    <div>天猫</div>
+                    <div>店铺</div>
+                </div>
+                <div style="width: 630px; height: 36px; border-radius: 20px; border: 2px solid orange;">
+                    <input id="search-input" type="text" placeholder="&#128269;爱你一万年">
+                    <span id="search-camera">&#128247;</span>
+                    <input id="search-button" type="button" value="搜索">
+                </div>
+                <div id="keywords-under-search-box">
+                    <span>新款连衣裙</span>
+                    <span>四件套</span>
+                    <span style="color: orangered;">潮流T恤</span>
+                    <span>时尚女鞋</span>
+                    <span>短裤</span>
+                    <span>半身裙</span>
+                    <span>男士外套</span>
+                    <span>墙纸</span>
+                    <span>行车记录仪</span>
+                    <span>新款男鞋</span>
+                    <span>耳机</span>
+                    <span>时尚女包</span>
+                    <span>沙发</span>
+                </div>
+            </div>
+            <div class="space-filler"></div>
+            <div class="qr-code">
+                <div><span>&#10005;</span></div>
+                <div style="width: 76px; height: 90px; border: 1px solid lightgray;">
+                    <span style="font-size: 12px; margin-left: 14px;">手机淘宝</span>
+                    <img src="qr-code.png" style="width: 62px; height: 62px; display: block; margin: auto;">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="content-under-search-box" style="background-color: #f4f4f4; width: 100%;">
+        <div class="module-wrapper" style="width: 100%;">
+            <div class="module">
+                <span>主题市场</span>
+                <span>天猫</span>
+                <span>聚划算</span>
+                <span>|</span>
+                <span>淘抢购</span>
+                <span>电器城</span>
+                <span>司法拍卖</span>
+                <span>淘宝心选</span>
+                <span>兴农脱贫</span>
+                <span>|</span>
+                <span>飞猪旅行</span>
+                <span>智能生活</span>
+                <span>苏宁易购</span>
+            </div>
+        </div>
+        <div class="category">
+            <div class="left-category" style="border: 1px solid #ff5000;">
+                <span>女装 / 内衣 / 家居</span>
+                <span>女鞋 / 男鞋 / 箱包</span>
+                <span>母婴 / 童装 / 玩具</span>
+                <span>男装 / 运动户外</span>
+                <span>美妆 / 彩妆 / 个护</span>
+                <span>手机 / 数码 / 企业</span>
+                <span>大家电 / 生活电器</span>
+                <span>零食 / 生鲜 / 茶酒</span>
+                <span>厨具 / 收纳 / 清洁</span>
+                <span>家纺 / 家饰 / 鲜花</span>
+                <span>图书音像 / 文具</span>
+                <span>医药保健 / 进口</span>
+                <span>汽车 / 二手车 / 用品</span>
+                <span>装修 / 建材 / 家具</span>
+                <span>手表 / 眼镜 / 珠宝饰品</span>
+            </div>
+            <div id="middle-core">
+                <div><img src="middle-tl.webp"></div>
+                <div id="middle-tmall">
+                    <img src="data:image/png;base64,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">
+                    <span style="margin-left: 10px;">理想生活上天猫</span>
+                    <div class="space-filler"></div>
+                    <span style="float: right;">1/6</span>
+                </div>
+                <div id="middle-core-bottom">
+                    <img src="middle-bl.jpg " alt=" " style="margin-left: 10px; margin-top: 10px;">
+                    <img src="middle-bm.jpg " alt=" ">
+                </div>
+            </div>
+            <div id="middle-sub-column">
+                <div>
+                    <img src="middle-tr.webp " style="width: 160px;">
+                </div>
+                <div>
+                    <span style="font-size: 12px; color: lightslategray;">今日热卖</span>
+                </div>
+                <div>
+                    <img src="middle-br.jpg " style="width: 160px; height: 200px;">
+                </div>
+            </div>
+            <div id="right-thumbnails">
+                <div style="width: 290px;">
+                    <img src="header.jpg" style="display: block; margin: auto; margin-top: 10px; width: 50px; border-radius: 25px;">
+                    <p style="text-align: center; font-size: 12px; margin-top: 0px;">Hi！你好</p>
+                    <p style="text-align: center; font-size: 14px; margin-top: 0px;">
+                        <a style="background-color: #ffe4db; border-radius: 8px; color: #ff5000!important; height: 17px; line-height: 17px;">
+                            <span style="background: url(icon-list.png) 0 0 no-repeat; background-position: 0 -528px; width: 16px; height: 16px; display: inline-block; vertical-align: middle;"></span>领淘金币抵钱
+                        </a>
+                        &nbsp;
+                        <a style="background-color: #ffe4db; border-radius: 8px; color: #ff5000!important;height: 17px; line-height: 17px;">
+                            <span style="background: url(icon-list.png) 0 0 no-repeat; background-position: 0 -572.5px; width: 16px; height: 16px; display: inline-block; vertical-align: middle;"></span>会员俱乐部
+                        </a>
+                    </p>
+                </div>
+                <div id="account-operations" style="width: 290px;">
+                    <div>登录</div>
+                    <div>注册</div>
+                    <div>开店</div>
+                </div>
+                <div>
+                    <img src="right-col-ad.jpg" style="width: 290px; margin-top: 4px;">
+                </div>
+                <div id="right-sub-domains">
+                    <div>公告</div>
+                    <div>规则</div>
+                    <div>论坛</div>
+                    <div>安全</div>
+                    <div>公益</div>
+                </div>
+                <div style="width: 290px; text-align: center; color: #ff5000; font-size: 12px; font-weight: 700; line-height: 25px; margin-top: 5px;">
+                    95公益周阿里、腾讯等六家公司同台联合做公益
+                </div>
+                <div id="right-service-tiles">
+                    <div class="right-tile-block right-1st-row">
+                        <span style="background-position: 0 0;"></span>
+                        <div class="right-tile-description">充话费</div>
+                    </div>
+                    <div class="right-tile-block right-1st-row">
+                        <span style="background-position: 0 -87px;"></span>
+                        <div class="right-tile-description">旅行</div>
+                    </div>
+                    <div class="right-tile-block right-1st-row">
+                        <span style="background-position: 0 -44px;"></span>
+                        <div class="right-tile-description">车险</div>
+                    </div>
+                    <div class="right-tile-block right-1st-row-corner">
+                        <span style="background-position: 0 -132px;"></span>
+                        <div class="right-tile-description">游戏</div>
+                    </div>
+                    <div class="right-tile-block right-2nd-row">
+                        <span style="background-position: 0 -176px;"></span>
+                        <div class="right-tile-description">彩票</div>
+                    </div>
+                    <div class="right-tile-block right-2nd-row">
+                        <span style="background-position: 0 -220px;"></span>
+                        <div class="right-tile-description">电影</div>
+                    </div>
+                    <div class="right-tile-block right-2nd-row">
+                        <span style="background-position: 0 -264px;"></span>
+                        <div class="right-tile-description">酒店</div>
+                    </div>
+                    <div class="right-tile-block right-2nd-row-corner">
+                        <span style="background-position: 0 -308px;"></span>
+                        <div class="right-tile-description">理财</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="right-bottom-description">
+                        <div style="font-size: 14px; font-weight: bold;">阿里APP</div>
+                        <div class="space-filler"></div>
+                        <div style="font-size: 12px;">更多></div>
+                    </div>
+                    <div class="right-bottom-apps">
+                        <img src="data:image/png;base64,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">
+                        <img src="data:image/png;base64,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">
+                        <img src="data:image/png;base64,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"
+                            alt="">
+                        <img src="data:image/png;base64,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"
+                            alt="">
+                        <img src="data:image/png;base64,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"
+                            alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="good-stuff">
+            <div style="display: flex; align-items: center; margin: 20px;">
+                <img src="good-stuff-logo.png" style="width: 72px;">
+                <span style="font-size: 12px; color: #999; margin-left: 10px;">与品质生活不期而遇</span>
+            </div>
+            <div style="display: flex; margin-left: 20px;">
+                <div class="good-stuff-block ">
+                    <img src="good-stuff-1.webp " alt=" ">
+                    <p class="good-stuff-block-p1">大豆家 方头奶奶鞋</p>
+                    <p class="good-stuff-block-p2">一脚蹬设计，方便日常的穿脱。</p>
+                    <p class="good-stuff-block-p3">&#128516;3758 人说好</p>
+                </div>
+                <div class="good-stuff-block ">
+                    <img src="good-stuff-2.webp " alt=" ">
+                    <p class="good-stuff-block-p1">佳宝路转角水槽</p>
+                    <p class="good-stuff-block-p2">304不锈钢，表面光洁坚固耐用。</p>
+                    <p class="good-stuff-block-p3">&#128516;123 人说好</p>
+                </div>
+                <div class="good-stuff-block ">
+                    <img src="good-stuff-3.webp " alt=" ">
+                    <p class="good-stuff-block-p1">肖优秀真皮细高跟过膝瘦腿弹力靴</p>
+                    <p class="good-stuff-block-p2">细跟尖头设计更显优雅女人味。</p>
+                    <p class="good-stuff-block-p3">&#128516;68 人说好</p>
+                </div>
+                <div class="good-stuff-block ">
+                    <img src="good-stuff-4.webp " alt=" ">
+                    <p class="good-stuff-block-p1">NBHD x adidas 贝壳头香炉</p>
+                    <p class="good-stuff-block-p2">双方共同打造的一款球鞋造型的香炉</p>
+                    <p class="good-stuff-block-p3">&#128516;10 人说好</p>
+                </div>
+                <div class="good-stuff-block ">
+                    <img src="good-stuff-5.webp " alt=" ">
+                    <p class="good-stuff-block-p1">LANCOME秋冬限量迷雾红管唇膏</p>
+                    <p class="good-stuff-block-p2">雾面质感暗红色管身，优雅而高贵。</p>
+                    <p class="good-stuff-block-p3">&#128516;16 人说好</p>
+                </div>
+                <div class="good-stuff-block ">
+                    <img src="good-stuff-6.webp " alt=" ">
+                    <p class="good-stuff-block-p1">苹果 iPhone X限量版手机</p>
+                    <p class="good-stuff-block-p2">出色的外观，faceID技术。</p>
+                    <p class="good-stuff-block-p3">&#128516;24 人说好</p>
+                </div>
+            </div>
+        </div>
+        <div class="ad-under-good-stuff" style="width: 1190px; margin: auto; margin-top: 10px;">
+            <img src="ad-under-good-stuff.jpg" alt="">
+        </div>
+        <div class="live">
+            <div id="live-left-wrapper">
+                <div style="display: flex; align-items: center;">
+                    <img src="live-left-logo.png" style="width: 81px;">
+                    <span style="font-size: 14px; color: #999; margin-left: 10px;">发现深藏的好店</span>
+                </div>
+                <div class="tri-img-region">
+                    <div class="tri-img-block">
+                        <p>万能市集</p>
+                        <img class="tri-img-left" src="live/col1-row1-left.webp">
+                        <div class="tri-img-right">
+                            <img src="live/col1-row1-rt.webp" alt="">
+                            <img src="live/col1-row1-rb.webp" alt="">
+                        </div>
+                    </div>
+                    <div class="tri-img-block">
+                        <p>淘宝江湖</p>
+                        <img class="tri-img-left" src="live/col2-row1-left.webp" alt="">
+                        <div class="tri-img-right">
+                            <img src="live/col2-row1-rt.webp" alt="">
+                            <img src="live/col2-row1-rb.webp" alt="">
+                        </div>
+                    </div>
+                    <div class="tri-img-block">
+                        <p>深藏不露</p>
+                        <img class="tri-img-left" src="live/col1-row2-left.webp" alt="">
+                        <div class="tri-img-right">
+                            <img src="live/col1-row2-rt.webp" alt="">
+                            <img src="live/col1-row2-rb.webp" alt="">
+                        </div>
+                    </div>
+                    <div class="tri-img-block">
+                        <p>高手林立</p>
+                        <img class="tri-img-left" src="live/col2-row2-left.webp" alt="">
+                        <div class="tri-img-right">
+                            <img src="live/col2-row2-rt.webp" alt="">
+                            <img src="live/col2-row2-rb.webp" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="live-right-wrapper">
+                <div style="display: flex; align-items: center;">
+                    <img src="live-right-logo.png" style="width: 102px;">
+                    <span style="font-size: 14px; color: #999; margin-left: 10px;">你的爱豆直播等你哟！</span>
+                </div>
+                <div class=" tri-img-region ">
+                    <div class="tri-img-block ">
+                        <p>够艾直播<span>1121观看</span></p>
+                        <img class="tri-img-left " src="live/col3-row1-left.webp " alt=" ">
+                        <div class="tri-img-right ">
+                            <img src="live/col3-row1-rt.webp " alt=" ">
+                            <img src="live/col3-row1-rb.webp " alt=" ">
+                        </div>
+                    </div>
+                    <div class="tri-img-block ">
+                        <p>沐雨001<span>1121观看</span></p>
+                        <img class="tri-img-left " src="live/col4-row1-left.webp " alt=" ">
+                        <div class="tri-img-right ">
+                            <img src="live/col4-row1-rt.webp " alt=" ">
+                            <img src="live/col4-row1-rb.webp " alt=" ">
+                        </div>
+                    </div>
+                    <div class="tri-img-block ">
+                        <p>爱依依品牌饰品<span>394观看</span></p>
+                        <img class="tri-img-left " src="live/col3-row2-left.webp " alt=" ">
+                        <div class="tri-img-right ">
+                            <img src="live/col3-row2-rt.webp " alt=" ">
+                            <img src="live/col3-row2-rb.webp " alt=" ">
+                        </div>
+                    </div>
+                    <div class="tri-img-block ">
+                        <p>lkl131<span>1427观看</span></p>
+                        <img class="tri-img-left " src="live/col4-row2-left.webp " alt=" ">
+                        <div class="tri-img-right ">
+                            <img src="live/col4-row2-rt.webp " alt=" ">
+                            <img src="live/col4-row2-rb.webp " alt=" ">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="specialty ">
+            <div style="background-color: white;">
+                <div id="spec-title">
+                    <span style="width: 4px; height: 20px; background-color: purple; display: inline-block;"></span>
+                    <span style="margin-left: 10px; color: purple">特色好物</span>
+                </div>
+                <div style="display: flex;">
+                    <div class="spec-block spec-block-not-last">
+                        <p class="spec-block-title">拍卖</p>
+                        <p class="spec-block-description">1元起拍漏</p>
+                        <img src="spec/1.webp" alt="">
+                    </div>
+                    <div class="spec-block spec-block-not-last">
+                        <p class="spec-block-title">淘小铺</p>
+                        <p class="spec-block-description">每月多赚1000元</p>
+                        <img src="spec/2.webp" alt="">
+                    </div>
+                    <div class="spec-block spec-block-not-last">
+                        <p class="spec-block-title">造点新货</p>
+                        <p class="spec-block-description">全球创意众筹平台</p>
+                        <img src="spec/3.webp" alt="">
+                    </div>
+                    <div class="spec-block">
+                        <p class="spec-block-title">淘宝心选</p>
+                        <p class="spec-block-description">美好而有用</p>
+                        <img src="spec/4.webp" alt="">
+                    </div>
+                </div>
+            </div>
+            <div id="specialty-right-ad">
+                <img src="spec/right-ad.jpg" style="margin: 20px;">
+            </div>
+        </div>
+        <div class="seller ">
+            <div>
+                <div id="seller-title">
+                    <span style="width: 4px; height: 20px; background-color: orangered; display: inline-block;"></span>
+                    <span style="font-size: 20px; font-weight: bold; color: orangered; margin-left: 10px;">热卖单品</span>
+                </div>
+                <div id="seller-genre">
+                    <span>连衣裙</span>
+                    <span>沙发</span>
+                    <span>窗帘</span>
+                    <span>零食</span>
+                    <span>床垫</span>
+                    <span>茶几</span>
+                    <span>耳机</span>
+                    <span>风扇</span>
+                    <span>电脑椅</span>
+                    <span>椅子</span>
+                    <span>拉杆箱</span>
+                    <span>男鞋</span>
+                    <span>电风扇</span>
+                    <span>鞋柜</span>
+                    <span>客厅灯</span>
+                    <span>女包</span>
+                    <span>电脑桌</span>
+                    <span>衣柜</span>
+                    <span>凉席</span>
+                    <span>浴室柜</span>
+                    <span>男内裤</span>
+                    <span>沙发垫</span>
+                    <span>男T恤</span>
+                    <span>面膜</span>
+                    <span>衬衫</span>
+                    <span style="margin-left: 100px;">
+                        <img src="seller-right-icon.png" style="width: 32px; height: 15px;">
+                    </span>
+                </div>
+            </div>
+            <div id="seller-items">
+                <table id="seller-table">
+                    <tr>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller1.webp" alt="">
+                                <p class="seller-name">拇指白小T 水柔棉 黑白两色纯棉短袖t恤圆领</p>
+                                <p class="seller-rating">评价 0 收藏 1254</p>
+                                <p>
+                                    <span class="seller-price">&#165;299</span>
+                                    <span class="seller-old-price"><s>&#165;599</s></span>
+                                    <span class="seller-sales">月销588笔</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller2.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller3.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller4.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller5.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller6.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller7.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller8.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller9.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="seller-block">
+                                <img class="seller-image" src="seller/seller10.webp" alt="">
+                                <p class="seller-name"><img src="seller/seller-icon.png">马克华菲卫衣男士2020秋季新款时尚潮流撞色</p>
+                                <p class="seller-rating">评价 16 收藏 352</p>
+                                <p>
+                                    <span class="seller-price">&#165;298</span>
+                                    <span class="seller-old-price"><s>&#165;495</s></span>
+                                    <span class="seller-sales">月销60笔</span>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="ad-under-seller">
+                <img src="seller/seller-ad-1.jpg">
+                <img src="seller/seller-ad-2.jpg">
+                <img src="seller/seller-ad-3.jpg">
+            </div>
+        </div>
+        <div class="recommendation">
+            <div id="recom-title">
+                <span style="width: 4px; height: 20px; background-color: orange; display: inline-block;"></span>
+                <span style="margin-left: 10px; color: orange;">猜你喜欢</span>
+            </div>
+            <div>
+                <table id="recom-table">
+                    <tr>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom1.webp">
+                                <p class="recom-description">酷彩le creuset陶瓷餐具花形盘水果盘子20CM深花</p>
+                                <p>
+                                    <span class="recom-price">&#165;299</span>
+                                    <span class="recom-sales">销量：18</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom2.webp">
+                                <p class="recom-description">【多功能】日本进口杉山金属三合一不粘锅早餐锅煎锅煎蛋牛排锅</p>
+                                <p>
+                                    <span class="recom-price">&#165;338</span>
+                                    <span class="recom-sales">销量：12</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom3.webp">
+                                <p class="recom-description">【国联扬声器专卖店】惠威K8 发烧音箱8寸低音喇叭低音炮单元正品</p>
+                                <p>
+                                    <span class="recom-price">&#165;150</span>
+                                    <span class="recom-sales">销量：42</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom4.webp">
+                                <p class="recom-description">丽婴房婴儿衣服配饰男童可爱保暖毛线帽子</p>
+                                <p>
+                                    <span class="recom-price">&#165;149</span>
+                                    <span class="recom-sales">销量：18</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom5.webp">
+                                <p class="recom-description">左迹/进口木材 手作小手盘 可悬挂墙 零食糕点器皿 田园风 不开裂</p>
+                                <p>
+                                    <span class="recom-price">&#165;160</span>
+                                    <span class="recom-sales">销量：35</span>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom6.webp">
+                                <p class="recom-description">酷彩le creuset陶瓷餐具花形盘水果盘子20CM深花</p>
+                                <p>
+                                    <span class="recom-price">&#165;299</span>
+                                    <span class="recom-sales">销量：18</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom7.webp">
+                                <p class="recom-description">【多功能】日本进口杉山金属三合一不粘锅早餐锅煎锅煎蛋牛排锅</p>
+                                <p>
+                                    <span class="recom-price">&#165;338</span>
+                                    <span class="recom-sales">销量：12</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom8.webp">
+                                <p class="recom-description">【国联扬声器专卖店】惠威K8 发烧音箱8寸低音喇叭低音炮单元正品</p>
+                                <p>
+                                    <span class="recom-price">&#165;150</span>
+                                    <span class="recom-sales">销量：42</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom9.webp">
+                                <p class="recom-description">丽婴房婴儿衣服配饰男童可爱保暖毛线帽子</p>
+                                <p>
+                                    <span class="recom-price">&#165;149</span>
+                                    <span class="recom-sales">销量：18</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom10.webp">
+                                <p class="recom-description">左迹/进口木材 手作小手盘 可悬挂墙 零食糕点器皿 田园风 不开裂</p>
+                                <p>
+                                    <span class="recom-price">&#165;160</span>
+                                    <span class="recom-sales">销量：35</span>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom11.webp">
+                                <p class="recom-description">酷彩le creuset陶瓷餐具花形盘水果盘子20CM深花</p>
+                                <p>
+                                    <span class="recom-price">&#165;299</span>
+                                    <span class="recom-sales">销量：18</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom12.webp">
+                                <p class="recom-description">【多功能】日本进口杉山金属三合一不粘锅早餐锅煎锅煎蛋牛排锅</p>
+                                <p>
+                                    <span class="recom-price">&#165;338</span>
+                                    <span class="recom-sales">销量：12</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom13.webp">
+                                <p class="recom-description">【国联扬声器专卖店】惠威K8 发烧音箱8寸低音喇叭低音炮单元正品</p>
+                                <p>
+                                    <span class="recom-price">&#165;150</span>
+                                    <span class="recom-sales">销量：42</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom14.webp">
+                                <p class="recom-description">丽婴房婴儿衣服配饰男童可爱保暖毛线帽子</p>
+                                <p>
+                                    <span class="recom-price">&#165;149</span>
+                                    <span class="recom-sales">销量：18</span>
+                                </p>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="recom-block">
+                                <img class="recom-img" src="recom/recom15.webp">
+                                <p class="recom-description">左迹/进口木材 手作小手盘 可悬挂墙 零食糕点器皿 田园风 不开裂</p>
+                                <p>
+                                    <span class="recom-price">&#165;160</span>
+                                    <span class="recom-sales">销量：35</span>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="info">
+            <div id="info-separate-line">
+                <div class="line"></div>
+                <div style="font-size: 16px; font-weight: bold; color: #ccc;">END</div>
+                <div class="line"></div>
+            </div>
+            <div id="info-items">
+                <div class="info-block">
+                    <p class="info-title">
+                        <span>&#x26E8;</span>
+                        <span>消费者保障</span>
+                    </p>
+                    <p class="info-details">
+                        <span>保障范围</span>
+                        <span>推脱退款流程</span>
+                        <span>服务中心</span>
+                        <span>更多特色服务</span>
+                    </p>
+                </div>
+                <div class="info-block">
+                    <p class="info-title">
+                        <span>&#10068;</span>
+                        <span>新手上路</span>
+                    </p>
+                    <p class="info-details">
+                        <span>新手专区</span>
+                        <span>消费警示</span>
+                        <span>交易安全</span>
+                        <span>24小时在线帮助</span>
+                        <span>免费开店</span>
+                    </p>
+                </div>
+                <div class="info-block">
+                    <p class="info-title">
+                        <span>&#127915;</span>
+                        <span>付款方式</span>
+                    </p>
+                    <p class="info-details">
+                        <span>快捷支付</span>
+                        <span>信用卡</span>
+                        <span>余额宝</span>
+                        <span>蚂蚁花呗</span>
+                        <span>货到付款</span>
+                    </p>
+                </div>
+                <div class="info-block">
+                    <p class="info-title">
+                        <span>&#127919;</span>
+                        <span>淘宝特色</span>
+                    </p>
+                    <p class="info-details">
+                        <span>手机淘宝</span>
+                        <span>旺旺/旺信</span>
+                        <span>大众评审</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="foot">
+        <div id="foot-content">
+            <div id="foot-outlinks">
+                <p>
+                    <span>阿里巴巴集团</span> |
+                    <span>淘宝网</span> |
+                    <span>天猫</span> |
+                    <span>聚划算</span> |
+                    <span>全球速卖通</span> |
+                    <span>阿里巴巴国际交易市场</span> |
+                    <span>1688</span> |
+                    <span>阿里妈妈</span> |
+                    <span>飞猪</span> |
+                    <span>淘小铺</span> |
+                    <span>阿里云计算</span> |
+                    <span>AliOS</span> |
+                    <span>阿里通信</span> |
+                    <span>一淘</span> |
+                    <span>万网</span> |
+                    <span>高德</span> |
+                    <span>UC</span> |
+                    <span>友盟</span> |
+                    <span>阿里安全</span>
+                </p>
+                <p>
+                    <span>虾米</span> |
+                    <span>大麦网</span> |
+                    <span>钉钉</span> |
+                    <span>支付宝</span> |
+                    <span>优酷</span> |
+                    <span>土豆</span> |
+                    <span>阿里健康</span> |
+                    <span>阿里影业</span> |
+                    <span>阿里体育</span> |
+                    <span>网商银行</span>
+                </p>
+            </div>
+            <div id="legal-info">
+                <p>
+                    <span>关于淘宝</span>
+                    <span>合作伙伴</span>
+                    <span>营销中心</span>
+                    <span>廉正举报</span>
+                    <span>联系客服</span>
+                    <span>开放平台</span>
+                    <span>诚征英才</span>
+                    <span>联系我们</span>
+                    <span>网站地图</span>
+                    <span>隐私权政策</span>
+                    <span>法律声明</span>
+                    <span>知识产权</span>
+                    <span>|</span>
+                    <span>&#169; 2003-现在 Taobao.com 版权所有</span>
+                </p>
+                <p>
+                    <span>增值电信业务经营许可证：浙B2-20080224</span> |
+                    <span>增值电信业务经营许可证（跨地区）： B2-20150210</span> |
+                    <span>浙网文（2019）1033-086号</span> |
+                    <span>浙江省网络食品销售第三方平台提供者备案：浙网食A33010001</span>
+                </p>
+                <p>
+                    <span>互联网药品信息服务资格证书（浙）-经营性-2018-0010</span> |
+                    <span>短消息类服务接入代码使用证书：号【2016】00154-A01</span> |
+                    <span>信息网络传播视听许可证：1109364号</span> |
+                    <span>出版物网络交易平台服务经营备案号：新出发浙备字第002号</span>
+                </p>
+                <p>
+                    <span style="background-image: url(official-links.jpg); 
+                    background-position: -861px 0px; 
+                    width: 20px; 
+                    height: 20px;
+                    display: inline-block;"></span>
+                    <span>浙公网安备 33010002000078号</span> |
+                    <span>广播电视节目制作经营许可证（浙）字第01012号</span> |
+                    <span>市场名称登记证：工商网市字3301004120号</span> |
+                    <span>医疗器械网络交易服务第三方平台备案：（浙）网械平台备字[2018]第00004号</span>
+                </p>
+                <p id="legal-imgs">
+                    <span style="background-image: url(police.gif); width: 36px;"></span>
+                    <span style="background-position: 0px 0px; width: 30px;"></span>
+                    <span style="background-position: -40px 0px; width: 33px;"></span>
+                    <span style="background-position: -80px 0px; width: 50px;"></span>
+                    <span style="background-position: -140px 0px; width: 83px;"></span>
+                    <span style="background-image: url(legal-mid.png); background-position: 0px -18px; width: 250px;"></span>
+                    <span style="background-position: -650px 0px; width: 105px;"></span>
+                    <span style="background-position: -345px 0px; width: 82px;"></span>
+                    <span style="background-position: -761px 0px; width: 97px;"></span>
+                    <span style="background-position: -884px 0px; width: 249px;"></span>
+                    <span style="background-image: url(legal-last.jpg); width: 249px;"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

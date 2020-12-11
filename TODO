@@ -27,5 +27,7 @@
 14. Combine both DOM similarity and coordinate similarity. [DONE]
 15. Further refine cluster result. [CENCELED]
 16. Batch clusering on traces using new criteria [DONE].
-16. Web page replay/record. [CANCELED]
+16. Save web page as disk files. [DONE]
+
+========================== 12.14 ~ 12.20 ========================================
 17. Demonstration of optimization scheme. 
