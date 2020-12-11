@@ -6,7 +6,8 @@
 
 // The following arrays are [mu-2*sigma, mu-sigma, mu, mu+sigma, mu+2*sigma].
 // As mu and sigma refer to the mean value and standard error in normal distribution.
-const QUANTITY = [3, 10, 29, 86, 252];
+// const QUANTITY = [3, 10, 29, 86, 252];
+const QUANTITY = [3, 13, 50, 183, 670];
 const COVERAGE = [0.0983, 0.0566, 0.326, 1.876, 10.802];
 
 // Accessing an element's attribtues:
@@ -277,12 +278,21 @@ function clusterByClassName() {
 
     stats.sort((a, b) => b[2] - a[2]);
 
-    // console.log(stats);
-    console.log('Maximum cluster size:', stats[0][2], ', Class name:', stats[0][1], '.');
-
-    for (let element of simpleClusters[stats[0][0]]) {
-        element.style.border = '3px solid red';
+    for (let entry of stats) {
+        for (let i = 3; i > 0; i--) {
+            if (entry[2] > QUANTITY[i]) {
+                console.log('Class name:', entry[1], ', Reduction number:', entry[2] - QUANTITY[i]);
+                break;
+            }
+        }
     }
+
+    // console.log(stats);
+    // console.log('Maximum cluster size:', stats[0][2], ', Class name:', stats[0][1], '.');
+
+    // for (let element of simpleClusters[stats[0][0]]) {
+    //     element.style.border = '3px solid red';
+    // }
 }
 
 chrome.runtime.onMessage.addListener(
@@ -291,6 +301,7 @@ chrome.runtime.onMessage.addListener(
             case 'CLUSTER':
                 setTimeout(clusterByClassName, 1000);
                 break;
+
             case 'SAVEDOM':
                 var file = new Blob([document.documentElement.outerHTML.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')]);
                 var a = document.createElement('a'), url = URL.createObjectURL(file);
@@ -303,6 +314,7 @@ chrome.runtime.onMessage.addListener(
                     document.body.removeChild(a);
                     window.URL.revokeObjectURL(url);
                 }, 100);
+
                 break;
         }
     }

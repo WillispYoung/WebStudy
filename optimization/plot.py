@@ -115,13 +115,12 @@ def plot_ccn():
         max_quantity.append(log(quantity[-1]))
         max_coverage.append(log(coverage[-1]))
 
-    pyplot.subplot(121)
-    pyplot.hist(max_quantity, bins=100)
+    mean = numpy.mean(max_quantity)
+    sigma = numpy.std(max_quantity)
 
-    pyplot.subplot(122)
-    pyplot.hist(max_coverage, bins=100)
-
-    pyplot.show()
+    print('Mean:', int(exp(mean)), ', Sigma:', int(exp(sigma)))
+    print(int(exp(mean-2*sigma)), int(exp(mean-sigma)),
+          int(exp(mean)), int(exp(mean+sigma)), int(exp(mean+2*sigma)))
 
 
 plot_ccn()

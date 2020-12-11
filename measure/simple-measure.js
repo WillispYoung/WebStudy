@@ -1,5 +1,3 @@
-// This is a simple measurement tool that deals with local address htttp://localhost:8000.
-
 const puppeteer = require('puppeteer');
 const delay = require('delay');
 const fs = require('fs');
@@ -36,7 +34,8 @@ async function navigate() {
     await page.tracing.start({ path: 'trace.json' });
 
     await delay(100);
-    await page.goto('http://localhost:8000/www.jd.com.html');
+    // await page.goto('http://localhost:8000/www.jd.com.html');
+    await page.goto('http://localhost:8000/www.jd.com-reduced.html');
 }
 
 navigate();
