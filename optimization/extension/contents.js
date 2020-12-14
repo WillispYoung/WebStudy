@@ -207,31 +207,30 @@ function clusterElements() {
     // }
 }
 
-function test() {
-    var allElements = document.body.getElementsByTagName('*');
-
-    for (let element of allElements) {
-        console.log('Tag:', element.tagName, ', Class:', element.classList, ', ID:', element.id);
-    }
-}
-
 function clusterByClassName() {
+    if (document.getElementById('resultPanel')) {
+        document.getElementById('resultPanel').remove();
+    }
+
     var allElements = document.body.getElementsByTagName('*');
 
     var allClassNames = [];
     var simpleClusters = [];
 
-    // function isVisible(e) {
-    //     return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
-    // }
-
     function isVisible(e) {
-        return e.offsetWidth > 0 && e.offsetHeight > 0;
+        return !!(e.offsetWidth || e.offsetHeight || e.getClientRects().length);
     }
+
+    // function isVisible(e) {
+    //     return e.offsetWidth > 0 && e.offsetHeight > 0;
+    // }
 
     for (let element of allElements) {
         if (isVisible(element)) {
-            if (element.className.trim().length > 0) {
+            element.originalBackground = element.style.background;
+            element.originalBorder = element.style.border;
+
+            if (element.className.length > 0) {
                 let cns = element.className.trim().split(/\s+/);
                 for (let name of cns) {
                     let idx = allClassNames.indexOf(name);
@@ -248,7 +247,7 @@ function clusterByClassName() {
 
                 // Find first classed parent node until reach document.body.
                 while (!possibleClassedParent.isSameNode(document.body)) {
-                    if (possibleClassedParent.className.trim().length > 0) {
+                    if (possibleClassedParent.className.length > 0) {
                         let cns = possibleClassedParent.className.trim().split(/\s+/);
                         for (let name of cns) {
                             let fullname = name + ' ' + cascadingClassName;
@@ -276,23 +275,153 @@ function clusterByClassName() {
         stats.push([i, allClassNames[i], simpleClusters[i].length]);
     }
 
-    stats.sort((a, b) => b[2] - a[2]);
+    stats.sort((a, b) => b[2] - a[2]);      // Sort by element quantity.
 
     for (let entry of stats) {
         for (let i = 3; i > 0; i--) {
             if (entry[2] > QUANTITY[i]) {
-                console.log('Class name:', entry[1], ', Reduction number:', entry[2] - QUANTITY[i]);
+                entry.push(QUANTITY[i]);
                 break;
             }
         }
     }
 
-    // console.log(stats);
-    // console.log('Maximum cluster size:', stats[0][2], ', Class name:', stats[0][1], '.');
+    function makeDraggable(target) {
+        var dragStartX = 0, dragStartY = 0;
+        target.onmousedown = dragMouseDown;
 
-    // for (let element of simpleClusters[stats[0][0]]) {
-    //     element.style.border = '3px solid red';
-    // }
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+
+            target.onmouseup = stopDragging;
+            target.onmousemove = moveElement;
+        }
+
+        function moveElement(e) {
+            e = e || window.event;
+            e.preventDefault();
+            target.style.left = (target.offsetLeft + e.clientX - dragStartX) + 'px';
+            target.style.top = (target.offsetTop + e.clientY - dragStartY) + 'px';
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+        }
+
+        function stopDragging() {
+            target.onmouseup = null;
+            target.onmousemove = null;
+        }
+    }
+
+    var resultPanel = document.createElement('div');
+    resultPanel.id = 'resultPanel';
+    resultPanel.style.position = 'fixed';
+    resultPanel.style.zIndex = '10';
+    resultPanel.style.left = '20px';
+    resultPanel.style.top = '20px';
+    resultPanel.style.width = '300px';
+    resultPanel.style.height = '240px';
+    resultPanel.style.fontSize = '14px';
+    resultPanel.style.fontFamily = 'Arial';
+    resultPanel.style.background = '#99CCFF';
+    resultPanel.style.border = '4px solid #6699FF';
+    document.body.appendChild(resultPanel);
+
+    var resultPanelTitle = document.createElement('p');
+    resultPanelTitle.innerHTML = 'Cluster Result';
+    // resultPanelTitle.style.height = '30px';
+    resultPanelTitle.style.margin = '-0.5px';
+    resultPanelTitle.style.paddingTop = '2px';
+    resultPanelTitle.style.color = 'white';
+    resultPanelTitle.style.fontSize = '20px';
+    resultPanelTitle.style.fontWeight = 'bold';
+    resultPanelTitle.style.textAlign = 'center';
+    resultPanelTitle.style.background = 'steelblue';
+    resultPanel.appendChild(resultPanelTitle);
+
+    var statsList = document.createElement('ul');
+    statsList.style.height = '200px';
+    statsList.style.marginTop = '2px';
+    statsList.style.overflowY = 'scroll';
+    resultPanel.appendChild(statsList);
+
+    var statsListTitle = document.createElement('li');
+    statsListTitle.style.display = 'flex';
+    statsListTitle.style.borderBottom = '2px solid #CC9966';
+    statsList.appendChild(statsListTitle);
+
+    var statsListClassName = document.createElement('P');
+    statsListClassName.style.width = '180px';
+    // statsListClassName.style.margin = '4px';
+    statsListClassName.style.fontSize = '16px';
+    statsListClassName.style.fontWeight = 'bold';
+    statsListClassName.innerHTML = 'Class Name';
+    statsListTitle.appendChild(statsListClassName);
+
+    var statsListReduction = document.createElement('P');
+    statsListReduction.style.width = '100px';
+    // statsListReduction.style.margin = '4px';
+    statsListReduction.style.fontSize = '16px';
+    statsListReduction.style.fontWeight = 'bold';
+    statsListReduction.innerHTML = 'Reduction';
+    statsListTitle.appendChild(statsListReduction);
+
+    var lastHighlightRadio = null;
+
+    for (let entry of stats) {
+        if (entry.length > 3) {
+            var statsEntry = document.createElement('li');
+            // statsEntry.setAttribute('clusterIndex', entry[0]);
+            statsEntry.style.display = 'flex';
+            statsEntry.style.margin = '2px';
+            statsEntry.style.height = '24px';
+            statsEntry.style.alignItems = 'center';
+            statsList.appendChild(statsEntry);
+
+            var p1 = document.createElement('p');
+            p1.style.width = '180px';
+            // p1.style.margin = '4px';
+            p1.innerHTML = entry[1];
+            statsEntry.appendChild(p1);
+
+            var p2 = document.createElement('p');
+            p2.style.width = '80px';
+            // p2.style.margin = '4px';
+            p2.innerHTML = `${entry[2] - entry[3]} / ${entry[2]}`;
+            statsEntry.appendChild(p2);
+
+            var radio = document.createElement('input');
+            radio.setAttribute('type', 'radio');
+            radio.setAttribute('clusterIndex', entry[0]);
+            radio.style.marginTop = '-5px';
+            // radio.style.verticalAlign = 'center';
+            statsEntry.appendChild(radio);
+
+            radio.onchange = function () {
+                if (this.checked) {
+                    if (lastHighlightRadio) {
+                        lastHighlightRadio.checked = false;
+                        var lastHighlightClusterIndex = lastHighlightRadio.getAttribute('clusterIndex');
+                        for (let element of simpleClusters[lastHighlightClusterIndex]) {
+                            element.style.background = element.originalBackground;
+                            // element.style.border = element.originalBorder;
+                        }
+                    }
+
+                    var nowHighlightClusterIndex = this.getAttribute('clusterIndex');
+                    for (let element of simpleClusters[nowHighlightClusterIndex]) {
+                        element.style.background = '#ff9999';
+                        // element.style.border = '2px solid #ff9999';
+                    }
+                    lastHighlightRadio = this;
+                }
+            };
+        }
+    }
+
+    makeDraggable(resultPanel);
 }
 
 chrome.runtime.onMessage.addListener(
