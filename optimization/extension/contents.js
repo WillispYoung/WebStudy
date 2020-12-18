@@ -432,7 +432,9 @@ chrome.runtime.onMessage.addListener(
                 break;
 
             case 'SAVEDOM':
-                var file = new Blob([document.documentElement.outerHTML.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')]);
+                var file = new Blob([document.documentElement.outerHTML
+                    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')]);
+                    // .replace(/<!--.*-->/, '');
                 var a = document.createElement('a'), url = URL.createObjectURL(file);
                 a.href = url;
                 a.download = `${window.location.hostname}.html`;

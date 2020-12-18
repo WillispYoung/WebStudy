@@ -3,6 +3,7 @@ import json
 import numpy
 from math import log, sqrt, exp, pi
 from matplotlib import pyplot
+from decimal import Decimal
 
 
 def plot_des():
@@ -123,4 +124,32 @@ def plot_ccn():
           int(exp(mean)), int(exp(mean+sigma)), int(exp(mean+2*sigma)))
 
 
-plot_ccn()
+def plot_opt_result():
+    before = [
+        [1174, 1242, 1002, 1030, 1027],
+        [931, 897, 834, 853, 838],
+        [1984, 2045, 1791, 1747, 1821],
+        [666, 625, 656, 661, 605],
+        [1300, 1207, 1177, 1288, 1184],
+        [397, 390, 392, 396, 402]
+    ]
+    after = [
+        [935, 903, 918, 930, 914],
+        [860, 756, 728, 744, 744],
+        [1625, 1677, 1593, 1588, 1581],
+        [521, 481, 484, 521, 504],
+        [693, 760, 775, 745, 732],
+        [298, 266, 261, 261, 265]
+    ]
+    reduction = []
+    for i in range(len(before)):
+        avg_before = numpy.mean(before[i])
+        avg_after = numpy.mean(after[i])
+        reduction.append([
+            avg_before - avg_after,
+            round(Decimal(1 - avg_after / avg_before), 2)
+        ])
+    print(reduction)
+
+
+plot_opt_result()
