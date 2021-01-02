@@ -194,4 +194,18 @@ def separated_nonlinear_fitting():
     # linear_regression_remove_10_percent_outliers(predictors, layout)
 
 
-separated_nonlinear_fitting()
+def statistics():
+    raw_data = json.loads(open('data-trace.json', 'r').read())['data']
+    layout = []
+    for entry in raw_data:
+        entry_layout = []
+        for arr in entry['tds']:
+            entry_layout.append(arr[4] + arr[5])
+        entry_layout.sort(reverse=True)
+        layout.append(int(sum(entry_layout[:5])/1000))
+    layout.sort()
+    print('Layout maximum:', max(layout), ', median:', layout[int(len(layout)/2)])
+
+
+# separated_nonlinear_fitting()
+statistics()

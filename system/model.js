@@ -369,3 +369,13 @@ Trace.parseTrace = function (traceEvents) {
 }
 
 module.exports = Trace;
+
+// const fs = require('fs');
+// rawData = JSON.parse(fs.readFileSync(process.argv[2]));
+// trace = Trace.parseTrace(rawData.traceEvents);
+// for (let process of trace.processes) {
+//     for (let thread of process.threads) {
+//         thread.buildTaskTrees();
+//     }
+// }
+// fs.writeFileSync('trace.json', JSON.stringify(trace));

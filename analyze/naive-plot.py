@@ -16,7 +16,7 @@ def sum_of_top5(arr):
 # And their relationships with layout task duration in the form of
 # scatter plot.
 
-data = json.loads(open('data1.json', 'r').read())['data']
+data = json.loads(open('data-trace.json', 'r').read())['data']
 
 node = []
 image = []
@@ -176,6 +176,8 @@ for obj in data:
     # layout.append(sum(layout_))
     # paint.append(sum(paint_))
     # layer.append(sum(layer_))
+
+# print('Layout maximum:', max(layout), ', median:', layout[int(len(layout)/2)])
 
 html.sort()
 css.sort()

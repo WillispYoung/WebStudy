@@ -1,6 +1,5 @@
 const { extract } = require('../system/util');
 const fs = require('fs');
-const { format } = require('path');
 
 // Output format for each file:
 // { 
