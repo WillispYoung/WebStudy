@@ -37,7 +37,7 @@ async function navigate() {
         // fs.unlinkSync('trace.json');
     });
 
-    await page.tracing.start({ path: 'typical/CNN.json' });
+    await page.tracing.start({ path: 'typical/Vimeo.json' });
 
     await delay(100);
     // await page.goto('http://localhost:8000/www.jd.com.html')
@@ -70,7 +70,7 @@ async function navigate() {
     // await page.goto('http://localhost:8000/www.fandom.com.html')
     // await page.goto('http://localhost:8000/www.fandom.com-reduced.html')
 
-    await page.goto('https://www.cnn.com');
+    await page.goto('https://www.vimeo.com');
 }
 
 navigate()
