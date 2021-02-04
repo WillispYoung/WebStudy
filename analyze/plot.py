@@ -5,6 +5,7 @@ import itertools
 from matplotlib import pyplot
 from sklearn import linear_model
 
+import numpy
 import pandas
 import statsmodels.formula.api as formula
 
@@ -196,16 +197,53 @@ def separated_nonlinear_fitting():
 
 def statistics():
     raw_data = json.loads(open('data-trace.json', 'r').read())['data']
+    js = []
     layout = []
+    pipeline = []
+    render_delay = []
     for entry in raw_data:
+        entry_js = []
         entry_layout = []
+        entry_pipeline = []
+        rd = 0
         for arr in entry['tds']:
+            entry_js.append(arr[2] + arr[3])
             entry_layout.append(arr[4] + arr[5])
-        entry_layout.sort(reverse=True)
-        layout.append(int(sum(entry_layout[:5])/1000))
-    layout.sort()
-    print('Layout maximum:', max(layout), ', median:', layout[int(len(layout)/2)])
+            entry_pipeline.append(sum(arr[4:]))
+            rd += sum(arr)
+        js.append(int(sum(entry_js)/1000))
+        layout.append(int(sum(entry_layout)/1000))
+        pipeline.append(int(sum(entry_pipeline)/1000))
+        render_delay.append(int(rd/1000))
 
+    length = len(raw_data)
+    rev_count = 0
+    layout_percentage = []
+    js_percentage_ = []
+    layout_percentage_ = []
+    pipeline_percentage_ = []
+    for i in range(length):
+        layout_percentage.append(layout[i] / pipeline[i] if pipeline[i] > 0 else 0)
+        js_percentage_.append(js[i] / render_delay[i] if render_delay[i] > 0 else 0)
+        layout_percentage_.append(layout[i] / render_delay[i] if render_delay[i] > 0 else 0)
+        pipeline_percentage_.append(pipeline[i] / render_delay[i] if render_delay[i] > 0 else 0)
+        if js[i] <= pipeline[i]:
+            rev_count += 1
+    
+    print('Cases when pipeline > JS:', rev_count , '/', length, ',', rev_count / length)
 
-# separated_nonlinear_fitting()
-statistics()
+    js.sort()
+    pipeline.sort()
+    layout_percentage.sort()
+    layout_percentage_.sort()
+    pipeline_percentage_.sort()
+
+    print('JavaScript maximum:', max(js), ',90 percentile:', js[int(length*0.9)], ', median:', js[int(length/2)], ', avg:', numpy.mean(js))
+    print('Pipeline maximum:', max(pipeline), ',90 percentile:', pipeline[int(length*0.9)], ', median:', pipeline[int(length/2)], ', avg:', numpy.mean(pipeline))
+    print('Layout percentage maximum:', max(layout_percentage), ', median:', layout_percentage[int(length/2)], ', avg:', numpy.mean(layout_percentage))
+    print('JS percentage in RD: AVG:', numpy.mean(js_percentage_), ', median:', js_percentage_[int(length/2)])
+    print('Layout percentage in RD: AVG:', numpy.mean(layout_percentage_), ', median:', layout_percentage_[int(length/2)])
+    print('Pipeline percentage in RD: AVG:', numpy.mean(pipeline_percentage_), ', median:', pipeline_percentage_[int(length/2)])
+
+separated_nonlinear_fitting()
+# statistics()

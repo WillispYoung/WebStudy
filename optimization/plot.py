@@ -131,7 +131,11 @@ def plot_opt_result():
         [1984, 2045, 1791, 1747, 1821],
         [666, 625, 656, 661, 605],
         [1300, 1207, 1177, 1288, 1184],
-        [397, 390, 392, 396, 402]
+        [397, 390, 392, 396, 402],
+        [2858, 2598, 2642, 2864, 2568],
+        [1301, 1179, 1332, 1159, 1205],
+        [1576, 1531, 1577, 1710, 1543],
+        [890, 773, 804, 899, 911]
     ]
     after = [
         [935, 903, 918, 930, 914],
@@ -139,17 +143,23 @@ def plot_opt_result():
         [1625, 1677, 1593, 1588, 1581],
         [521, 481, 484, 521, 504],
         [693, 760, 775, 745, 732],
-        [298, 266, 261, 261, 265]
+        [298, 266, 261, 261, 265],
+        [1254, 1650, 1332, 1712, 1333],
+        [937, 967, 1000, 982, 978],
+        [1145, 1295, 1090, 1326, 1019],
+        [558, 554, 592, 553, 515]
     ]
-    reduction = []
+    rdc1 = []
+    rdc2 = []
     for i in range(len(before)):
         avg_before = numpy.mean(before[i])
         avg_after = numpy.mean(after[i])
-        reduction.append([
-            avg_before - avg_after,
-            round(Decimal(1 - avg_after / avg_before), 2)
-        ])
-    print(reduction)
+        rdc1.append(avg_before - avg_after)
+        rdc2.append(round(Decimal(1 - avg_after / avg_before), 2))
+    rdc1.sort()
+    rdc2.sort()
+    print('Reduction by value:', rdc1[1], rdc1[-2])
+    print('Reduction by percentage:', rdc2[1], rdc2[-2])
 
 
 plot_opt_result()

@@ -318,9 +318,9 @@ function clusterByClassName() {
     var resultPanel = document.createElement('div');
     resultPanel.id = 'resultPanel';
     resultPanel.style.position = 'fixed';
-    resultPanel.style.zIndex = '10';
-    resultPanel.style.left = '20px';
-    resultPanel.style.top = '20px';
+    resultPanel.style.zIndex = '1000';
+    resultPanel.style.left = '200px';
+    resultPanel.style.top = '200px';
     resultPanel.style.width = '300px';
     resultPanel.style.height = '240px';
     resultPanel.style.fontSize = '14px';
@@ -434,7 +434,7 @@ chrome.runtime.onMessage.addListener(
             case 'SAVEDOM':
                 var file = new Blob([document.documentElement.outerHTML
                     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')]);
-                    // .replace(/<!--.*-->/, '');
+                // .replace(/<!--.*-->/, '');
                 var a = document.createElement('a'), url = URL.createObjectURL(file);
                 a.href = url;
                 a.download = `${window.location.hostname}.html`;
