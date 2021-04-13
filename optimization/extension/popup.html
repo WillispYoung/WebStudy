@@ -1,27 +1,22 @@
 <html>
 
 <body>
-    <div style="display: flex;">
-        <button id="cluster" style="margin-right: 10px;">CLUSTER</button>
-        <button id="savedom">SAVE</button>
+    <div
+        style="width: 200px; display: flex; flex-direction: column; justify-content: center;">
+        <button id="cluster">Cluster Elements</button>
+        <br>
+        <button id="savedom">Save Document</button>
+        <br>
+        <button id='sltd'>Layout Deferring</button>
+        <br>
+        <button id="resume">Layout Resume</button>
     </div>
 
     <style>
         button {
-            font-size: 16px;
-            color: steelblue;
-            padding: 6px 4px 6px 4px;
-            font-weight: bold;
-            border: none;
-            text-decoration: none;
-            text-align: center;
-            -webkit-appearance: none;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 14px;
         }
-
-        /* button:focus {
-            outline: none;
-            box-shadow: none;
-        } */
     </style>
 
     <script src="popup.js"></script>

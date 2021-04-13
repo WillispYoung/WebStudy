@@ -16,6 +16,15 @@ async function navigate() {
     // await client.send("DOM.enable");
     // await client.send("DOMSnapshot.enable");
 
+    // var client = await page.target().createCDPSession();
+    // await client.send("Network.enable");
+    // await client.send("Network.emulateNetworkConditions", {
+    //     offline: false,
+    //     latency: 100,
+    //     downloadThroughput: 200 * 1024,
+    //     uploadThroughput: 200 * 1024
+    // });
+
     page.on('load', async () => {
         // await delay(100);
         // var domss = await client.send('DOMSnapshot.captureSnapshot', { computedStyles: [] });
@@ -28,18 +37,22 @@ async function navigate() {
         await page.close();
         await browser.close();
 
-        // await delay(100);
-        // var data = JSON.parse(fs.readFileSync('trace.json'));
-        // var ult = data.traceEvents.filter(e => e.name === 'UpdateLayoutTree').map(e => e.dur).reduce((a, b) => a + b);
-        // var layout = data.traceEvents.filter(e => e.name === 'Layout').map(e => e.dur).reduce((a, b) => a + b);
-        // console.log(Math.floor((ult + layout) / 1000));
+        await delay(100);
+        var data = JSON.parse(fs.readFileSync('trace.json'));
+        var ult = data.traceEvents.filter(e => e.name === 'UpdateLayoutTree').map(e => e.dur).reduce((a, b) => a + b);
+        var layout = data.traceEvents.filter(e => e.name === 'Layout').map(e => e.dur).reduce((a, b) => a + b);
+        console.log(Math.floor((ult + layout) / 1000));
 
-        // fs.unlinkSync('trace.json');
+        fs.unlinkSync('trace.json');
     });
 
-    await page.tracing.start({ path: 'typical/Vimeo.json' });
+    await page.tracing.start({ path: 'trace.json' });
 
     await delay(100);
+    // await page.goto('https://www.jd.com')
+
+    await page.goto('http://localhost:8000/jd-example-sltd.html')
+
     // await page.goto('http://localhost:8000/www.jd.com.html')
     // await page.goto('http://localhost:8000/www.jd.com-reduced.html')
 
@@ -70,7 +83,7 @@ async function navigate() {
     // await page.goto('http://localhost:8000/www.fandom.com.html')
     // await page.goto('http://localhost:8000/www.fandom.com-reduced.html')
 
-    await page.goto('https://www.vimeo.com');
+    // await page.goto('https://www.vimeo.com');
 }
 
 navigate()

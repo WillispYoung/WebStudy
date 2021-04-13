@@ -2,34 +2,35 @@ const EventEmitter = require('events');
 const puppeteer = require('puppeteer');
 const delay = require('delay');
 const fs = require('fs');
+const CrTrace = require('../system/model');
 
-process.on('uncaughtException', function(error) {
+process.on('uncaughtException', function (error) {
     console.log(`Uncaught exception: ${error.message}`);
 });
 
-process.on('unhandledRejection', function(error) {
+process.on('unhandledRejection', function (error) {
     console.log(`Unhandled rejection: ${error.message}`);
 });
 
 // URL start points.
-var urls = fs.readFileSync('forum-domains.txt').toString().split('\r\n');
-var extendedURLs = new Set(urls);
-urls = Array.from(extendedURLs);
+// var urls = fs.readFileSync('forum-domains.txt').toString().split('\r\n');
+// var extendedURLs = new Set(urls);
+// urls = Array.from(extendedURLs);
 
-const ORIGINAL_LENGTH = urls.length;
+// const ORIGINAL_LENGTH = urls.length;
 
-var i = 0;
-var monitor = new EventEmitter();
+// var i = 0;
+// var monitor = new EventEmitter();
 
-monitor.on('next', () => {
-    if (i < ORIGINAL_LENGTH - 1) {
-        i += 1;
-        navigate(urls[i], monitor);
-    } else {
-        for (var s of urls) fs.appendFileSync('forum-domains-xtd.txt', s + '\n');
-        process.exit();
-    }
-});
+// monitor.on('next', () => {
+//     if (i < ORIGINAL_LENGTH - 1) {
+//         i += 1;
+//         navigate(urls[i], monitor);
+//     } else {
+//         for (var s of urls) fs.appendFileSync('forum-domains-xtd.txt', s + '\n');
+//         process.exit();
+//     }
+// });
 
 async function navigate(url) {
     console.log(i, urls.length);
@@ -40,7 +41,7 @@ async function navigate(url) {
     await page.setViewport({ width: 1600, height: 900 });
     await page.setCacheEnabled(false);
 
-    page.on('load', async() => {
+    page.on('load', async () => {
         var links = await page.$$eval('a', as => as.map(a => a.href));
         links = Array.from(links);
         links = links.slice(0, 100);
@@ -63,4 +64,11 @@ async function navigate(url) {
     await page.goto(url);
 }
 
-navigate(urls[i]);
+function processJDTrace() {
+    var jdTrace = CrTrace.parseTrace(JSON.parse(fs.readFileSync('jd.json')).traceEvents);
+    var td = jdTrace.taskDurationBeforeFrameUpdate();
+    fs.writeFileSync('jd_td.json', JSON.stringify(td));
+}
+
+// navigate(urls[i]);
+processJDTrace()

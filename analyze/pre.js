@@ -1,5 +1,6 @@
 const { extract } = require('../system/util');
 const fs = require('fs');
+const CrTrace = require('../system/model');
 
 // Output format for each file:
 // { 
@@ -15,12 +16,12 @@ const fs = require('fs');
 // Run from base directory.
 
 function v0() {
-    var files = fs.readdirSync('measure/trace/');
+    var files = fs.readdirSync('../measure/trace/');
     var formatted = [];
 
     var count = 0;
     for (var f of files) {
-        let filename = 'measure/trace/' + f;
+        let filename = '../measure/trace/' + f;
         let data = JSON.parse(fs.readFileSync(filename));
         let res = extract(data);
         var output = {
@@ -40,7 +41,7 @@ function v0() {
         console.log(count);
     }
 
-    fs.writeFileSync('analyze/data1.json', JSON.stringify({ data: formatted }));
+    fs.writeFileSync('data1.json', JSON.stringify({ data: formatted }));
 }
 
 function v1() {
@@ -64,4 +65,48 @@ function v1() {
     fs.writeFileSync('data-trace.json', JSON.stringify({ data: formatted }));
 }
 
-v1();
+function totalThreadTaskDuration() {
+    var folder = '../measure/trace/';
+    var files = fs.readdirSync(folder);
+    var threadTaskDuration = [];
+
+    let count = 0;
+
+    for (var f of files) {
+        let filename = folder + f;
+        let data = JSON.parse(fs.readFileSync(filename));
+        var trace = CrTrace.parseTrace(data.traceEvents);
+
+        var output = [0, 0, 0];
+
+        for (let proc of trace.processes) {
+            for (let thread of proc.threads) {
+                let sum = 0;
+                if (thread.name == 'CrRendererMain') {
+                    thread.buildTaskTrees();
+                    for (let t of thread.trees) sum += t.dur;
+                    output[0] += sum;
+                } else if (thread.name == 'Compositor') {
+                    thread.buildTaskTrees();
+                    for (let t of thread.trees) sum += t.dur;
+                    output[1] += sum;
+                } else if (thread.name.startsWith('CompositorTileWorker')) {
+                    thread.buildTaskTrees();
+                    for (let t of thread.trees) sum += t.dur;
+                    output[2] += sum;
+                }
+            }
+        }
+
+        threadTaskDuration.push(output);
+        trace = undefined;
+
+        console.log(count);
+        count += 1;
+    }
+
+    fs.writeFileSync('ttd.json', JSON.stringify({ res: threadTaskDuration }));
+}
+
+v0()
+

@@ -38,22 +38,26 @@ def plot_des():
     maximum_element_quantity.sort()
     mean = numpy.mean(maximum_element_quantity)
     stdd = numpy.std(maximum_element_quantity)
+    # print(mean, stdd)
     nd = normal_distribution(maximum_element_quantity)
     max1 = 70
     max2 = max(nd)
     nd = [max1 * v / max2 for v in nd]
-    pyplot.hist(maximum_element_quantity, bins=60, color='gray')
-    pyplot.plot(maximum_element_quantity, nd, linewidth='2')
-    pyplot.plot([mean-2*stdd, mean-2*stdd],
-                [0, 10], linewidth='4', color='red')
-    pyplot.plot([mean-stdd, mean-stdd], [0, 44], linewidth='4', color='red')
-    pyplot.plot([mean, mean], [0, 70], linewidth='4', color='red')
-    pyplot.plot([mean+stdd, mean+stdd], [0, 44], linewidth='4', color='red')
-    pyplot.plot([mean+2*stdd, mean+2*stdd],
-                [0, 10], linewidth='4', color='red')
+    pyplot.hist(maximum_element_quantity, bins=60, color='lightblue')
+    pyplot.plot(maximum_element_quantity, nd, linewidth='2', color='steelblue')
+    pyplot.plot([mean-2*stdd, mean-2*stdd], [0, 10], linewidth='2', color='red', linestyle='--')
+    pyplot.plot([mean-stdd, mean-stdd], [0, 43], linewidth='2', color='red', linestyle='--')
+    pyplot.plot([mean, mean], [0, 70], linewidth='2', color='red', linestyle='--')
+    pyplot.plot([mean+stdd, mean+stdd], [0, 43], linewidth='2', color='red', linestyle='--')
+    pyplot.plot([mean+2*stdd, mean+2*stdd], [0, 10], linewidth='2', color='red', linestyle='--')
     # pyplot.title('Maximum Element Quantity')
     # pyplot.xlabel('单类元素最大数量的对数值')
     # pyplot.ylabel('网页频次')
+    # pyplot.legend(['Normal Distribution', 'Standard Deviation'])
+    pyplot.text(mean+2*stdd, 60, r'$\mu=3.39$')
+    pyplot.text(mean+2*stdd, 55, r'$\sigma=1.07$')
+    pyplot.xticks([mean-2*stdd, mean-stdd, mean, mean+stdd, mean+2*stdd], 
+        [r'$\mu-2\sigma$', r'$\mu-\sigma (10)$', r'$\mu (29)$', r'$\mu+\sigma (86)$', r'$\mu+2\sigma$'])
     pyplot.show()
 
     # pyplot.subplot(233)
@@ -149,6 +153,14 @@ def plot_opt_result():
         [1145, 1295, 1090, 1326, 1019],
         [558, 554, 592, 553, 515]
     ]
+    sltd = [
+        [401, 374, 323, 277, 295],
+        [367, 377, 412, 377, 377],
+        [227, 221, 219, 222, 216]
+    ]
+
+    more = [[521, 268]]
+
     rdc1 = []
     rdc2 = []
     for i in range(len(before)):
@@ -162,4 +174,207 @@ def plot_opt_result():
     print('Reduction by percentage:', rdc2[1], rdc2[-2])
 
 
-plot_opt_result()
+def layout_model_41():
+    ticks = ['PH', 'PASS', 'ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['FlexBox', 'Inline-Block', 'Float']
+    timepoints = [[9500, 200, 300, 16000, 300, 100, 600, 300],
+                [8000, 220, 320, 16200, 350, 120, 620, 320],
+                [6100, 210, 310, 16300, 340, 130, 610, 310]]
+    axis_font = {'fontname':'Arial', 'size':'16'}
+    markers = ['x', '^', '+']
+
+    for i in range(3):
+        pyplot.scatter(range(8), timepoints[i], marker=markers[i])
+    
+    pyplot.legend(legends, prop={'size': 16})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(8), ticks, **axis_font)
+    pyplot.yticks([0, 4000, 8000, 12000, 16000], **axis_font)
+    pyplot.show()
+
+
+def css_selector_42():
+    ticks = ['PH', 'PASS', 'ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', 'Nth-child', 'In Tag']
+    timepoints = [[1000, 100, 13500, 22000, 200, 150, 220, 170],
+                [1100, 90, 14000, 24000, 210, 160, 210, 180],
+                [1200, 110, 13000, 23500, 190, 140, 200, 190]]
+    axis_font = {'fontname':'Arial', 'size':'16'}
+    markers = ['x', '^', '+']
+
+    for i in range(3):
+        pyplot.scatter(range(8), timepoints[i], marker=markers[i])
+    
+    pyplot.legend(legends, prop={'size': 16})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(8), ticks, **axis_font)
+    pyplot.yticks([0, 5000, 10000, 15000, 20000, 25000], **axis_font)
+    pyplot.show()
+
+
+def image_count_431():
+    ticks = ['ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', '1 img', '2 imgs', '3 imgs', '4 imgs']
+    timepoints = [[100, 100, 200, 150, 100, 200],
+                [110, 200, 210, 170, 120, 250],
+                [120, 9500, 220, 190, 130, 270],
+                [130, 9600, 230, 210, 140, 290],
+                [140, 9900, 240, 230, 250, 310]]
+    axis_font = {'fontname':'Arial', 'size':'18'}
+    markers = ['x', '^', '+', 'v', 'o']
+
+    for i in range(5):
+        pyplot.scatter(range(6), timepoints[i], marker=markers[i], s=40)
+    
+    pyplot.legend(legends, prop={'size': 18})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(6), ticks, **axis_font)
+    pyplot.yticks([0, 5000, 10000], **axis_font)
+    pyplot.show()
+
+
+def image_size_432():
+    ticks = ['ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', '23k', '886k', '1908k']
+    timepoints = [[10, 10, 100, 40, 30, 180],
+                [90, 420, 190, 40, 100, 350],
+                [120, 430, 290, 180, 100, 570],
+                [130, 490, 280, 250, 110, 550]]
+    axis_font = {'fontname':'Arial', 'size':'18'}
+    markers = ['x', '^', '+', 'v', 'o']
+
+    for i in range(4):
+        pyplot.scatter(range(6), timepoints[i], marker=markers[i], s=40)
+    
+    pyplot.legend(legends, prop={'size': 18})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(6), ticks, **axis_font)
+    pyplot.yticks([0, 300, 600], **axis_font)
+    pyplot.show()
+
+
+def ol_image_433():
+    ticks = ['ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', '2 items', '3 items', '4 items']
+    timepoints = [[100, 100, 120, 100, 90, 130],
+                [100, 100, 130, 100, 90, 135],
+                [110, 8500, 500, 300, 200, 300],
+                [300, 9000, 800, 300, 200, 400]]
+    axis_font = {'fontname':'Arial', 'size':'18'}
+    markers = ['x', '^', '+', 'v', 'o']
+
+    for i in range(4):
+        pyplot.scatter(range(6), timepoints[i], marker=markers[i], s=40)
+    
+    pyplot.legend(legends, prop={'size': 18})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(6), ticks, **axis_font)
+    pyplot.yticks([0, 5000, 10000], **axis_font)
+    pyplot.show()
+
+
+def table_image_434():
+    ticks = ['ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', '1X2', '1X4', '2X2', '2X4']
+    timepoints = [[10, 10, 100, 60, 30, 150],
+                [260, 900, 350, 250, 150, 600],
+                [270, 1000, 540, 500, 160, 650],
+                [280, 960, 550, 170, 170, 660],
+                [300, 1850, 750, 740, 240, 1000]]
+    axis_font = {'fontname':'Arial', 'size':'18'}
+    markers = ['x', '^', '+', 'v', 'o']
+
+    for i in range(len(legends)):
+        pyplot.scatter(range(6), timepoints[i], marker=markers[i], s=40)
+    
+    pyplot.legend(legends, prop={'size': 18})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(6), ticks, **axis_font)
+    pyplot.yticks([0, 1000, 2000], **axis_font)
+    pyplot.show()
+
+
+def word_count_441():
+    ticks = ['ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', '100 words', '200 words', '400 words', '800 words']
+    timepoints = [[0, 0, 90, 20, 10, 150],
+                [0, 0, 220, 130, 10, 210],
+                [0, 0, 170, 140, 15, 200],
+                [0, 0, 200, 160, 10, 180],
+                [0, 0, 320, 270, 20, 240]]
+    axis_font = {'fontname':'Arial', 'size':'18'}
+    markers = ['x', '^', '+', 'v', 'o']
+
+    for i in range(len(legends)):
+        pyplot.scatter(range(6), timepoints[i], marker=markers[i], s=60)
+    
+    pyplot.legend(legends, prop={'size': 18})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(6), ticks, **axis_font)
+    pyplot.yticks([0, 200, 400], **axis_font)
+    pyplot.show()
+
+
+def para_count_442():
+    ticks = ['ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', '1 para', '2 paras', '3 paras', '4 paras']
+    timepoints = [[0, 0, 100, 30, 20, 150],
+                [0, 0, 160, 120, 25, 230],
+                [0, 0, 175, 130, 27, 180],
+                [0, 0, 180, 155, 30, 183],
+                [0, 0, 230, 170, 33, 185]]
+    axis_font = {'fontname':'Arial', 'size':'18'}
+    markers = ['x', '^', '+', 'v', 'o']
+
+    for i in range(len(legends)):
+        pyplot.scatter(range(6), timepoints[i], marker=markers[i], s=60)
+    
+    pyplot.legend(legends, prop={'size': 18})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(6), ticks, **axis_font)
+    pyplot.yticks([0, 100, 200], **axis_font)
+    pyplot.show()
+
+
+def list_text_443():
+    ticks = ['ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', '2 items', '3 items', '4 items']
+    timepoints = [[0, 0, 100, 30, 20, 150],
+                [0, 0, 190, 155, 22, 200],
+                [0, 0, 200, 170, 25, 190],
+                [0, 0, 290, 260, 30, 230]]
+    axis_font = {'fontname':'Arial', 'size':'18'}
+    markers = ['x', '^', '+', 'v', 'o']
+
+    for i in range(len(legends)):
+        pyplot.scatter(range(6), timepoints[i], marker=markers[i], s=60)
+    
+    pyplot.legend(legends, prop={'size': 18})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(6), ticks, **axis_font)
+    pyplot.yticks([0, 100, 200], **axis_font)
+    pyplot.show()
+
+
+def table_text_444():
+    ticks = ['ULT', 'Layout', 'ULrT', 'UL', 'Paint', 'CL']
+    legends = ['Baseline', '1X2', '1X4', '2X2', '2X4']
+    timepoints = [[0, 0, 100, 30, 20, 150],
+                [30, 20, 100, 100, 50, 80],
+                [50, 30, 200, 150, 60, 100],
+                [90, 3000, 400, 400, 80, 200],
+                [110, 6500, 500, 600, 90, 250, ]]
+    axis_font = {'fontname':'Arial', 'size':'18'}
+    markers = ['x', '^', '+', 'v', 'o']
+
+    for i in range(len(legends)):
+        pyplot.scatter(range(6), timepoints[i], marker=markers[i], s=60)
+    
+    pyplot.legend(legends, prop={'size': 18})
+    # pyplot.xlabel(xlabels)
+    pyplot.xticks(range(6), ticks, **axis_font)
+    pyplot.yticks([0, 2000, 4000, 6000, 8000], **axis_font)
+    pyplot.show()
+
+
+table_text_444()

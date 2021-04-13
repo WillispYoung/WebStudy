@@ -68,8 +68,9 @@ def OLS(y, x1, x2, x3, x4, x5, x6):
     explainable_equations = list(filter(equation_filter, overall_results))
     explainable_equations.sort(key=lambda l: l[3], reverse=True)      # sort by r-squared value.
 
-    for ee in explainable_equations:
-        print(ee)
+    # for ee in explainable_equations:
+    #     print(ee)
+    print(explainable_equations[0])
 
 
 # Predictor data form: [[x11, x21, x31, ...], ... , [x1n, x2n, x3n, ...]]
@@ -191,9 +192,12 @@ def separated_nonlinear_fitting():
                   for i in range(len(ilc))]
     
     layout_sum = [ult[i] + layout[i] for i in range(len(ult))]
+    linear_regression_remove_10_percent_outliers(predictors, layout)
+    print()
+    linear_regression_remove_10_percent_outliers(predictors, ult)
+    print()
     linear_regression_remove_10_percent_outliers(predictors, layout_sum)
-    # linear_regression_remove_10_percent_outliers(predictors, layout)
-
+    
 
 def statistics():
     raw_data = json.loads(open('data-trace.json', 'r').read())['data']
@@ -245,5 +249,377 @@ def statistics():
     print('Layout percentage in RD: AVG:', numpy.mean(layout_percentage_), ', median:', layout_percentage_[int(length/2)])
     print('Pipeline percentage in RD: AVG:', numpy.mean(pipeline_percentage_), ', median:', pipeline_percentage_[int(length/2)])
 
-separated_nonlinear_fitting()
-# statistics()
+
+def totalTaskDurationThread():
+    data = json.loads(open('ttd.json', 'r').read())['res']
+    axis_font = {'fontname':'Arial', 'size':'16'}
+    task = [[], [], []]
+    for entry in data:
+        task[0].append(entry[0] / 1000)
+        task[1].append(entry[1] / 1000)
+        task[2].append(entry[2] / 1000)
+    # task[0].sort()
+    # task[1].sort()
+    # task[2].sort()
+    l = len(task[0])
+    # task[0] = task[0][:int(0.9*l)]
+    # task[1] = task[1][:int(0.9*l)]
+    # task[2] = task[2][:int(0.9*l)]
+    # pyplot.plot(task[0])
+    # pyplot.plot(task[1], linestyle='--')
+    # pyplot.plot(task[2], linestyle=':')
+    # pyplot.legend(['Renderer', 'Compositor', 'Tile Workers'], prop={'size': 16})
+    # # pyplot.ylabel('Total Task Duration / ms', axis_font)
+    # pyplot.yticks([0, 1000, 2000, 3000], **axis_font)
+    # pyplot.ylim(-0.1, 3000)
+    # pyplot.xticks([])
+    # pyplot.show()
+    for i in range(l):
+        task[1][i] /= task[0][i] + 1
+        task[2][i] /= task[0][i] + 1
+    task[1].sort()
+    task[2].sort()
+    task[1] = task[1][:int(0.9*l)]
+    task[2] = task[2][:int(0.9*l)]
+    pyplot.plot(task[1])
+    pyplot.plot(task[2], linestyle='--')
+    # pyplot.hist(task[1], bins=60)
+    # pyplot.hist(task[2], bins=60)
+    pyplot.legend(['Compositor / Renderer', 'Tile Workers / Renderer'], prop={'size': 16})
+    # pyplot.ylabel('Total Task Duration Proportion / %')
+    pyplot.xticks([])
+    pyplot.yticks([0, 0.04, 0.08, 0.12, 0.16], **axis_font)
+    pyplot.show()
+
+
+def main_top5_sorted_3_13_a():
+    legends = ['PH', 'PASS', 'ES', 'FC', 'ULT', 'Layout', 'UL', 'ULrT', 'Paint', 'CL']
+    axis_font = {'fontname':'Arial', 'size':'18'}
+
+    raw_data = json.loads(open('data-trace.json', 'r').read())['data']
+    tasks = [[] for i in range(len(legends))]
+    for entry in raw_data:
+        _tasks = [[] for i in range(10)]
+        for _entry in entry['tds']:
+            for i in range(10):
+                _tasks[i].append(_entry[i])
+        for i in range(10):
+            _tasks[i].sort(reverse=True)
+            tasks[i].append(sum(_tasks[i][:5]) / 1000)
+    
+    for i in range(len(legends)):
+        tasks[i].sort()
+        tasks[i] = tasks[i][:int(len(tasks[i]) * 0.9)]
+    
+    linestyles = ['-', '--', '-.', ':']
+
+    for i in range(len(legends)):
+        pyplot.plot(tasks[i], linestyle=linestyles[i % len(linestyles)])
+    
+    pyplot.legend(legends, prop={'size': 14})
+    pyplot.xticks([])
+    pyplot.yticks([0, 200, 400, 600], **axis_font)
+    pyplot.show()
+
+
+def main_top5_sorted_3_13_b():
+    legends = ['HTML', 'CSS', 'JS', 'Layout', 'Layer', 'Paint']
+    axis_font = {'fontname':'Arial', 'size':'18'}
+
+    raw_data = json.loads(open('data-trace.json', 'r').read())['data']
+    tasks = [[] for _ in range(10)]
+    for entry in raw_data:
+        _tasks = [[] for i in range(10)]
+        for _entry in entry['tds']:
+            for i in range(10):
+                _tasks[i].append(_entry[i])
+        for i in range(10):
+            _tasks[i].sort(reverse=True)
+            tasks[i].append(sum(_tasks[i][:5]) / 1000)
+    agg_tasks = [[] for i in range(6)]
+    l = len(tasks[0])
+    for i in range(l):
+        agg_tasks[0].append(tasks[0][i])    # HTML
+        agg_tasks[1].append(tasks[1][i])    # CSS
+        agg_tasks[2].append(tasks[2][i] + tasks[3][i])  # JS
+        agg_tasks[3].append(tasks[4][i] + tasks[5][i])  # Layout
+        agg_tasks[4].append(tasks[6][i] + tasks[7][i] + tasks[9][i])    # Layer
+        agg_tasks[5].append(tasks[8][i])    # Paint
+    
+    for i in range(6):
+        agg_tasks[i].sort()
+        agg_tasks[i] = agg_tasks[i][:int(l * 0.9)]
+
+    linestyles = ['-', '--', '-.', ':']
+
+    for i in range(len(legends)):
+        pyplot.plot(agg_tasks[i], linestyle=linestyles[i % len(linestyles)])
+    
+    pyplot.legend(legends, prop={'size': 14})
+    pyplot.xticks([])
+    pyplot.yticks([0, 500, 1000], **axis_font)
+    pyplot.show()
+
+
+def task_proportion_3_14_a():
+    legends = ['HTML', 'CSS', 'JS', 'Layout', 'Layer', 'Paint']
+    axis_font = {'fontname':'Arial', 'size':'18'}
+
+    raw_data = json.loads(open('data-trace.json', 'r').read())['data']
+    tasks = [[] for _ in range(10)]
+    for entry in raw_data:
+        _tasks = [[] for i in range(10)]
+        for _entry in entry['tds']:
+            for i in range(10):
+                _tasks[i].append(_entry[i])
+        for i in range(10):
+            _tasks[i].sort(reverse=True)
+            tasks[i].append(sum(_tasks[i][:5]) / 1000)
+    agg_tasks = [[] for i in range(6)]
+    l = len(tasks[0])
+    for i in range(l):
+        total = 1
+        for j in range(10):
+            total += tasks[j][i]
+        agg_tasks[0].append(tasks[0][i] / total)    # HTML
+        agg_tasks[1].append(tasks[1][i] / total)    # CSS
+        agg_tasks[2].append((tasks[2][i] + tasks[3][i]) / total)  # JS
+        agg_tasks[3].append((tasks[4][i] + tasks[5][i]) / total)  # Layout
+        agg_tasks[4].append((tasks[6][i] + tasks[7][i] + tasks[9][i]) / total)    # Layer
+        agg_tasks[5].append((tasks[8][i]) / total)    # Paint
+    
+    for i in range(6):
+        agg_tasks[i].sort()
+        agg_tasks[i] = agg_tasks[i][:int(l * 0.9)]
+
+    linestyles = ['-', '--', '-.', ':']
+
+    for i in range(len(legends)):
+        pyplot.plot(agg_tasks[i], linestyle=linestyles[i % len(linestyles)])
+    
+    pyplot.legend(legends, prop={'size': 18})
+    pyplot.xticks([])
+    pyplot.yticks([0, 0.2, 0.4, 0.6, 0.8], **axis_font)
+    pyplot.show()
+
+
+def task_proportion_3_14_b():
+    axis_font = {'fontname':'Arial', 'size':'18'}
+
+    data = json.loads(open('data-trace.json', 'r').read())['data']
+    tasks = [[] for i in range(10)]
+    for entry in data:
+        _tasks = [[] for i in range(10)]
+        for _entry in entry['tds']:
+            for i in range(10):
+                _tasks[i].append(_entry[i])
+        for i in range(10):
+            _tasks[i].sort(reverse=True)
+            tasks[i].append(sum(_tasks[i][:5]) / 1000)
+    agg_tasks = [[] for i in range(6)]
+    l = len(tasks[0])
+    for i in range(l):
+        agg_tasks[0].append(tasks[0][i])    # HTML
+        agg_tasks[1].append(tasks[1][i])    # CSS
+        agg_tasks[2].append(tasks[2][i] + tasks[3][i])  # JS
+        agg_tasks[3].append(tasks[4][i] + tasks[5][i])  # Layout
+        agg_tasks[4].append(tasks[6][i] + tasks[7][i] + tasks[9][i])    # Layer
+        agg_tasks[5].append(tasks[8][i])    # Paint
+    total = []
+    for i in range(l):
+        _sum = 0
+        for j in range(6):
+            _sum += agg_tasks[j][i]
+        total.append(_sum)
+    for i in range(6):
+        for j in range(l):
+            agg_tasks[i][j] /= (total[j] + 0.01)
+    
+    pivot = [[agg_tasks[2][i], i] for i in range(l)]
+    pivot.sort(key=lambda arr: arr[0])
+
+    _agg_tasks = [[] for i in range(6)]
+    for i in range(l):
+        for j in range(6):
+            _agg_tasks[j].append(agg_tasks[j][pivot[i][1]])
+    
+    current_bottom = [0 for i in range(l)]
+
+    pyplot.bar(range(l), _agg_tasks[2], hatch='//')
+
+    for i in range(l):
+        current_bottom[i] += _agg_tasks[2][i]
+    pyplot.bar(range(l), _agg_tasks[3], bottom=current_bottom, hatch='\\')
+
+    for i in range(l):
+        current_bottom[i] += _agg_tasks[3][i]
+    pyplot.bar(range(l), _agg_tasks[0], bottom=current_bottom)
+
+    for i in range(l):
+        current_bottom[i] += _agg_tasks[0][i]
+    pyplot.bar(range(l), _agg_tasks[1], bottom=current_bottom)
+
+    for i in range(l):
+        current_bottom[i] += _agg_tasks[1][i]
+    pyplot.bar(range(l), _agg_tasks[4], bottom=current_bottom)
+
+    for i in range(l):
+        current_bottom[i] += _agg_tasks[4][i]
+    pyplot.bar(range(l), _agg_tasks[5], bottom=current_bottom)
+
+    pyplot.legend(['JS', 'Layout', 'HTML', 'CSS', 'Layer', 'Paint'], prop={'size': 18})
+    pyplot.xticks([])
+    pyplot.yticks([0, 0.5, 1], **axis_font)
+    pyplot.show()
+
+
+def main_sorted_3_15_a():
+    legends = ['JS', 'Layout', 'HTML', 'CSS', 'Layer', 'Paint']
+    axis_font = {'fontname':'Arial', 'size':'18'}
+
+    raw_data = json.loads(open('data-trace.json', 'r').read())['data']
+    tasks = [[] for i in range(len(legends))]
+    for entry in raw_data:
+        for _entry in entry['tds']:
+            tasks[2].append(_entry[0])    # HTML
+            tasks[3].append(_entry[1])    # CSS
+            tasks[0].append(_entry[2] + _entry[3])  # JS
+            tasks[1].append(_entry[4] + _entry[5])  # Layout
+            tasks[4].append(_entry[6] + _entry[7] + _entry[9])    # Layer
+            tasks[5].append(_entry[8])    # Paint
+    
+    for i in range(len(legends)):
+        tasks[i].sort()
+        tasks[i] = tasks[i][:int(len(tasks[i]) * 0.99)]
+    
+    linestyles = ['-', '--', '-.', ':']
+
+    for i in range(len(legends)):
+        pyplot.plot(tasks[i], linestyle=linestyles[i % len(linestyles)])
+    
+    pyplot.plot(48000, 50000, '^', color='red', markersize=12)
+    pyplot.text(35000, 50000, '(95%, 50)', **axis_font)
+
+    pyplot.legend(legends, prop={'size': 18})
+    pyplot.xticks([])
+    pyplot.yticks([0, 100000, 200000, 300000], ['0', '100', '200', '300'], **axis_font)
+    pyplot.show()
+
+
+def main_stacked_3_15_b():
+    axis_font = {'fontname':'Arial', 'size':'18'}
+
+    data = json.loads(open('data-trace.json', 'r').read())['data']
+    tasks = [[] for i in range(6)]
+    for entry in data:
+        for _entry in entry['tds']:
+            tasks[2].append(_entry[0])    # HTML
+            tasks[3].append(_entry[1])    # CSS
+            tasks[0].append(_entry[2] + _entry[3])  # JS
+            tasks[1].append(_entry[4] + _entry[5])  # Layout
+            tasks[4].append(_entry[6] + _entry[7] + _entry[9])    # Layer
+            tasks[5].append(_entry[8])    # Paint
+    
+    l = len(tasks[0])
+    pivot = [[tasks[0][i], i] for i in range(l)]
+    pivot.sort(key=lambda arr: arr[0])
+
+    _res = [[] for i in range(6)]
+    # l = int(l * 0.99)
+    
+    for i in range(6):
+        for j in range(30000, l):
+            _res[i].append(tasks[i][pivot[j][1]] / 1000)
+    
+    current_bottom = [0 for i in range(l-30000)]
+    for i in range(6):
+        # _res[i] = [v/1000 for v in _res[i]]
+        # tasks[i].sort()
+        # tasks[i] = tasks[i][:int(l*0.99)]
+        # pyplot.plot(tasks[i])
+        if i > 0:
+            pyplot.bar(range(l-30000), _res[i], bottom=current_bottom)
+        else:
+            pyplot.bar(range(l-30000), _res[i])
+        
+        for j in range(l-30000):
+            current_bottom[j] += _res[i][j]
+    
+    # pyplot.yscale('log')
+    # pyplot.plot(48560, 50, 'bo')
+    # pyplot.text(38200, 46, '(48560, 50)')
+    pyplot.ylim(0, 800)
+    pyplot.legend(['JS', 'Layout', 'HTML', 'CSS', 'Layer', 'Paint'], prop={'size':16})
+    # pyplot.ylabel('Task Duration in PRD / ms')
+    pyplot.xticks([])
+    pyplot.yticks([0, 200, 400, 600, 800], **axis_font)
+    pyplot.show()
+
+
+def quantity_dist_scatter_45():
+    axis_font = {'fontname':'Arial', 'size':'18'}
+
+    raw_data = json.loads(open('data1.json', 'r').read())['data']
+    metadata = [[] for _ in range(4)]
+    layout = []
+    for entry in raw_data:
+        metadata[0].append(entry['metadata'][0])
+        metadata[1].append(entry['metadata'][1])
+        metadata[2].append(entry['metadata'][2])
+        metadata[3].append(entry['metadata'][5])
+        _layout = []
+        for td in entry['duration']:
+            _layout.append((td[4] + td[5])/1000)
+        _layout.sort(reverse=True)
+        layout.append(sum(_layout[:5]))
+
+    pyplot.subplots_adjust(wspace=0.3)
+
+    pyplot.subplot(241)
+    pyplot.plot(sorted(metadata[0]))
+    pyplot.title('Node Count', **axis_font)
+    pyplot.xticks([])
+    pyplot.yticks([0,20000, 40000], ['0', '20k', '40k'], **axis_font)
+
+    pyplot.subplot(242)
+    pyplot.plot(sorted(metadata[1]))
+    pyplot.title('Image Count', **axis_font)
+    pyplot.xticks([])
+    pyplot.yticks([0, 400, 800, 1200], **axis_font)
+
+    pyplot.subplot(243)
+    pyplot.plot(sorted(metadata[2]))
+    pyplot.title('Text Count', **axis_font)
+    pyplot.xticks([])
+    pyplot.yticks([0, 4000, 8000], **axis_font)
+
+    pyplot.subplot(244)
+    pyplot.plot(sorted(metadata[3]))
+    pyplot.title('CSS Rule Count', **axis_font)
+    pyplot.xticks([])
+    pyplot.yticks([0, 500, 1000], **axis_font)
+
+    pyplot.subplot(245)
+    pyplot.scatter(metadata[0], layout, s=1)
+    pyplot.xticks([10000, 20000, 30000], ['10k', '20k', '30k'], **axis_font)
+    pyplot.yticks([0, 500, 1000, 1500], **axis_font)
+
+    pyplot.subplot(246)
+    pyplot.scatter(metadata[1], layout, s=1)
+    pyplot.xticks([ 400, 800], **axis_font)
+    pyplot.yticks([0, 500, 1000, 1500], **axis_font)
+
+    pyplot.subplot(247)
+    pyplot.scatter(metadata[2], layout, s=1)
+    pyplot.xticks([2500, 5000], **axis_font)
+    pyplot.yticks([0, 500, 1000, 1500], **axis_font)
+
+    pyplot.subplot(248)
+    pyplot.scatter(metadata[3], layout, s=1)
+    pyplot.xticks([ 400, 800], **axis_font)
+    pyplot.yticks([0, 500, 1000, 1500], **axis_font)
+
+    pyplot.show()
+
+
+quantity_dist_scatter_45()

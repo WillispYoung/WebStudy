@@ -424,6 +424,151 @@ function clusterByClassName() {
     makeDraggable(resultPanel);
 }
 
+function saveDocument(withjs) {
+    var content = withjs ? document.documentElement.outerHTML :
+        document.documentElement.outerHTML.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+
+    var file = new Blob([content]);
+    var a = document.createElement('a'), url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = `${window.location.hostname}.html`;
+    document.body.appendChild(a);
+    a.click();
+
+    setTimeout(function () {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }, 100);
+}
+
+var nodeRecords = [];
+var array_elements = [];
+
+function layoutDeferring() {
+    // console.log(screen.width, screen.height);
+
+    var complete_set_element = document.body.getElementsByTagName('*');
+    var sltd_index = 0;
+    for (let element of complete_set_element) {
+        element.setAttribute('sltd-index', sltd_index);
+        array_elements.push(element);
+        sltd_index += 1;
+    }
+    complete_set_element = undefined;
+
+    function intersect(region) {
+        let left_ = Math.max(region.left, 0),
+            top_ = Math.max(region.top, 0),
+            right_ = Math.min(region.right, screen.width),
+            bottom_ = Math.min(region.bottom, 1.2 * screen.height);
+        return right_ > left_ && bottom_ > top_;
+    }
+
+    function isHidden(node) {
+        var style = window.getComputedStyle(node);
+        return (style.display === 'none');
+    }
+
+    function isVisible(node) {
+        let bcr = node.getBoundingClientRect();
+        return (bcr.width > 0) && (bcr.height > 0) && intersect(bcr) && !isHidden(node);
+    }
+
+    function traverse(node) {
+        if (node.tagName.toLowerCase() == 'script' || node.tagName.toLowerCase() == 'style') return;
+
+        for (let i = node.children.length - 1; i >= 0; i--) {
+            if (!isVisible(node.children[i])) {
+                nodeRecords.push([node.getAttribute('sltd-index'), node.children[i].getAttribute('sltd-index')]);
+                node.children[i].remove();
+            }
+            else
+                traverse(node.children[i]);
+        }
+    }
+
+    // function traverse(node, phase = '') {
+    //     var childrenVisible = false;
+    //     var nodeVisible = isVisible(node);
+
+    //     for (let i = node.children.length - 1; i >= 0; i--) {
+    //         res = traverse(node.children[i], `${phase}-${i + 1}/${node.children.length}`);
+    //         if (res) {
+    //             childrenVisible = true;
+    //             break;
+    //         }
+    //         else {
+    //             if (!node.tagName.toLowerCase() == 'script' && !node.tagName.toLowerCase() == 'style')
+    //                 node.children[i].remove();
+    //         }
+    //     }
+    //     if (childrenVisible) return true;
+    //     else return nodeVisible;
+    // }
+
+    // function traverse(node) {
+    //     for (let i = node.children.length - 1; i >= 0; i--) {
+    //         traverse(node.children[i]);
+    //     }
+
+    //     bcr = node.getBoundingClientRect();
+    //     console.log(isVisible(node), bcr.left, bcr.top, bcr.right, bcr.bottom);
+    // }
+
+    traverse(document.body);
+
+    function scriptify() {
+        var scriptContent = 'function addElements() {\n';
+
+        for (i = nodeRecords.length - 1; i >= 0; i--) {
+            entry = nodeRecords[i];
+            scriptContent += allocateElement(entry[1]);
+            scriptContent += appendElement(entry[1], entry[0]);
+        }
+
+        scriptContent += '}\n';
+        scriptContent += 'window.onload = addElements;\n';
+        // scriptContent += 'addElements();\n';
+        return scriptContent;
+    }
+
+    function allocateElement(ci) {
+        var sentences = `elem${ci}=document.createElement("${array_elements[ci].tagName}");\n`;
+        var eas = array_elements[ci].attributes;
+        for (let i = 0; i < eas.length; i++)
+            sentences += `elem${ci}.setAttribute("${eas[i].name}", "${eas[i].value}");\n`;
+
+        content = array_elements[ci].innerHTML.trim().replace(/(?:\r\n|\r|\n)/g, '').replace(/"/g, "'");
+        if (content.length)
+            sentences += `elem${ci}.innerHTML="${content}";\n`;
+        return sentences;
+    }
+
+    function appendElement(ci, pi) {
+        var sentences = pi ? `parent = document.querySelector('[sltd-index="${pi}"]');\n`
+            : 'parent = document.body;\n';
+        sentences += `parent.appendChild(elem${ci});\n`;
+        return sentences;
+    }
+
+    var target = document.createElement('script');
+    target.innerHTML = scriptify();
+    document.body.appendChild(target);
+
+    saveDocument(true);
+}
+
+function resume() {
+    var entry = nodeRecords.pop();
+    while (entry) {
+        parent = entry[0] ? array_elements[parseInt(entry[0])] : document.body;
+        child = array_elements[parseInt(entry[1])];
+        parent.appendChild(child);
+
+        entry = nodeRecords.pop();
+    }
+}
+
 chrome.runtime.onMessage.addListener(
     function (request) {
         switch (request.name) {
@@ -432,20 +577,15 @@ chrome.runtime.onMessage.addListener(
                 break;
 
             case 'SAVEDOM':
-                var file = new Blob([document.documentElement.outerHTML
-                    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')]);
-                // .replace(/<!--.*-->/, '');
-                var a = document.createElement('a'), url = URL.createObjectURL(file);
-                a.href = url;
-                a.download = `${window.location.hostname}.html`;
-                document.body.appendChild(a);
-                a.click();
+                saveDocument(false);
+                break;
 
-                setTimeout(function () {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 100);
+            case 'SLTD':
+                layoutDeferring();
+                break;
 
+            case 'RESUME':
+                resume();
                 break;
         }
     }

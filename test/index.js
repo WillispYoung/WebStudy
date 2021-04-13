@@ -17,3 +17,12 @@ arr[1] = 7;
 console.log(arr, arr_);
 arr_[1] = 5;
 console.log(arr, arr_);
+
+// Trace category.
+const fs = require('fs');
+var data = JSON.parse(fs.readFileSync('trace.json'));
+var catSet = new Set();
+for (let e of data.traceEvents) {
+    catSet.add(e.cat);
+}
+console.log(catSet);
