@@ -19,6 +19,8 @@ const COVERAGE = [0.0983, 0.0566, 0.326, 1.876, 10.802];
 // 1. element.getBoundingClientRect() returns a dictionary-style object. Denote it as BCR.
 // 2. BCR contains the following keys: left, right, top, bottom, x, y.
 
+window.addEventListener("unhandledrejection", function (promiseRejectionEvent) { });
+
 function clusterElements() {
     // Get all the elements in DOM.
     var allElements = document.body.getElementsByTagName('*');
@@ -444,9 +446,46 @@ function saveDocument(withjs) {
 var nodeRecords = [];
 var array_elements = [];
 
-function layoutDeferring() {
-    // console.log(screen.width, screen.height);
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
+// Heavy workload, not always works!
+async function captureScreenshot() {
+    try {
+        var canvas = await html2canvas(document.body);
+        var image_data = canvas.getContext('2d').getImageData(0, 0, screen.width, screen.height);
+        var tmp_canvas = document.createElement('canvas');
+        tmp_canvas.width = screen.width;
+        tmp_canvas.height = screen.height;
+        tmp_canvas.getContext('2d').putImageData(image_data, 0, 0);
+        image = tmp_canvas.toDataURL('image/png');
+        tmp_canvas = undefined;
+        image_data = undefined;
+        canvas = undefined;
+        return image;
+    }
+    catch (error) {
+        return null;
+    }
+}
+
+// Works even worse!
+async function captureScreenshotMedia() {
+    const canvas = document.createElement("canvas");
+    canvas.width = screen.width;
+    canvas.height = screen.height;
+    const context = canvas.getContext("2d");
+    const video = document.createElement("video");
+    const captureStream = await navigator.mediaDevices.getDisplayMedia();
+    video.srcObject = captureStream;
+    context.drawImage(video, 0, 0, screen.width, screen.height);
+    var frame = canvas.toDataURL("image/png");
+    captureStream.getTracks().forEach(track => track.stop());
+    return frame;
+}
+
+async function layoutDeferring() {
     var complete_set_element = document.body.getElementsByTagName('*');
     var sltd_index = 0;
     for (let element of complete_set_element) {
@@ -455,6 +494,8 @@ function layoutDeferring() {
         sltd_index += 1;
     }
     complete_set_element = undefined;
+
+    var ss1 = await captureScreenshot();
 
     function intersect(region) {
         let left_ = Math.max(region.left, 0),
@@ -479,7 +520,11 @@ function layoutDeferring() {
 
         for (let i = node.children.length - 1; i >= 0; i--) {
             if (!isVisible(node.children[i])) {
-                nodeRecords.push([node.getAttribute('sltd-index'), node.children[i].getAttribute('sltd-index')]);
+                v1 = node.getAttribute('sltd-index');
+                v2 = node.children[i].getAttribute('sltd-index')
+                v3 = node.children[i].nextElementSibling ?
+                    node.children[i].nextElementSibling.getAttribute('sltd-index') : null;
+                nodeRecords.push([v1, v2, v3]);
                 node.children[i].remove();
             }
             else
@@ -487,35 +532,23 @@ function layoutDeferring() {
         }
     }
 
-    // function traverse(node, phase = '') {
-    //     var childrenVisible = false;
-    //     var nodeVisible = isVisible(node);
-
-    //     for (let i = node.children.length - 1; i >= 0; i--) {
-    //         res = traverse(node.children[i], `${phase}-${i + 1}/${node.children.length}`);
-    //         if (res) {
-    //             childrenVisible = true;
-    //             break;
-    //         }
-    //         else {
-    //             if (!node.tagName.toLowerCase() == 'script' && !node.tagName.toLowerCase() == 'style')
-    //                 node.children[i].remove();
-    //         }
-    //     }
-    //     if (childrenVisible) return true;
-    //     else return nodeVisible;
-    // }
-
-    // function traverse(node) {
-    //     for (let i = node.children.length - 1; i >= 0; i--) {
-    //         traverse(node.children[i]);
-    //     }
-
-    //     bcr = node.getBoundingClientRect();
-    //     console.log(isVisible(node), bcr.left, bcr.top, bcr.right, bcr.bottom);
-    // }
-
     traverse(document.body);
+
+    await sleep(300);
+
+    var ss2 = await captureScreenshot();
+
+    // if (ss1 && ss2) {
+    //     var img1 = document.createElement('img');
+    //     img1.width = 400;
+    //     img1.src = ss1;
+    //     document.body.appendChild(img1);
+
+    //     var img2 = document.createElement('img');
+    //     img2.width = 400;
+    //     img2.src = ss2;
+    //     document.body.appendChild(img2);
+    // }
 
     function scriptify() {
         var scriptContent = 'function addElements() {\n';
@@ -528,7 +561,6 @@ function layoutDeferring() {
 
         scriptContent += '}\n';
         scriptContent += 'window.onload = addElements;\n';
-        // scriptContent += 'addElements();\n';
         return scriptContent;
     }
 
@@ -551,19 +583,39 @@ function layoutDeferring() {
         return sentences;
     }
 
-    var target = document.createElement('script');
-    target.innerHTML = scriptify();
-    document.body.appendChild(target);
+    async function checkSideEffect() {
+        if (ss1 && ss2) {
+            res = await ssim(ss1, ss2);
+            return res.mssim < 0.8;
+        }
+        else return true;
+    }
 
-    saveDocument(true);
+    if (! await checkSideEffect()) {
+        var target = document.createElement('script');
+        target.innerHTML = scriptify();
+        document.body.appendChild(target);
+        // saveDocument(true);
+    }
+    else {
+        resume();
+        alert('SLTD not applicable!');
+    }
 }
 
 function resume() {
     var entry = nodeRecords.pop();
     while (entry) {
-        parent = entry[0] ? array_elements[parseInt(entry[0])] : document.body;
-        child = array_elements[parseInt(entry[1])];
-        parent.appendChild(child);
+        try {
+            parent = entry[0] ? array_elements[parseInt(entry[0])] : document.body;
+            child = array_elements[parseInt(entry[1])];
+            nextSibling = entry[2] ? array_elements[parseInt(entry[2])] : null;
+            if (nextSibling)
+                parent.insertBefore(child, nextSibling);
+            else
+                parent.appendChild(child);
+        }
+        catch (error) { }
 
         entry = nodeRecords.pop();
     }

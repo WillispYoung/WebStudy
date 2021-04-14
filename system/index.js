@@ -38,9 +38,9 @@ function createWindow() {
         }
     });
 
-    window.loadFile('system/main.html');
+    window.loadFile('system/index.html');
     window.removeMenu();
-    window.setTitle('Render Delay Check');
+    window.setTitle('Pipeline Rendering Delay');
 }
 
 app.whenReady().then(createWindow);

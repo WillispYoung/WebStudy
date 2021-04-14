@@ -8,7 +8,7 @@
                 "<all_urls>"
             ],
             "js": [
-                "contents.js"
+                "contents.js", "html2canvas.js", "ssim.web.js"
             ],
             "run_at": "document_end"
         }

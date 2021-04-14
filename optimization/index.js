@@ -294,7 +294,7 @@ function determineElementSimilarity(documents, strings) {
 }
 
 const fs = require('fs');
-var data = JSON.parse(fs.readFileSync('optimization/trace.json'));
+var data = JSON.parse(fs.readFileSync('system/trace.json'));
 var res = determineElementSimilarity(data.documents, data.strings);
 
 const { app, BrowserWindow, ipcMain } = require('electron');
