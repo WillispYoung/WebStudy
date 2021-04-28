@@ -15,35 +15,89 @@
         <p style="font-size: 12px; margin-top: -10px; font-style: italic;">
             An automated tool to record, analyze and optimize web page's rendering.</p>
     </div>
+
     <div style="width: 100%; margin-top: 20px;">
         <div id="input_wrapper">
             <input id="url" type="text" spellcheck="false">
             <button id="check">CHECK</button>
         </div>
     </div>
-    <div style="margin-top: 30px; margin-left: 20px; margin-right: 20px; display: flex;">
-        <div style="display: flex; flex-direction: column;">
-            <div>
-                <p id="metadata-title"></p>
-            </div>
-            <div id="metadata"></div>
-            <div>
-                <p id="prediction"></p>
-            </div>
-            <div id="suggestion"></div>
-        </div>
-        <div style="width: 600;">
-            <div style="width: 600;">
-                <p id="plot-title"></p>
-            </div>
-            <div>
-                <svg id="plot" width="600" height="330"></svg>
-            </div>
-            <div id="plot-description"></div>
-        </div>
-    </div>
 
     <textarea id="log" cols="30" rows="10" readonly></textarea>
+
+    <div id="result" style="display: none;">
+        <div id="statistics">
+            <table style="text-align: left;">
+                <tr>
+                    <th>属性</th>
+                    <th>数值</th>
+                </tr>
+
+                <tr>
+                    <td>DOM节点数量</td>
+                    <td id="v1">1000</td>
+                </tr>
+
+                <tr>
+                    <td>图片节点数量</td>
+                    <td id="v2">100</td>
+                </tr>
+
+                <tr>
+                    <td>文本节点数量</td>
+                    <td id="v3">300</td>
+                </tr>
+
+                <tr>
+                    <td>文字字符数量</td>
+                    <td id="v4">10000</td>
+                </tr>
+
+                <tr>
+                    <td>不可见节点比例</td>
+                    <td id="v5">0%</td>
+                </tr>
+
+                <tr>
+                    <td>总加载时间</td>
+                    <td id="v6">10s</td>
+                </tr>
+
+                <tr>
+                    <td>总渲染耗时</td>
+                    <td id="v7">7s</td>
+                </tr>
+
+                <tr>
+                    <td>总布局耗时</td>
+                    <td id="v8">5s</td>
+                </tr>
+
+                <tr>
+                    <td>预计总布局耗时</td>
+                    <td id="v9">5s</td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="margin-left: 20px;">
+            <svg id='plot' width="600" height="330"></svg>
+            <div style="text-align: center;">
+                <p style="margin-bottom: 2px;">主线程任务耗时的时序变化情况
+                    <span>
+                        <select name="plot_opt" id="plot_opt">
+                        <option value="0">独立</option>
+                        <option value="1">堆叠</option>
+                        </select>
+                    </select> 
+                </span>
+                </p>
+                <p style="font-size: 14px; font-style: italic; color: gray; margin-top: 0px;">
+                    横轴：第n次帧更新（总计<span id="v11">100</span>次）&nbsp;&nbsp;纵轴：帧更新期间该项任务的耗时（最长<span id="v12">600</span>ms）
+                </p>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

@@ -1,22 +1,10 @@
-.highlight {
-    color: red;
-}
-
-.soft-highlight {
-    color: steelblue;
-}
-
-.indent {
-    margin-left: 20px;
-}
-
 #input_wrapper {
     margin: auto;
     display: flex;
     width: 400px;
     height: 30px;
     border: 2px solid orange;
-    border-radius: 15px;
+    border-radius: 17px;
 }
 
 #url {
@@ -36,11 +24,13 @@
 
 #check {
     width: 120px;
-    height: 30px;
+    height: 28px;
+    margin-top: 1px;
+    margin-right: 1px;
     border: none;
     appearance: none;
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
     background-color: orange;
     color: white;
     font-weight: bold;
@@ -77,29 +67,47 @@
     outline: none;
 }
 
-#plot-title {
-    margin: auto;
-    text-align: center;
+#result {
+    display: flex;
+    margin-top: 15px;
 }
 
-#plot-description {
-    width: 600;
-    margin: auto;
-    text-align: center;
+#statistics {
+    width: 280px;
+    margin-left: 10px;
+    margin-top: 25px;
 }
 
-p {
-    margin: 4px;
+table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
 }
 
-#metadata {
-    margin-left: 20px;
+td,
+th {
+    font-size: 14px;
+    padding: 8px;
+    border: 1px solid #ddd;
 }
 
-#prediction {
-    margin-top: 10px;
+th {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    background-color: #4CAF50;
+    color: white;
 }
 
-#suggestion {
-    margin-top: 10px;
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
+}
+
+#v11,
+#v12 {
+    color: red;
+    font-weight: bold;
 }

@@ -44,6 +44,7 @@ async function navigate(url, event, notifier) {
         data.strings = domss.strings;
         data.ruleUsage = css.ruleUsage;
         data.cssCount = cssCount;
+        data.loadTime = end - start;
         domss = undefined;
         ruleUsage = undefined;
         fs.unlinkSync('trace.json');
@@ -62,6 +63,7 @@ async function navigate(url, event, notifier) {
 function extract(data) {
     // Metadata.
     var res = extractDataFromDomSnapshot(data.documents, data.strings);
+    res.loadTime = data.loadTime;
     res.cssCount = data.cssCount;
     res.cssRuleCount = data.ruleUsage.length;
 
@@ -85,8 +87,14 @@ function extractDataFromDomSnapshot(documents, strings) {
         imageCount: 0,
         textCount: 0,
         charCount: 0,
-        inLayoutCount: 0
+        inLayoutCount: 0,
+        invisibleNodeProportion: 0
     };
+
+    function intersect(bound) {
+        return bound[2] > 0 && bound[3] > 0 &&
+            0 < bound[0] < 1280 && 0 < bound[1] < 720;
+    }
 
     var layoutCount = doc.layout.nodeIndex.length;
     res.inLayoutCount = layoutCount;
@@ -103,7 +111,12 @@ function extractDataFromDomSnapshot(documents, strings) {
                 res.imageCount += 1;
             }
         }
+
+        if (!intersect(doc.layout.bounds[i]))
+            res.invisibleNodeProportion += 1;
     }
+
+    res.invisibleNodeProportion /= layoutCount;
 
     var texts = doc.layout.text.filter(idx => idx !== -1);
     texts = texts.map(idx => strings[idx]);
