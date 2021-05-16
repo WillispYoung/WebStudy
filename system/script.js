@@ -125,8 +125,8 @@ function plotTaskDurations() {
 
             var L = formatted_data.length; // count of frame update.
             for (var j = 0; j < L; j++) {
-                var x = x0 + WIDTH * (j + 1) / L;
-                var y = y0 - HEIGHT * formatted_data[j][i] / MAX_VALUE;
+                var x = x0 + parseInt(WIDTH * (j + 1) / L);
+                var y = y0 - parseInt(HEIGHT * formatted_data[j][i] / MAX_VALUE);
                 line_points = line_points + x.toString() + " ";
                 line_points = line_points + y.toString() + " ";
             }
@@ -186,14 +186,14 @@ function plotTaskDurations() {
             svg.append(label_text);
         }
 
-        for (i = 0; i < DATA.length; i++) {
+        for (i = 0; i < formatted_data.length; i++) {
             var yet_sum = SVG_HEIGHT - GAP - 1; // vertically stacking
             for (j = 0; j < 6; j++) {
                 var bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                 var x = GAP + 1 + BAR_WIDTH * i;
-                var height = DATA[i][j] * AXIS_LIMIT / MAX_SUM;
+                var height = parseInt(formatted_data[i][j] * AXIS_LIMIT / MAX_SUM);
                 var y = yet_sum - height;
-                yet_sum -= height;
+                yet_sum = y;
 
                 bar.setAttribute('x', x);
                 bar.setAttribute('y', y);
