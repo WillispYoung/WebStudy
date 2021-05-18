@@ -19,7 +19,7 @@ const COVERAGE = [0.0983, 0.0566, 0.326, 1.876, 10.802];
 // 1. element.getBoundingClientRect() returns a dictionary-style object. Denote it as BCR.
 // 2. BCR contains the following keys: left, right, top, bottom, x, y.
 
-window.addEventListener("unhandledrejection", function (promiseRejectionEvent) { });
+window.addEventListener("unhandledrejection", function(promiseRejectionEvent) {});
 
 function clusterElements() {
     // Get all the elements in DOM.
@@ -48,6 +48,7 @@ function clusterElements() {
     }
 
     const MIN_OFFSET = 4;
+
     function similarPosition(r1, r2) {
         return Math.abs(r1.width - r2.width) <= MIN_OFFSET &&
             Math.abs(r1.height - r2.height) <= MIN_OFFSET &&
@@ -69,7 +70,8 @@ function clusterElements() {
         return 1;
     }
 
-    var c1 = 0, c2 = 0;
+    var c1 = 0,
+        c2 = 0;
 
     // External elements: similar size, same row / column.
     // Internal elements: recursively similar tag composition.
@@ -140,13 +142,11 @@ function clusterElements() {
                         targetFound = true;
                         cl.push(j);
                         break;
-                    }
-                    else if (cl.includes(j) && !cl.includes(i)) {
+                    } else if (cl.includes(j) && !cl.includes(i)) {
                         targetFound = true;
                         cl.push(i);
                         break;
-                    }
-                    else if (cl.includes(i) && cl.includes(j)) {
+                    } else if (cl.includes(i) && cl.includes(j)) {
                         targetFound = true;
                         break;
                     }
@@ -277,7 +277,7 @@ function clusterByClassName() {
         stats.push([i, allClassNames[i], simpleClusters[i].length]);
     }
 
-    stats.sort((a, b) => b[2] - a[2]);      // Sort by element quantity.
+    stats.sort((a, b) => b[2] - a[2]); // Sort by element quantity.
 
     for (let entry of stats) {
         for (let i = 3; i > 0; i--) {
@@ -289,7 +289,8 @@ function clusterByClassName() {
     }
 
     function makeDraggable(target) {
-        var dragStartX = 0, dragStartY = 0;
+        var dragStartX = 0,
+            dragStartY = 0;
         target.onmousedown = dragMouseDown;
 
         function dragMouseDown(e) {
@@ -401,7 +402,7 @@ function clusterByClassName() {
             // radio.style.verticalAlign = 'center';
             statsEntry.appendChild(radio);
 
-            radio.onchange = function () {
+            radio.onchange = function() {
                 if (this.checked) {
                     if (lastHighlightRadio) {
                         lastHighlightRadio.checked = false;
@@ -431,13 +432,14 @@ function saveDocument(withjs) {
         document.documentElement.outerHTML.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
 
     var file = new Blob([content]);
-    var a = document.createElement('a'), url = URL.createObjectURL(file);
+    var a = document.createElement('a'),
+        url = URL.createObjectURL(file);
     a.href = url;
     a.download = `${window.location.hostname}.html`;
     document.body.appendChild(a);
     a.click();
 
-    setTimeout(function () {
+    setTimeout(function() {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
     }, 100);
@@ -464,8 +466,7 @@ async function captureScreenshot() {
         image_data = undefined;
         canvas = undefined;
         return image;
-    }
-    catch (error) {
+    } catch (error) {
         return null;
     }
 }
@@ -526,8 +527,7 @@ async function layoutDeferring() {
                     node.children[i].nextElementSibling.getAttribute('sltd-index') : null;
                 nodeRecords.push([v1, v2, v3]);
                 node.children[i].remove();
-            }
-            else
+            } else
                 traverse(node.children[i]);
         }
     }
@@ -577,8 +577,8 @@ async function layoutDeferring() {
     }
 
     function appendElement(ci, pi) {
-        var sentences = pi ? `parent = document.querySelector('[sltd-index="${pi}"]');\n`
-            : 'parent = document.body;\n';
+        var sentences = pi ? `parent = document.querySelector('[sltd-index="${pi}"]');\n` :
+            'parent = document.body;\n';
         sentences += `parent.appendChild(elem${ci});\n`;
         return sentences;
     }
@@ -587,17 +587,15 @@ async function layoutDeferring() {
         if (ss1 && ss2) {
             res = await ssim(ss1, ss2);
             return res.mssim < 0.8;
-        }
-        else return true;
+        } else return true;
     }
 
-    if (! await checkSideEffect()) {
+    if (!await checkSideEffect()) {
         var target = document.createElement('script');
         target.innerHTML = scriptify();
         document.body.appendChild(target);
         // saveDocument(true);
-    }
-    else {
+    } else {
         resume();
         alert('SLTD not applicable!');
     }
@@ -614,15 +612,14 @@ function resume() {
                 parent.insertBefore(child, nextSibling);
             else
                 parent.appendChild(child);
-        }
-        catch (error) { }
+        } catch (error) {}
 
         entry = nodeRecords.pop();
     }
 }
 
 chrome.runtime.onMessage.addListener(
-    function (request) {
+    function(request) {
         switch (request.name) {
             case 'CLUSTER':
                 setTimeout(clusterByClassName, 1000);
